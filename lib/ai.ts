@@ -137,3 +137,57 @@ export async function generateJson(system: string, prompt: string): Promise<any>
     return null
   }
 }
+
+// --- Diagnostica: prova ogni provider AI e restituisce un messaggio di errore specifico ---
+
+export type AiProbe = { configured: boolean; ok: boolean | null; message: string }
+
+export async function probeGroq(): Promise<AiProbe> {
+  if (!GROQ_KEY) return { configured: false, ok: null, message: 'Chiave GROQ_API_KEY non impostata.' }
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: GROQ_MODEL, max_tokens: 5, messages: [ { role: 'user', content: 'OK' } ] }),
+    })
+    if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + GROQ_MODEL + ').' }
+    const t = await r.text()
+    return { configured: true, ok: false, message: 'Errore HTTP ' + r.status + ': ' + t.slice(0, 160) }
+  } catch (e) {
+    return { configured: true, ok: false, message: 'Errore di rete: ' + String(e).slice(0, 140) }
+  }
+}
+
+export async function probeOpenRouter(): Promise<AiProbe> {
+  if (!OPENROUTER_KEY) return { configured: false, ok: null, message: 'Chiave OPENROUTER_API_KEY non impostata.' }
+  try {
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + OPENROUTER_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: OPENROUTER_MODEL, max_tokens: 5, messages: [ { role: 'user', content: 'OK' } ] }),
+    })
+    if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + OPENROUTER_MODEL + ').' }
+    const t = await r.text()
+    return { configured: true, ok: false, message: 'Errore HTTP ' + r.status + ': ' + t.slice(0, 160) }
+  } catch (e) {
+    return { configured: true, ok: false, message: 'Errore di rete: ' + String(e).slice(0, 140) }
+  }
+}
+
+export async function probeGemini(): Promise<AiProbe> {
+  if (!GEMINI_KEY) return { configured: false, ok: null, message: 'Chiave GEMINI_API_KEY non impostata.' }
+  try {
+    const url =
+      'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + GEMINI_KEY
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [ { parts: [ { text: 'OK' } ] } ] }),
+    })
+    if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + GEMINI_MODEL + ').' }
+    const t = await r.text()
+    return { configured: true, ok: false, message: 'Errore HTTP ' + r.status + ': ' + t.slice(0, 160) }
+  } catch (e) {
+    return { configured: true, ok: false, message: 'Errore di rete: ' + String(e).slice(0, 140) }
+  }
+}
