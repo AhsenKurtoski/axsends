@@ -14,6 +14,8 @@ type Product = {
   score: number
   label: string
   popularity: number
+  competitorLow: number
+  competitorHigh: number
 }
 
 export default function ResearchPage() {
@@ -124,6 +126,9 @@ export default function ResearchPage() {
                   <div className='text-lg font-semibold'>€{p.suggestedPrice}</div>
                 </div>
                 <div className='text-right text-xs text-emerald-400'>{p.margin}% margine</div>
+              </div>
+              <div className='mt-2 text-[11px] text-white/40'>
+                Competitor (stima): €{p.competitorLow} – €{p.competitorHigh}
               </div>
               <button
                 onClick={() => importProduct(p)}

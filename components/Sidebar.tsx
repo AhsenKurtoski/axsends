@@ -11,12 +11,16 @@ import {
   Activity,
   Sparkles,
   Rocket,
+  TrendingUp,
+  Tag,
 } from 'lucide-react'
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/research', label: 'Ricerca prodotti', icon: Rocket },
+  { href: '/trends', label: 'Trend virali', icon: TrendingUp },
   { href: '/products', label: 'Prodotti', icon: Package },
+  { href: '/pricing', label: 'Regole prezzo', icon: Tag },
   { href: '/orders', label: 'Ordini', icon: ShoppingCart },
   { href: '/suppliers', label: 'Fornitori', icon: Truck },
   { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
@@ -27,7 +31,7 @@ const nav = [
 export default function Sidebar() {
   const pathname = usePathname()
   return (
-    <aside className='glass m-3 w-64 shrink-0 p-5 hidden md:flex flex-col gap-2 sticky top-3 h-[calc(100vh-1.5rem)]'>
+    <aside className='glass m-3 w-64 shrink-0 p-5 hidden md:flex flex-col gap-2 sticky top-3 h-[calc(100vh-1.5rem)] overflow-y-auto'>
       <div className='mb-6 flex items-center gap-3 px-2'>
         <div className='grid h-10 w-10 place-items-center rounded-xl bg-brand text-lg font-bold text-white shadow-glass'>
           A
