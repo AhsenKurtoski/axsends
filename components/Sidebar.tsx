@@ -9,6 +9,7 @@ import {
   Truck,
   BarChart3,
   Activity,
+  Sparkles,
 } from 'lucide-react'
 
 const nav = [
@@ -17,6 +18,7 @@ const nav = [
   { href: '/orders', label: 'Ordini', icon: ShoppingCart },
   { href: '/suppliers', label: 'Fornitori', icon: Truck },
   { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
+  { href: '/ads', label: 'AI Ads', icon: Sparkles },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ]
 
