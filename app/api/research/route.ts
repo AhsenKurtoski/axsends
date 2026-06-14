@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { searchCjProducts } from '@/lib/cj'
-import { BaseProduct, MARKUP, scoreProduct, demoProducts } from '@/lib/products'
+import { BaseProduct, MARKUP, scoreProduct } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -12,16 +12,20 @@ export async function GET(req: Request) {
 
   const cj = await searchCjProducts({ keyword, pageSize: 20 })
 
-  let source = 'cj'
-  let base: BaseProduct[]
-  if (cj.ok && cj.products.length > 0) {
-    base = cj.products
-  } else {
-    source = 'demo'
-    const k = keyword.toLowerCase()
-    base = demoProducts.filter((p) => !k || p.name.toLowerCase().includes(k))
+  if (!cj.ok || cj.products.length === 0) {
+    return NextResponse.json({
+      source: 'none',
+      configured: cj.error !== 'no-credentials',
+      note:
+        cj.error === 'no-credentials'
+          ? 'Aggiungi CJ_EMAIL e CJ_API_KEY in .env.local per cercare prodotti reali su CJ Dropshipping.'
+          : 'Nessun prodotto trovato per questa ricerca.',
+      error: cj.error && cj.error !== 'no-credentials' ? cj.error : undefined,
+      products: [],
+    })
   }
 
+  const base: BaseProduct[] = cj.products
   const scored = base.map((p) => {
     const s = scoreProduct(p.cost, p.popularity)
     const suggestedPrice = Math.round(p.cost * MARKUP * 100) / 100
@@ -35,13 +39,5 @@ export async function GET(req: Request) {
   else if (sort === 'margin') scored.sort((a, b) => b.margin - a.margin)
   else scored.sort((a, b) => b.score - a.score)
 
-  return NextResponse.json({
-    source,
-    note:
-      source === 'cj'
-        ? 'Prodotti reali da CJ Dropshipping.'
-        : 'Modalita demo: aggiungi CJ_EMAIL e CJ_API_KEY in .env.local per prodotti reali da CJ Dropshipping.',
-    error: cj.error && cj.error !== 'no-credentials' ? cj.error : undefined,
-    products: scored,
-  })
+  return NextResponse.json({ source: 'cj', note: 'Prodotti reali da CJ Dropshipping.', products: scored })
 }

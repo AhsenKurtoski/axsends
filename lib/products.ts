@@ -1,4 +1,4 @@
-// Modello prodotto condiviso, motore di punteggio e dataset demo.
+// Modello prodotto condiviso e motore di punteggio. Nessun dato demo.
 
 export type BaseProduct = {
   id: string
@@ -27,18 +27,3 @@ export function scoreProduct(cost: number, popularity: number): { score: number;
   else if (total >= 35) label = 'Medio'
   return { score: total, label }
 }
-
-export const demoProducts: BaseProduct[] = [
-  { id: 'd1', name: 'Anello smart per il monitoraggio del sonno', image: '💍', cost: 11.2, category: 'Wearable', popularity: 8400 },
-  { id: 'd2', name: 'Massaggiatore cervicale EMS', image: '💆', cost: 7.9, category: 'Benessere', popularity: 15200 },
-  { id: 'd3', name: 'Mini aspirapolvere portatile USB', image: '🧹', cost: 9.1, category: 'Casa', popularity: 22000 },
-  { id: 'd4', name: 'Proiettore galassia LED', image: '🌌', cost: 8.7, category: 'Casa', popularity: 31000 },
-  { id: 'd5', name: 'Spazzola lisciante ionica', image: '💇', cost: 12.5, category: 'Beauty', popularity: 9800 },
-  { id: 'd6', name: 'Supporto laptop pieghevole in alluminio', image: '💻', cost: 5.6, category: 'Ufficio', popularity: 4300 },
-  { id: 'd7', name: 'Collare GPS per animali', image: '🐾', cost: 14.2, category: 'Pet', popularity: 5400 },
-  { id: 'd8', name: 'Borraccia termica smart con display', image: '🍶', cost: 6.4, category: 'Lifestyle', popularity: 6100 },
-  { id: 'd9', name: 'Luce LED da cucina ricaricabile', image: '💡', cost: 4.8, category: 'Casa', popularity: 12500 },
-  { id: 'd10', name: 'Organizer cavi magnetico da scrivania', image: '🔌', cost: 3.9, category: 'Ufficio', popularity: 7700 },
-  { id: 'd11', name: 'Tappetino yoga antiscivolo premium', image: '🧘', cost: 13.4, category: 'Fitness', popularity: 18900 },
-  { id: 'd12', name: 'Custodia AirPods di design', image: '🎧', cost: 4.2, category: 'Accessori', popularity: 26000 },
-]

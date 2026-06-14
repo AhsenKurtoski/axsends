@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { searchCjProducts } from '@/lib/cj'
-import { BaseProduct, MARKUP, scoreProduct, demoProducts } from '@/lib/products'
+import { BaseProduct, MARKUP, scoreProduct } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -11,22 +11,30 @@ const NICHES = ['kitchen gadget', 'fitness', 'pet', 'beauty tool', 'home decor',
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export async function GET() {
-  const map = new Map<string, BaseProduct>()
-  let source = 'demo'
-
-  // Prima ricerca: verifica anche se le credenziali CJ sono attive
   const probe = await searchCjProducts({ keyword: NICHES[0], pageSize: 10 })
-  if (probe.ok) {
-    source = 'cj'
-    probe.products.forEach((p) => map.set(p.id, p))
-    for (let i = 1; i < NICHES.length; i++) {
-      // Rispetta il rate limit del piano free CJ (1 richiesta/secondo)
-      await sleep(1100)
-      const r = await searchCjProducts({ keyword: NICHES[i], pageSize: 10 })
-      if (r.ok) r.products.forEach((p) => map.set(p.id, p))
-    }
-  } else {
-    demoProducts.forEach((p) => map.set(p.id, p))
+
+  if (!probe.ok) {
+    return NextResponse.json({
+      source: 'none',
+      configured: probe.error !== 'no-credentials',
+      scannedAt: new Date().toISOString(),
+      niches: NICHES,
+      count: 0,
+      note:
+        probe.error === 'no-credentials'
+          ? 'Collega CJ (CJ_EMAIL + CJ_API_KEY) in .env.local per la scansione automatica reale.'
+          : 'Scansione non riuscita: ' + (probe.error || 'errore sconosciuto'),
+      products: [],
+    })
+  }
+
+  const map = new Map<string, BaseProduct>()
+  probe.products.forEach((p) => map.set(p.id, p))
+  for (let i = 1; i < NICHES.length; i++) {
+    // Rispetta il rate limit del piano free CJ (1 richiesta/secondo)
+    await sleep(1100)
+    const r = await searchCjProducts({ keyword: NICHES[i], pageSize: 10 })
+    if (r.ok) r.products.forEach((p) => map.set(p.id, p))
   }
 
   const scored = Array.from(map.values()).map((p) => {
@@ -40,14 +48,11 @@ export async function GET() {
   const top = scored.slice(0, 12)
 
   return NextResponse.json({
-    source,
+    source: 'cj',
     scannedAt: new Date().toISOString(),
     niches: NICHES,
     count: top.length,
-    note:
-      source === 'cj'
-        ? 'Radar: scansione automatica multi-nicchia su CJ Dropshipping.'
-        : 'Demo: collega CJ (CJ_EMAIL + CJ_API_KEY) per la scansione reale.',
+    note: 'Radar: scansione automatica multi-nicchia su CJ Dropshipping.',
     products: top,
   })
 }
