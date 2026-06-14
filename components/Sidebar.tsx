@@ -18,10 +18,16 @@ import {
   DollarSign,
   Megaphone,
   CalendarClock,
+  Wallet,
+  Store,
+  BookOpen,
+  Clapperboard,
+  CalendarDays,
 } from 'lucide-react'
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/money', label: 'Centro guadagni', icon: Wallet },
   { href: '/radar', label: 'Radar vincenti', icon: Radar },
   { href: '/research', label: 'Ricerca prodotti', icon: Rocket },
   { href: '/trends', label: 'Trend virali', icon: TrendingUp },
@@ -33,7 +39,11 @@ const nav = [
   { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
   { href: '/ads', label: 'AI Ads', icon: Sparkles },
   { href: '/auto-ads', label: 'Ads automatiche', icon: Megaphone },
+  { href: '/calendar', label: 'Calendario', icon: CalendarDays },
   { href: '/queue', label: 'Coda', icon: CalendarClock },
+  { href: '/store', label: 'Negozio AI', icon: Store },
+  { href: '/digital', label: 'Prodotti digitali', icon: BookOpen },
+  { href: '/ugc', label: 'UGC Studio', icon: Clapperboard },
   { href: '/affiliate', label: 'Affiliate', icon: DollarSign },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ]
