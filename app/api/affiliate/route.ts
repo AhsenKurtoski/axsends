@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
+import { generateJson, aiConfigured, aiProvider } from '@/lib/ai'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 30
 
-// Genera contenuti promozionali per un link affiliato (caption, hashtag, disclosure).
-// Deterministico: funziona sempre, senza chiavi esterne.
+// Contenuti promozionali per un link affiliato, scritti dall'AI (Groq/Gemini).
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as any
   const product = (body && body.product) || 'questo prodotto'
@@ -11,24 +12,59 @@ export async function POST(req: Request) {
   const platform = (body && body.platform) || 'TikTok'
   const network = (body && body.network) || 'Amazon'
 
-  const slug = String(product).replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
-  const hashtags = ['#' + slug, '#affiliate', '#dealoftheday', '#musthave', '#sconto']
-  const captions = [
-    'Ho provato ' + product + ' ed e una bomba. Link in descrizione!',
-    'Stop allo scroll: ' + product + ' che ti semplifica la vita.',
-    'Perche tutti parlano di ' + product + '? Te lo spiego in 30 secondi.',
-  ]
+  const disclosure =
+    'Disclosure: contenuto con link affiliati ' + network +
+    '. Acquistando dal link posso ricevere una commissione, senza costi extra per te.'
+
+  if (!aiConfigured()) {
+    return NextResponse.json({
+      configured: false,
+      provider: 'none',
+      note: 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY in .env.local per generare contenuti affiliate con AI.',
+      title: null,
+      body: '',
+      captions: [],
+      hashtags: [],
+      disclosure,
+      cta: '',
+      platform,
+    })
+  }
+
+  const system =
+    'Sei un social media marketer esperto di affiliate marketing. Scrivi in italiano, naturale e adatto a ' +
+    platform + '.'
+  const prompt =
+    'Genera contenuti per promuovere "' + product + '" tramite link affiliato ' + network + '. ' +
+    'Restituisci un JSON con: title (stringa), body (2-3 frasi), captions (array di 3 caption brevi e diverse), ' +
+    'hashtags (array di 6 hashtag con #), cta (stringa breve).'
+
+  const data = await generateJson(system, prompt)
+  if (!data) {
+    return NextResponse.json({
+      configured: true,
+      provider: aiProvider(),
+      note: 'L AI non ha risposto, riprova tra poco.',
+      title: null,
+      body: '',
+      captions: [],
+      hashtags: [],
+      disclosure,
+      cta: '',
+      platform,
+    })
+  }
 
   return NextResponse.json({
-    title: product + ' - vale la pena? (link sotto)',
-    body: 'Ti spiego perche ' + product + ' merita. Lo trovi qui: ' + link,
-    captions,
-    hashtags,
-    disclosure:
-      'Disclosure: questo contenuto include link affiliati ' +
-      network +
-      '. Acquistando tramite il link posso ricevere una commissione, senza costi extra per te.',
-    cta: 'Tocca il link per approfittare dell offerta su ' + network + '.',
+    configured: true,
+    provider: aiProvider(),
+    title: data.title || product,
+    body: data.body || '',
+    captions: Array.isArray(data.captions) ? data.captions : [],
+    hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],
+    disclosure: data.disclosure || disclosure,
+    cta: data.cta || ('Tocca il link per ' + product + ' su ' + network + '.'),
     platform,
+    link,
   })
 }

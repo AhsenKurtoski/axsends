@@ -1,39 +1,56 @@
 import { NextResponse } from 'next/server'
+import { generateJson, aiConfigured, aiProvider } from '@/lib/ai'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 30
 
-// Generazione automatica di descrizione prodotto + titolo SEO + tag.
-// Deterministica: funziona sempre, senza dipendenze esterne.
+// Descrizione prodotto generata dall'AI (Groq/Gemini). Niente template.
 export async function POST(req: Request) {
   const b = (await req.json().catch(() => ({}))) as any
   const name = (b && b.name ? String(b.name) : 'Prodotto').trim()
   const category = (b && b.category ? String(b.category) : 'lifestyle').trim()
   const price = b && b.price ? b.price : null
 
-  const bullets = [
-    'Design pratico e moderno che si adatta a ogni esigenza',
-    'Materiali di qualita pensati per durare nel tempo',
-    'Facile da usare, risultati immediati fin dal primo utilizzo',
-    'Perfetto come regalo o per uso quotidiano',
-  ]
+  if (!aiConfigured()) {
+    return NextResponse.json({
+      configured: false,
+      provider: 'none',
+      note: 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY in .env.local per generare descrizioni reali con AI.',
+      title: null,
+      description: null,
+      bullets: [],
+      tags: [],
+    })
+  }
 
-  const title = name + ' - ' + category + ' premium' + (price ? ' a soli ' + price + '€' : '')
-  const description =
-    name +
-    ' e la soluzione che stavi cercando. ' +
-    bullets.join('. ') +
-    '.\n\nMigliaia di clienti soddisfatti lo hanno gia scelto. Spedizione tracciata e reso facile. ' +
-    'Ordina ora ' +
-    name +
-    ' e scopri la differenza!'
-  const tags = [
-    category.toLowerCase(),
-    'offerta',
-    'novita',
-    'trending',
-    'spedizione veloce',
-    name.toLowerCase().split(' ')[0],
-  ]
+  const system =
+    'Sei un copywriter e-commerce esperto di dropshipping. Scrivi in italiano, persuasivo ma onesto, ottimizzato per conversione e SEO.'
+  const prompt =
+    'Crea la scheda prodotto per: "' + name + '". Categoria: ' + category + '. ' +
+    (price ? 'Prezzo di vendita: ' + price + ' euro. ' : '') +
+    'Restituisci un JSON con questi campi esatti: title (titolo SEO accattivante, max 70 caratteri), ' +
+    'description (60-110 parole), bullets (array di 4 benefici), tags (array di 6 parole chiave SEO minuscole).'
 
-  return NextResponse.json({ title, description, bullets, tags })
+  const data = await generateJson(system, prompt)
+  if (!data || !data.description) {
+    return NextResponse.json({
+      configured: true,
+      provider: aiProvider(),
+      note: 'L AI non ha risposto correttamente, riprova tra poco.',
+      title: null,
+      description: null,
+      bullets: [],
+      tags: [],
+    })
+  }
+
+  return NextResponse.json({
+    configured: true,
+    provider: aiProvider(),
+    note: 'Generato con AI (' + aiProvider() + ').',
+    title: data.title || name,
+    description: data.description,
+    bullets: Array.isArray(data.bullets) ? data.bullets : [],
+    tags: Array.isArray(data.tags) ? data.tags : [],
+  })
 }

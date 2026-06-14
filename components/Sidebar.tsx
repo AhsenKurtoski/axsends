@@ -16,6 +16,7 @@ import {
   Radar,
   Zap,
   DollarSign,
+  Megaphone,
 } from 'lucide-react'
 
 const nav = [
@@ -30,6 +31,7 @@ const nav = [
   { href: '/suppliers', label: 'Fornitori', icon: Truck },
   { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
   { href: '/ads', label: 'AI Ads', icon: Sparkles },
+  { href: '/auto-ads', label: 'Ads automatiche', icon: Megaphone },
   { href: '/affiliate', label: 'Affiliate', icon: DollarSign },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ]
@@ -70,8 +72,8 @@ export default function Sidebar() {
         })}
       </nav>
       <div className='mt-auto glass p-3 text-xs text-white/50'>
-        <div className='font-medium text-white/70'>Modalità demo</div>
-        Aggiungi le chiavi (Supabase / CJ) per i dati reali.
+        <div className='font-medium text-white/70'>Dati reali</div>
+        Aggiungi le chiavi (CJ, Supabase, AI) in .env.local per attivare tutto.
       </div>
     </aside>
   )

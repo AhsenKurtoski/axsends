@@ -12,17 +12,22 @@ const AUTOMATIONS: Auto[] = [
   { id: 'round99', label: 'Arrotondamento .99', desc: 'Prezzi psicologici automatici', status: 'Attivo' },
   { id: 'competitor', label: 'Analisi competitor', desc: 'Stima fascia prezzi dei concorrenti', status: 'Attivo' },
   { id: 'trends', label: 'Trend virali', desc: 'Classifica automatica per domanda', status: 'Attivo' },
-  { id: 'caption', label: 'Caption + hashtag AI', desc: 'Testi social generati per ogni ad', status: 'Attivo' },
   { id: 'monitor', label: 'Monitoraggio prezzi', desc: 'Controllo automatico ogni 6 ore (cron)', status: 'Attivo' },
-  { id: 'desc', label: 'Descrizione + SEO AI', desc: 'Schede prodotto generate automaticamente', status: 'Attivo' },
-  { id: 'affiliate', label: 'Contenuti affiliate AI', desc: 'Post e disclosure per i link affiliati', status: 'Attivo' },
+  { id: 'desc', label: 'Descrizione + SEO AI', desc: 'Schede prodotto scritte dall AI, niente template', status: 'Richiede AI' },
+  { id: 'caption', label: 'Caption + hashtag AI', desc: 'Testi social generati dall AI per ogni ad', status: 'Richiede AI' },
+  { id: 'affiliate', label: 'Contenuti affiliate AI', desc: 'Post e disclosure scritti dall AI', status: 'Richiede AI' },
+  { id: 'autoads', label: 'Ads auto multi-prodotto', desc: 'TikTok + YouTube generate dall AI per ogni prodotto con potenziale', status: 'Richiede AI' },
+  { id: 'aicopy', label: 'Copywriting AI (Groq/Gemini)', desc: 'Tutti i testi scritti dall AI, mai template fissi', status: 'Richiede AI' },
+  { id: 'seo', label: 'Tag SEO automatici', desc: 'Parole chiave generate dall AI per ogni scheda', status: 'Richiede AI' },
   { id: 'image', label: 'Creativo immagine AI', desc: 'Immagine pubblicitaria con Hugging Face', status: 'Richiede HF' },
   { id: 'video', label: 'Video ad AI', desc: 'Video pubblicitario con Hugging Face', status: 'Richiede HF' },
   { id: 'tiktok', label: 'Upload TikTok', desc: 'Pubblica i video sul tuo account TikTok', status: 'Richiede TikTok' },
   { id: 'tiktokshop', label: 'TikTok Shop', desc: 'Sincronizza i prodotti con TikTok Shop', status: 'Richiede TikTok' },
+  { id: 'queue', label: 'Coda di pubblicazione', desc: 'Pianifica i post video su TikTok e YouTube', status: 'Richiede TikTok' },
   { id: 'youtube', label: 'Upload YouTube', desc: 'Carica Shorts e video sul tuo canale', status: 'Richiede YouTube' },
   { id: 'stock', label: 'Monitoraggio stock', desc: 'Avviso quando un prodotto sta finendo', status: 'Richiede CJ' },
   { id: 'fulfill', label: 'Auto-fulfillment ordini', desc: 'Preparazione automatica ordini verso CJ', status: 'Richiede CJ' },
+  { id: 'reprice', label: 'Riprezzo dinamico', desc: 'Adegua markup e margine se il costo CJ cambia', status: 'Richiede CJ' },
   { id: 'autoimport', label: 'Import automatico winners', desc: 'Importa i top del radar nel catalogo', status: 'Richiede Supabase' },
   { id: 'report', label: 'Report giornaliero', desc: 'Riepilogo vendite e margini ogni giorno', status: 'Richiede Supabase' },
 ]
@@ -68,7 +73,7 @@ export default function AutomationPage() {
           <Zap className='text-brand' size={22} /> Centro automazioni
         </h1>
         <p className='text-sm text-white/50'>
-          {activeCount} di {AUTOMATIONS.length} automazioni attive{saved ? ' · salvato' : ''}
+          {activeCount} di {AUTOMATIONS.length} automazioni attive{saved ? ' - salvato' : ''}
         </p>
       </header>
 
