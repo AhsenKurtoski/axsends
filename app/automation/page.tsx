@@ -17,6 +17,8 @@ const AUTOMATIONS: Auto[] = [
   { id: 'desc', label: 'Descrizione + SEO AI', desc: 'Schede prodotto generate automaticamente', status: 'Attivo' },
   { id: 'image', label: 'Creativo immagine AI', desc: 'Immagine pubblicitaria con Hugging Face', status: 'Richiede HF' },
   { id: 'video', label: 'Video ad AI', desc: 'Video pubblicitario con Hugging Face', status: 'Richiede HF' },
+  { id: 'tiktok', label: 'Upload TikTok', desc: 'Pubblica i video sul tuo account TikTok', status: 'Richiede TikTok' },
+  { id: 'tiktokshop', label: 'TikTok Shop', desc: 'Sincronizza i prodotti con TikTok Shop', status: 'Richiede TikTok' },
   { id: 'stock', label: 'Monitoraggio stock', desc: 'Avviso quando un prodotto sta finendo', status: 'Richiede CJ' },
   { id: 'fulfill', label: 'Auto-fulfillment ordini', desc: 'Preparazione automatica ordini verso CJ', status: 'Richiede CJ' },
   { id: 'autoimport', label: 'Import automatico winners', desc: 'Importa i top del radar nel catalogo', status: 'Richiede Supabase' },

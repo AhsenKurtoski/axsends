@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Loader2, Film, Video } from 'lucide-react'
+import { Sparkles, Loader2, Film, Video, Send } from 'lucide-react'
 
 type Scene = { time: string; visual: string; voiceover: string }
 type AdResult = {
@@ -31,6 +31,10 @@ export default function AdsPage() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [videoError, setVideoError] = useState<string | null>(null)
 
+  const [ttUrl, setTtUrl] = useState('')
+  const [ttLoading, setTtLoading] = useState(false)
+  const [ttMsg, setTtMsg] = useState<string | null>(null)
+
   async function generate(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -38,6 +42,7 @@ export default function AdsPage() {
     setResult(null)
     setVideoUrl(null)
     setVideoError(null)
+    setTtMsg(null)
     try {
       const res = await fetch('/api/generate-ad', {
         method: 'POST',
@@ -78,6 +83,29 @@ export default function AdsPage() {
       setVideoError('Errore di rete')
     } finally {
       setVideoLoading(false)
+    }
+  }
+
+  async function publishTikTok() {
+    setTtLoading(true)
+    setTtMsg(null)
+    try {
+      const caption = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
+      const res = await fetch('/api/tiktok', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: ttUrl, caption }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setTtMsg('Inviato a TikTok in modalita privata. Apri le notifiche TikTok per completare la pubblicazione.')
+      } else {
+        setTtMsg(data.error || data.note || 'TikTok non configurato.')
+      }
+    } catch (err) {
+      setTtMsg('Errore di rete')
+    } finally {
+      setTtLoading(false)
     }
   }
 
@@ -202,6 +230,18 @@ export default function AdsPage() {
 
                 {videoError ? <p className='mt-3 text-xs text-amber-400'>{videoError}</p> : null}
                 {videoUrl ? <video src={videoUrl} controls className='mt-3 w-full rounded-xl' /> : null}
+              </div>
+
+              <div className='glass p-5'>
+                <div className='mb-2 text-sm font-medium'>Pubblica su TikTok</div>
+                <p className='mb-3 text-xs text-white/40'>Incolla un URL pubblico del video: useremo la caption e gli hashtag generati.</p>
+                <div className='flex flex-col gap-2 sm:flex-row'>
+                  <input value={ttUrl} onChange={(e) => setTtUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
+                  <button onClick={publishTikTok} disabled={ttLoading || !ttUrl} className='flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
+                    {ttLoading ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />} Pubblica
+                  </button>
+                </div>
+                {ttMsg ? <p className='mt-3 text-xs text-white/60'>{ttMsg}</p> : null}
               </div>
             </>
           ) : null}
