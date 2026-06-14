@@ -98,7 +98,6 @@ export default function SettingsPage() {
 
       <div className='glass p-5 text-sm text-white/60'>
         <div className='mb-2 font-medium text-white/80'>Come sistemare un errore</div>
-        <ol class​='hidden'></ol>
         <ol className='list-decimal space-y-1 pl-5'>
           <li>Apri il file .env.local nella cartella del progetto (copialo da .env.example se non esiste).</li>
           <li>Incolla la chiave giusta dopo il segno uguale, senza spazi e senza virgolette.</li>
