@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Loader2, Film, Video, Send, Youtube } from 'lucide-react'
+import { Sparkles, Loader2, Film, Video, Send, Youtube, Instagram, Share2 } from 'lucide-react'
 
 type Scene = { time: string; visual: string; voiceover: string }
 type AdResult = {
@@ -39,6 +39,14 @@ export default function AdsPage() {
   const [ytLoading, setYtLoading] = useState(false)
   const [ytMsg, setYtMsg] = useState<string | null>(null)
 
+  const [igUrl, setIgUrl] = useState('')
+  const [igLoading, setIgLoading] = useState(false)
+  const [igMsg, setIgMsg] = useState<string | null>(null)
+
+  const [allUrl, setAllUrl] = useState('')
+  const [allLoading, setAllLoading] = useState(false)
+  const [allMsg, setAllMsg] = useState<string | null>(null)
+
   async function generate(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -48,6 +56,8 @@ export default function AdsPage() {
     setVideoError(null)
     setTtMsg(null)
     setYtMsg(null)
+    setIgMsg(null)
+    setAllMsg(null)
     try {
       const res = await fetch('/api/generate-ad', {
         method: 'POST',
@@ -139,6 +149,50 @@ export default function AdsPage() {
     }
   }
 
+  async function publishInstagram() {
+    setIgLoading(true)
+    setIgMsg(null)
+    try {
+      const caption = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
+      const res = await fetch('/api/instagram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: igUrl, caption }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setIgMsg('Pubblicato su Instagram come Reel.')
+      } else {
+        setIgMsg(data.error || data.note || 'Instagram non configurato.')
+      }
+    } catch (err) {
+      setIgMsg('Errore di rete')
+    } finally {
+      setIgLoading(false)
+    }
+  }
+
+  async function publishEverywhere() {
+    setAllLoading(true)
+    setAllMsg(null)
+    try {
+      const caption = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
+      const title = result ? result.script.hook : 'Nuovo video'
+      const tags = result ? result.script.hashtags.map((h) => h.replace('#', '')) : []
+      const res = await fetch('/api/publish-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: allUrl, caption, title, description: caption, tags }),
+      })
+      const data = await res.json()
+      setAllMsg(data.note || 'Operazione completata.')
+    } catch (err) {
+      setAllMsg('Errore di rete')
+    } finally {
+      setAllLoading(false)
+    }
+  }
+
   const tones = ['energico', 'elegante', 'divertente', 'professionale', 'urgente']
   const platforms = ['TikTok', 'Instagram Reels', 'YouTube Shorts', 'Facebook']
 
@@ -148,7 +202,7 @@ export default function AdsPage() {
         <h1 className='flex items-center gap-2 text-2xl font-semibold'>
           <Sparkles className='text-brand' size={22} /> AI Ads Generator
         </h1>
-        <p className='text-sm text-white/50'>Genera script, copy e creatività per i tuoi video ads con AI</p>
+        <p className='text-sm text-white/50'>Genera script, copy e creativita per i tuoi video ads con AI</p>
       </header>
 
       <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
@@ -238,7 +292,7 @@ export default function AdsPage() {
 
               <div className='glass p-5'>
                 <div className='mb-3 flex items-center justify-between'>
-                  <div className='text-sm font-medium'>Creatività AI</div>
+                  <div className='text-sm font-medium'>Creativita AI</div>
                   <button onClick={generateVideo} disabled={videoLoading} className='flex items-center gap-2 rounded-xl border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs text-white transition hover:bg-brand/20 disabled:opacity-50'>
                     {videoLoading ? (
                       <>
@@ -262,12 +316,12 @@ export default function AdsPage() {
                 {videoUrl ? <video src={videoUrl} controls className='mt-3 w-full rounded-xl' /> : null}
               </div>
 
-              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
                 <div className='glass p-5'>
                   <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
-                    <Send size={15} className='text-brand' /> Pubblica su TikTok
+                    <Send size={15} className='text-brand' /> TikTok
                   </div>
-                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video + caption/hashtag generati.</p>
+                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video + caption/hashtag.</p>
                   <div className='flex flex-col gap-2'>
                     <input value={ttUrl} onChange={(e) => setTtUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
                     <button onClick={publishTikTok} disabled={ttLoading || !ttUrl} className='flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
@@ -279,9 +333,9 @@ export default function AdsPage() {
 
                 <div className='glass p-5'>
                   <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
-                    <Youtube size={16} className='text-rose-400' /> Pubblica su YouTube
+                    <Youtube size={16} className='text-rose-400' /> YouTube
                   </div>
-                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video + titolo/descrizione generati.</p>
+                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video + titolo/descrizione.</p>
                   <div className='flex flex-col gap-2'>
                     <input value={ytUrl} onChange={(e) => setYtUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
                     <button onClick={publishYouTube} disabled={ytLoading || !ytUrl} className='flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
@@ -290,6 +344,34 @@ export default function AdsPage() {
                   </div>
                   {ytMsg ? <p className='mt-3 text-xs text-white/60'>{ytMsg}</p> : null}
                 </div>
+
+                <div className='glass p-5'>
+                  <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
+                    <Instagram size={16} className='text-pink-400' /> Instagram
+                  </div>
+                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video (Reel) + caption.</p>
+                  <div className='flex flex-col gap-2'>
+                    <input value={igUrl} onChange={(e) => setIgUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
+                    <button onClick={publishInstagram} disabled={igLoading || !igUrl} className='flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
+                      {igLoading ? <Loader2 size={14} className='animate-spin' /> : <Instagram size={14} />} Pubblica
+                    </button>
+                  </div>
+                  {igMsg ? <p className='mt-3 text-xs text-white/60'>{igMsg}</p> : null}
+                </div>
+              </div>
+
+              <div className='glass p-5'>
+                <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
+                  <Share2 size={16} className='text-brand' /> Pubblica ovunque (Instagram + TikTok + YouTube)
+                </div>
+                <p className='mb-3 text-xs text-white/40'>Un solo URL video: lo pubblica su tutte le piattaforme configurate con titolo, descrizione e hashtag generati.</p>
+                <div className='flex flex-col gap-2 sm:flex-row'>
+                  <input value={allUrl} onChange={(e) => setAllUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
+                  <button onClick={publishEverywhere} disabled={allLoading || !allUrl} className='flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
+                    {allLoading ? <Loader2 size={14} className='animate-spin' /> : <Share2 size={14} />} Pubblica ovunque
+                  </button>
+                </div>
+                {allMsg ? <p className='mt-3 text-xs text-white/60'>{allMsg}</p> : null}
               </div>
             </>
           ) : null}
