@@ -72,7 +72,7 @@ export default function UgcPage() {
         <div className='space-y-4'>
           {Array.isArray(data.scripts) && data.scripts.length > 0 ? (
             <div className='glass space-y-3 p-5'>
-              <div class​Name='text-sm font-medium'>Script video</div>
+              <div className='text-sm font-medium'>Script video</div>
               {data.scripts.map((s: any, i: number) => (
                 <div key={i} className='rounded-xl border border-white/5 p-3'>
                   <div className='text-sm font-medium text-brand'>{str(s && s.hook)}</div>
