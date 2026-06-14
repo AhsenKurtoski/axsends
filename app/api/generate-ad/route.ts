@@ -24,6 +24,12 @@ function fallbackScript(b: Body) {
 
   const hook = 'POV: hai appena scoperto ' + product + ' e non potrai piu farne a meno'
 
+  const variants = [
+    'Non comprare altro finche non vedi ' + product,
+    '3 motivi per cui ' + product + ' sta diventando virale',
+    'Ho provato ' + product + ' per 7 giorni: ecco cosa e successo',
+  ]
+
   const scenes = [
     { time: '0-2s', visual: 'Primo piano dinamico di ' + product + ' con luci al neon e zoom rapido', voiceover: 'Stop! Se sei ' + audience + ', guarda qui.' },
     { time: '2-6s', visual: 'Mostra il problema quotidiano che ' + product + ' risolve, taglio veloce', voiceover: 'Basta perdere tempo con soluzioni che non funzionano.' },
@@ -34,29 +40,33 @@ function fallbackScript(b: Body) {
 
   const cta = 'Tocca il link e ordina ' + product + ' prima che finisca!'
   const caption = product + ' sta diventando virale su ' + platform + '. Perfetto per ' + audience + '. Link in bio!'
-  const hashtags = ['#fyp', '#perte', '#tiktokmademebuyit', '#dropshipping', '#offerta', '#trending', '#shopping']
+  const hashtags = ['#fyp', '#perte', '#tiktokmademebuyit', '#dropshipping', '#offerta', '#trending', '#shopping', '#viral']
+  const targeting = 'Pubblico consigliato: ' + audience + '. Eta 18-45, dispositivi mobile, interessi collegati alla categoria del prodotto.'
 
-  return { hook, scenes, cta, caption, hashtags, tone, platform }
+  return { hook, variants, scenes, cta, caption, hashtags, targeting, tone, platform }
 }
 
 async function aiScript(b: Body) {
   const system =
-    'Sei un media buyer e copywriter esperto di video ads virali per dropshipping (TikTok, Reels, Shorts). Scrivi in italiano.'
+    'Sei un direttore creativo e media buyer premium per video ads di e-commerce e dropshipping ad alta conversione (TikTok, Reels, Facebook, YouTube Shorts). Scrivi in italiano con copy professionale, moderno e persuasivo: hook fortissimo nei primi 2 secondi, dimostrazione chiara del valore, prova sociale e una CTA diretta.'
   const prompt =
-    'Crea lo script di un video ad di 20 secondi per il prodotto "' + (b.product || 'prodotto') + '". ' +
+    'Crea uno script PREMIUM di un video ad di 20 secondi per il prodotto "' + (b.product || 'prodotto') + '". ' +
     'Pubblico: ' + (b.audience || 'pubblico ampio') + '. Tono: ' + (b.tone || 'energico') + '. ' +
     'Piattaforma: ' + (b.platform || 'TikTok') + '. ' +
     (b.price ? 'Prezzo: ' + b.price + ' euro. ' : '') +
-    'Restituisci un JSON con: hook (stringa), scenes (array di 5 oggetti con time, visual, voiceover), ' +
-    'cta (stringa), caption (stringa), hashtags (array di 7 hashtag con #).'
+    'Restituisci un JSON con: hook (stringa), variants (array di 3 hook alternativi per A/B test), ' +
+    'scenes (array di 5 oggetti con time, visual, voiceover), cta (stringa), caption (stringa), ' +
+    'hashtags (array di 8 hashtag con #), targeting (stringa con suggerimento di pubblico e interessi).'
   const data = await generateJson(system, prompt)
   if (!data || !data.hook || !Array.isArray(data.scenes)) return null
   return {
     hook: data.hook,
+    variants: Array.isArray(data.variants) ? data.variants : [],
     scenes: data.scenes,
     cta: data.cta || '',
     caption: data.caption || '',
     hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],
+    targeting: data.targeting || '',
     tone: b.tone || 'energico',
     platform: b.platform || 'TikTok',
   }
@@ -83,18 +93,18 @@ export async function POST(req: Request) {
   const ai = aiConfigured() ? await aiScript(body) : null
   const script = ai || fallbackScript(body)
   const imagePrompt =
-    'Professional advertising poster for ' +
+    'Premium professional advertising poster for ' +
     (body.product || 'product') +
     ', ' +
     (body.tone || 'modern') +
-    ' style, studio lighting, vibrant colors, high detail, e-commerce hero shot, no text'
+    ' style, studio lighting, cinematic, vibrant colors, ultra detailed, e-commerce hero shot, no text'
   const image = await hfImage(imagePrompt)
   return NextResponse.json({
     configured: Boolean(HF_TOKEN),
     aiText: Boolean(ai),
     provider: aiProvider(),
     note: ai
-      ? 'Script generato con AI (' + aiProvider() + ').'
+      ? 'Script premium generato con AI (' + aiProvider() + ').'
       : HF_TOKEN
       ? 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY per script scritti dall AI.'
       : 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY (testo) e HUGGINGFACE_API_TOKEN (immagine/video) in .env.local.',
