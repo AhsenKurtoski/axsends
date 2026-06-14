@@ -1,14 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { Wallet, Radar, DollarSign, Store, BookOpen, Clapperboard } from 'lucide-react'
+import { Wallet, Radar, DollarSign, Store, BookOpen, Clapperboard, Globe, Shirt } from 'lucide-react'
 
 const MODES = [
   { href: '/radar', icon: Radar, title: 'Dropshipping', desc: 'Trova prodotti vincenti e vendili col tuo margine.', tag: 'Attivo' },
   { href: '/affiliate', icon: DollarSign, title: 'Affiliate + 17 metodi', desc: 'Link Amazon automatici e 17 modi per guadagnare.', tag: 'Attivo' },
   { href: '/store', icon: Store, title: 'Negozio AI', desc: 'Landing che vende + raccolta ordini. Vendita diretta.', tag: 'Nuovo' },
-  { href: '/digital', icon: BookOpen, title: 'Prodotti digitali', desc: 'Crea e vendi ebook e guide. Margine quasi 100%.', tag: 'Nuovo' },
+  { href: '/digital', icon: BookOpen, title: 'Prodotti digitali', desc: 'Crea e vendi ebook reali. Margine quasi 100%.', tag: 'Nuovo' },
   { href: '/ugc', icon: Clapperboard, title: 'UGC Studio', desc: 'Vendi video ai brand: 50-150 EUR a video.', tag: 'Nuovo' },
+  { href: '/website', icon: Globe, title: 'Web Studio', desc: 'L AI crea siti premium da vendere ai locali (200-500 EUR).', tag: 'Nuovo' },
+  { href: '/pod', icon: Shirt, title: 'Print on Demand', desc: 'Design AI su Redbubble/Etsy. Zero magazzino.', tag: 'Nuovo' },
 ]
 
 export default function MoneyPage() {

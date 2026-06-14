@@ -23,6 +23,9 @@ import {
   BookOpen,
   Clapperboard,
   CalendarDays,
+  Globe,
+  Shirt,
+  Settings,
 } from 'lucide-react'
 
 const nav = [
@@ -44,8 +47,11 @@ const nav = [
   { href: '/store', label: 'Negozio AI', icon: Store },
   { href: '/digital', label: 'Prodotti digitali', icon: BookOpen },
   { href: '/ugc', label: 'UGC Studio', icon: Clapperboard },
+  { href: '/website', label: 'Web Studio', icon: Globe },
+  { href: '/pod', label: 'Print on Demand', icon: Shirt },
   { href: '/affiliate', label: 'Affiliate', icon: DollarSign },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/settings', label: 'Stato AI e chiavi', icon: Settings },
 ]
 
 export default function Sidebar() {
