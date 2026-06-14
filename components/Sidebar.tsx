@@ -17,6 +17,7 @@ import {
   Zap,
   DollarSign,
   Megaphone,
+  CalendarClock,
 } from 'lucide-react'
 
 const nav = [
@@ -32,6 +33,7 @@ const nav = [
   { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
   { href: '/ads', label: 'AI Ads', icon: Sparkles },
   { href: '/auto-ads', label: 'Ads automatiche', icon: Megaphone },
+  { href: '/queue', label: 'Coda', icon: CalendarClock },
   { href: '/affiliate', label: 'Affiliate', icon: DollarSign },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ]

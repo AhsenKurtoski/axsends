@@ -52,9 +52,22 @@ create table if not exists price_history (
   checked_at timestamptz default now()
 );
 
+-- CODA DI PUBBLICAZIONE ADS (Instagram / TikTok / YouTube)
+create table if not exists ad_queue (
+  id bigint generated always as identity primary key,
+  product text,
+  platform text default 'tiktok',
+  title text,
+  caption text,
+  hashtags text,
+  video_url text,
+  status text default 'queued',
+  scheduled_at timestamptz,
+  created_at timestamptz default now()
+);
+
 -- =============================================================
 -- Accesso: app personale a uso singolo.
--- Per semplicita' lasciamo le tabelle accessibili con la anon key.
 -- Se Supabase ti chiede di attivare la RLS, puoi attivarla e poi
 -- aggiungere queste policy permissive (eseguile solo se hai attivato la RLS):
 -- =============================================================
@@ -63,8 +76,10 @@ create table if not exists price_history (
 -- alter table orders enable row level security;
 -- alter table suppliers enable row level security;
 -- alter table price_history enable row level security;
+-- alter table ad_queue enable row level security;
 
 -- create policy "allow all products" on products for all using (true) with check (true);
 -- create policy "allow all orders" on orders for all using (true) with check (true);
 -- create policy "allow all suppliers" on suppliers for all using (true) with check (true);
 -- create policy "allow all price_history" on price_history for all using (true) with check (true);
+-- create policy "allow all ad_queue" on ad_queue for all using (true) with check (true);

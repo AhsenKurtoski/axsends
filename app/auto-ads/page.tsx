@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Megaphone, Loader2, Send, Youtube } from 'lucide-react'
+import { Megaphone, Loader2, Send, Youtube, ListPlus } from 'lucide-react'
 
 type AdItem = {
   product: { id: string; name: string; image: string; price: number; score: number; label: string }
@@ -31,6 +31,21 @@ export default function AutoAdsPage() {
       setError('Errore di rete')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function saveToQueue(product: string, platform: string, title: string, caption: string, hashtags: any) {
+    try {
+      const res = await fetch('/api/ad-queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product, platform, title, caption, hashtags }),
+      })
+      const data = await res.json()
+      if (data.ok) setNote('Salvato in coda: ' + product + ' (' + platform + '). Aprila dalla voce Coda.')
+      else setNote(data.note || 'Per salvare in coda servono le chiavi Supabase.')
+    } catch (err) {
+      setNote('Errore nel salvataggio in coda')
     }
   }
 
@@ -96,6 +111,9 @@ export default function AutoAdsPage() {
                     ))}
                   </ul>
                 ) : null}
+                <button onClick={() => saveToQueue(a.product.name, 'tiktok', a.tiktok.hook || '', a.tiktok.caption || '', a.tiktok.hashtags)} className='mt-3 flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1.5 text-xs text-white transition hover:bg-brand/20'>
+                  <ListPlus size={13} /> Salva in coda
+                </button>
               </div>
             ) : null}
 
@@ -114,6 +132,9 @@ export default function AutoAdsPage() {
                     ))}
                   </ul>
                 ) : null}
+                <button onClick={() => saveToQueue(a.product.name, 'youtube', a.youtube.title || '', a.youtube.description || '', a.youtube.tags)} className='mt-3 flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1.5 text-xs text-white transition hover:bg-brand/20'>
+                  <ListPlus size={13} /> Salva in coda
+                </button>
               </div>
             ) : null}
           </div>
