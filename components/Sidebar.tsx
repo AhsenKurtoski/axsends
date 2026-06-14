@@ -15,6 +15,7 @@ import {
   Tag,
   Radar,
   Zap,
+  DollarSign,
 } from 'lucide-react'
 
 const nav = [
@@ -29,6 +30,7 @@ const nav = [
   { href: '/suppliers', label: 'Fornitori', icon: Truck },
   { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
   { href: '/ads', label: 'AI Ads', icon: Sparkles },
+  { href: '/affiliate', label: 'Affiliate', icon: DollarSign },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ]
 

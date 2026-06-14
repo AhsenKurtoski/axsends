@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, Loader2, Film, Video, Send } from 'lucide-react'
+import { Sparkles, Loader2, Film, Video, Send, Youtube } from 'lucide-react'
 
 type Scene = { time: string; visual: string; voiceover: string }
 type AdResult = {
@@ -35,6 +35,10 @@ export default function AdsPage() {
   const [ttLoading, setTtLoading] = useState(false)
   const [ttMsg, setTtMsg] = useState<string | null>(null)
 
+  const [ytUrl, setYtUrl] = useState('')
+  const [ytLoading, setYtLoading] = useState(false)
+  const [ytMsg, setYtMsg] = useState<string | null>(null)
+
   async function generate(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -43,6 +47,7 @@ export default function AdsPage() {
     setVideoUrl(null)
     setVideoError(null)
     setTtMsg(null)
+    setYtMsg(null)
     try {
       const res = await fetch('/api/generate-ad', {
         method: 'POST',
@@ -106,6 +111,31 @@ export default function AdsPage() {
       setTtMsg('Errore di rete')
     } finally {
       setTtLoading(false)
+    }
+  }
+
+  async function publishYouTube() {
+    setYtLoading(true)
+    setYtMsg(null)
+    try {
+      const title = result ? result.script.hook : 'Nuovo video'
+      const description = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
+      const tags = result ? result.script.hashtags.map((h) => h.replace('#', '')) : []
+      const res = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl: ytUrl, title, description, tags }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setYtMsg('Caricato su YouTube come privato. Controlla YouTube Studio per pubblicarlo.')
+      } else {
+        setYtMsg(data.error || data.note || 'YouTube non configurato.')
+      }
+    } catch (err) {
+      setYtMsg('Errore di rete')
+    } finally {
+      setYtLoading(false)
     }
   }
 
@@ -232,16 +262,34 @@ export default function AdsPage() {
                 {videoUrl ? <video src={videoUrl} controls className='mt-3 w-full rounded-xl' /> : null}
               </div>
 
-              <div className='glass p-5'>
-                <div className='mb-2 text-sm font-medium'>Pubblica su TikTok</div>
-                <p className='mb-3 text-xs text-white/40'>Incolla un URL pubblico del video: useremo la caption e gli hashtag generati.</p>
-                <div className='flex flex-col gap-2 sm:flex-row'>
-                  <input value={ttUrl} onChange={(e) => setTtUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
-                  <button onClick={publishTikTok} disabled={ttLoading || !ttUrl} className='flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
-                    {ttLoading ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />} Pubblica
-                  </button>
+              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                <div className='glass p-5'>
+                  <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
+                    <Send size={15} className='text-brand' /> Pubblica su TikTok
+                  </div>
+                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video + caption/hashtag generati.</p>
+                  <div className='flex flex-col gap-2'>
+                    <input value={ttUrl} onChange={(e) => setTtUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
+                    <button onClick={publishTikTok} disabled={ttLoading || !ttUrl} className='flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
+                      {ttLoading ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />} Pubblica
+                    </button>
+                  </div>
+                  {ttMsg ? <p className='mt-3 text-xs text-white/60'>{ttMsg}</p> : null}
                 </div>
-                {ttMsg ? <p className='mt-3 text-xs text-white/60'>{ttMsg}</p> : null}
+
+                <div className='glass p-5'>
+                  <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
+                    <Youtube size={16} className='text-rose-400' /> Pubblica su YouTube
+                  </div>
+                  <p className='mb-3 text-xs text-white/40'>URL pubblico del video + titolo/descrizione generati.</p>
+                  <div className='flex flex-col gap-2'>
+                    <input value={ytUrl} onChange={(e) => setYtUrl(e.target.value)} placeholder='https://.../video.mp4' className='w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-brand/50' />
+                    <button onClick={publishYouTube} disabled={ytLoading || !ytUrl} className='flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2 text-sm text-white transition hover:bg-brand-dark disabled:opacity-50'>
+                      {ytLoading ? <Loader2 size={14} className='animate-spin' /> : <Youtube size={14} />} Carica
+                    </button>
+                  </div>
+                  {ytMsg ? <p className='mt-3 text-xs text-white/60'>{ytMsg}</p> : null}
+                </div>
               </div>
             </>
           ) : null}
