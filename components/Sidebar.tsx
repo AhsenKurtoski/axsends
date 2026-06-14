@@ -10,10 +10,12 @@ import {
   BarChart3,
   Activity,
   Sparkles,
+  Rocket,
 } from 'lucide-react'
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/research', label: 'Ricerca prodotti', icon: Rocket },
   { href: '/products', label: 'Prodotti', icon: Package },
   { href: '/orders', label: 'Ordini', icon: ShoppingCart },
   { href: '/suppliers', label: 'Fornitori', icon: Truck },
@@ -59,7 +61,7 @@ export default function Sidebar() {
       </nav>
       <div className='mt-auto glass p-3 text-xs text-white/50'>
         <div className='font-medium text-white/70'>Modalità demo</div>
-        Aggiungi le chiavi Supabase per i dati reali.
+        Aggiungi le chiavi (Supabase / CJ) per i dati reali.
       </div>
     </aside>
   )
