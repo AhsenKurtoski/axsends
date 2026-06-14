@@ -18,6 +18,36 @@ type AdResult = {
   }
 }
 
+// Converte qualsiasi valore (stringa, numero, oggetto, array) in testo sicuro da
+// mostrare in React. L'AI a volte restituisce le scene come oggetti annidati
+// (es. { scene: ... }): questa funzione evita il crash mostrando comunque il testo.
+function txt(v: any): string {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (Array.isArray(v)) return v.map(txt).filter(Boolean).join(' ')
+  if (typeof v === 'object') {
+    if (typeof v.scene === 'string') return v.scene
+    if (typeof v.text === 'string') return v.text
+    if (typeof v.description === 'string') return v.description
+    if (typeof v.value === 'string') return v.value
+    return Object.keys(v).map((k) => txt(v[k])).filter(Boolean).join(' ')
+  }
+  return String(v)
+}
+
+// Estrae gli hashtag in modo sicuro, qualunque formato arrivi dall'AI.
+function hashtagText(hashtags: any): string {
+  if (Array.isArray(hashtags)) return hashtags.map(txt).filter(Boolean).join(' ')
+  return txt(hashtags)
+}
+
+function hashtagList(hashtags: any): string[] {
+  if (Array.isArray(hashtags)) return hashtags.map(txt).filter(Boolean)
+  const single = txt(hashtags)
+  return single ? [single] : []
+}
+
 export default function AdsPage() {
   const [product, setProduct] = useState('')
   const [audience, setAudience] = useState('')
@@ -105,7 +135,7 @@ export default function AdsPage() {
     setTtLoading(true)
     setTtMsg(null)
     try {
-      const caption = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
+      const caption = result ? txt(result.script.caption) + ' ' + hashtagText(result.script.hashtags) : ''
       const res = await fetch('/api/tiktok', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,9 +158,9 @@ export default function AdsPage() {
     setYtLoading(true)
     setYtMsg(null)
     try {
-      const title = result ? result.script.hook : 'Nuovo video'
-      const description = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
-      const tags = result ? result.script.hashtags.map((h) => h.replace('#', '')) : []
+      const title = result ? txt(result.script.hook) : 'Nuovo video'
+      const description = result ? txt(result.script.caption) + ' ' + hashtagText(result.script.hashtags) : ''
+      const tags = result ? hashtagList(result.script.hashtags).map((h) => h.replace('#', '')) : []
       const res = await fetch('/api/youtube', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,7 +183,7 @@ export default function AdsPage() {
     setIgLoading(true)
     setIgMsg(null)
     try {
-      const caption = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
+      const caption = result ? txt(result.script.caption) + ' ' + hashtagText(result.script.hashtags) : ''
       const res = await fetch('/api/instagram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -176,9 +206,9 @@ export default function AdsPage() {
     setAllLoading(true)
     setAllMsg(null)
     try {
-      const caption = result ? result.script.caption + ' ' + result.script.hashtags.join(' ') : ''
-      const title = result ? result.script.hook : 'Nuovo video'
-      const tags = result ? result.script.hashtags.map((h) => h.replace('#', '')) : []
+      const caption = result ? txt(result.script.caption) + ' ' + hashtagText(result.script.hashtags) : ''
+      const title = result ? txt(result.script.hook) : 'Nuovo video'
+      const tags = result ? hashtagList(result.script.hashtags).map((h) => h.replace('#', '')) : []
       const res = await fetch('/api/publish-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -195,6 +225,7 @@ export default function AdsPage() {
 
   const tones = ['energico', 'elegante', 'divertente', 'professionale', 'urgente']
   const platforms = ['TikTok', 'Instagram Reels', 'YouTube Shorts', 'Facebook']
+  const scenes = result && Array.isArray(result.script.scenes) ? result.script.scenes : []
 
   return (
     <div className='space-y-6'>
@@ -260,18 +291,18 @@ export default function AdsPage() {
             <>
               <div className='glass p-5'>
                 <div className='mb-2 text-xs uppercase tracking-wide text-brand'>Hook</div>
-                <p className='text-lg font-medium'>{result.script.hook}</p>
+                <p className='text-lg font-medium'>{txt(result.script.hook)}</p>
               </div>
 
               <div className='glass p-5'>
                 <div className='mb-3 text-sm font-medium'>Storyboard</div>
                 <div className='space-y-3'>
-                  {result.script.scenes.map((sc, i) => (
+                  {scenes.map((sc: any, i: number) => (
                     <div key={i} className='flex gap-3 rounded-xl border border-white/5 p-3'>
-                      <div className='shrink-0 rounded-lg bg-brand/15 px-2 py-1 text-xs text-brand'>{sc.time}</div>
+                      <div className='shrink-0 rounded-lg bg-brand/15 px-2 py-1 text-xs text-brand'>{txt(sc && sc.time) || ('Scena ' + (i + 1))}</div>
                       <div className='text-sm'>
-                        <div className='text-white/80'>{sc.visual}</div>
-                        <div className='mt-1 text-white/50'>🎤 {sc.voiceover}</div>
+                        <div className='text-white/80'>{txt(sc && sc.visual) || txt(sc)}</div>
+                        <div className='mt-1 text-white/50'>🎤 {txt(sc && sc.voiceover)}</div>
                       </div>
                     </div>
                   ))}
@@ -281,12 +312,12 @@ export default function AdsPage() {
               <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
                 <div className='glass p-5'>
                   <div className='mb-2 text-sm font-medium'>Call to action</div>
-                  <p className='text-sm text-white/80'>{result.script.cta}</p>
+                  <p className='text-sm text-white/80'>{txt(result.script.cta)}</p>
                 </div>
                 <div className='glass p-5'>
                   <div className='mb-2 text-sm font-medium'>Caption</div>
-                  <p className='text-sm text-white/80'>{result.script.caption}</p>
-                  <p className='mt-2 text-sm text-brand'>{result.script.hashtags.join(' ')}</p>
+                  <p className='text-sm text-white/80'>{txt(result.script.caption)}</p>
+                  <p className='mt-2 text-sm text-brand'>{hashtagText(result.script.hashtags)}</p>
                 </div>
               </div>
 
@@ -309,7 +340,7 @@ export default function AdsPage() {
                 {result.image ? (
                   <img src={result.image} alt='Creativita AI' className='w-full rounded-xl' />
                 ) : (
-                  <p className='text-xs text-white/40'>{result.note}</p>
+                  <p className='text-xs text-white/40'>{txt(result.note)}</p>
                 )}
 
                 {videoError ? <p className='mt-3 text-xs text-amber-400'>{videoError}</p> : null}
@@ -362,7 +393,7 @@ export default function AdsPage() {
 
               <div className='glass p-5'>
                 <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
-                  <Share2 size={16} className='text-brand' /> Pubblica ovunque (Instagram + TikTok + YouTube)
+                  <Share2 size={16} className='text-brand' /> Pubblica ovunque (Facebook + Instagram + TikTok + YouTube)
                 </div>
                 <p className='mb-3 text-xs text-white/40'>Un solo URL video: lo pubblica su tutte le piattaforme configurate con titolo, descrizione e hashtag generati.</p>
                 <div className='flex flex-col gap-2 sm:flex-row'>
