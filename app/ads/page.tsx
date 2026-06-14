@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, Loader2, Film, Video, Send, Youtube, Instagram, Share2 } from 'lucide-react'
+import { Sparkles, Loader2, Film, Video, Send, Youtube, Instagram, Share2, Download } from 'lucide-react'
 
 type Scene = { time: string; visual: string; voiceover: string }
 type AdResult = {
@@ -58,7 +58,8 @@ export default function AdsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [videoLoading, setVideoLoading] = useState(false)
-  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [frames, setFrames] = useState<string[]>([])
+  const [videoNote, setVideoNote] = useState<string | null>(null)
   const [videoError, setVideoError] = useState<string | null>(null)
 
   const [ttUrl, setTtUrl] = useState('')
@@ -93,7 +94,8 @@ export default function AdsPage() {
     setLoading(true)
     setError(null)
     setResult(null)
-    setVideoUrl(null)
+    setFrames([])
+    setVideoNote(null)
     setVideoError(null)
     setTtMsg(null)
     setYtMsg(null)
@@ -118,22 +120,24 @@ export default function AdsPage() {
     }
   }
 
-  async function generateVideo() {
+  async function generateFrames() {
     if (!result) return
     setVideoLoading(true)
     setVideoError(null)
-    setVideoUrl(null)
+    setVideoNote(null)
+    setFrames([])
     try {
       const res = await fetch('/api/generate-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: result.imagePrompt }),
+        body: JSON.stringify({ prompt: result.imagePrompt, product, scenes: result.script.scenes }),
       })
       const data = await res.json()
       if (!res.ok) {
-        setVideoError(data.error || 'Video non disponibile')
+        setVideoError(data.error || 'Fotogrammi non disponibili')
       } else {
-        setVideoUrl(data.video)
+        setFrames(Array.isArray(data.frames) ? data.frames : [])
+        setVideoNote(data.note || null)
       }
     } catch (err) {
       setVideoError('Errore di rete')
@@ -334,15 +338,15 @@ export default function AdsPage() {
 
               <div className='glass p-5'>
                 <div className='mb-3 flex items-center justify-between'>
-                  <div className='text-sm font-medium'>Creativita AI</div>
-                  <button onClick={generateVideo} disabled={videoLoading} className='flex items-center gap-2 rounded-xl border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs text-white transition hover:bg-brand/20 disabled:opacity-50'>
+                  <div className='text-sm font-medium'>Fotogrammi AI per il video</div>
+                  <button onClick={generateFrames} disabled={videoLoading} className='flex items-center gap-2 rounded-xl border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs text-white transition hover:bg-brand/20 disabled:opacity-50'>
                     {videoLoading ? (
                       <>
-                        <Loader2 size={14} className='animate-spin' /> Genero video...
+                        <Loader2 size={14} className='animate-spin' /> Genero fotogrammi...
                       </>
                     ) : (
                       <>
-                        <Video size={14} /> Genera video AI
+                        <Video size={14} /> Genera fotogrammi AI
                       </>
                     )}
                   </button>
@@ -355,7 +359,22 @@ export default function AdsPage() {
                 )}
 
                 {videoError ? <p className='mt-3 text-xs text-amber-400'>{videoError}</p> : null}
-                {videoUrl ? <video src={videoUrl} controls className='mt-3 w-full rounded-xl' /> : null}
+
+                {frames.length > 0 ? (
+                  <div className='mt-3 space-y-2'>
+                    <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
+                      {frames.map((f, i) => (
+                        <a key={i} href={f} download={'frame-' + (i + 1) + '.png'} className='group relative block overflow-hidden rounded-xl'>
+                          <img src={f} alt={'Fotogramma ' + (i + 1)} className='w-full rounded-xl' />
+                          <span className='absolute bottom-1 right-1 flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-[11px] text-white opacity-0 transition group-hover:opacity-100'>
+                            <Download size={11} /> Scarica
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                    {videoNote ? <p className='text-xs text-white/50'>{videoNote}</p> : null}
+                  </div>
+                ) : null}
               </div>
 
               <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
