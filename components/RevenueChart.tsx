@@ -18,10 +18,12 @@ const tipStyle = {
   color: '#fff',
 }
 
+const chartMargin = { top: 10, right: 10, left: -10, bottom: 0 }
+
 export default function RevenueChart({ data }: { data: PricePoint[] }) {
   return (
     <ResponsiveContainer width='100%' height={260}>
-      <AreaChart data={data} margin= top: 10, right: 10, left: -10, bottom: 0 >
+      <AreaChart data={data} margin={chartMargin}>
         <defs>
           <linearGradient id='rev' x1='0' y1='0' x2='0' y2='1'>
             <stop offset='5%' stopColor='#7c5cff' stopOpacity={0.5} />
