@@ -9,17 +9,20 @@ export type BaseProduct = {
   popularity: number
 }
 
-export const MARKUP = 2.8
+// Margine basso: ricarico del +25% sul costo (profitto reale 15-30%).
+// Cosi i prezzi restano competitivi e si vende di piu.
+export const MARKUP = 1.25
 
 export function scoreProduct(cost: number, popularity: number): { score: number; label: string } {
   const suggested = cost * MARKUP
-  const profit = suggested - cost
-  const marginScore = Math.min(40, profit / 1.5)
-  let priceScore = 6
-  if (suggested >= 15 && suggested <= 60) priceScore = 30
-  else if (suggested >= 8 && suggested < 15) priceScore = 18
-  else if (suggested > 60 && suggested <= 90) priceScore = 15
-  const popScore = Math.min(30, Math.log10(popularity + 1) * 12)
+  const marginPct = suggested > 0 ? ((suggested - cost) / suggested) * 100 : 0
+  // Con margine basso pesiamo di piu domanda e fascia di prezzo.
+  const marginScore = Math.min(30, marginPct * 1.4)
+  let priceScore = 8
+  if (suggested >= 12 && suggested <= 45) priceScore = 35
+  else if (suggested >= 6 && suggested < 12) priceScore = 24
+  else if (suggested > 45 && suggested <= 80) priceScore = 18
+  const popScore = Math.min(35, Math.log10(popularity + 1) * 14)
   const total = Math.round(Math.max(0, Math.min(100, marginScore + priceScore + popScore)))
   let label = 'Da valutare'
   if (total >= 75) label = 'Winning 🔥'

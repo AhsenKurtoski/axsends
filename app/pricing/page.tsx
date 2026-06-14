@@ -6,9 +6,9 @@ import { Tag, Save, Check } from 'lucide-react'
 const SAMPLE = [5, 10, 15, 25, 40, 60]
 
 export default function PricingPage() {
-  const [markup, setMarkup] = useState(2.8)
+  const [markup, setMarkup] = useState(1.25)
   const [round99, setRound99] = useState(true)
-  const [minMargin, setMinMargin] = useState(35)
+  const [minMargin, setMinMargin] = useState(20)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function PricingPage() {
         <h1 className='flex items-center gap-2 text-2xl font-semibold'>
           <Tag className='text-brand' size={22} /> Regole di prezzo automatiche
         </h1>
-        <p className='text-sm text-white/50'>Definisci markup, margine minimo e arrotondamento applicati agli import</p>
+        <p className='text-sm text-white/50'>Margine basso consigliato: markup 1.25 (+25%) e margine minimo 20% per vendere di piu</p>
       </header>
 
       <div className='grid gap-6 lg:grid-cols-3'>
@@ -62,7 +62,7 @@ export default function PricingPage() {
             <span className='text-xs text-white/50'>Markup (moltiplicatore sul costo)</span>
             <input
               type='number'
-              step={0.1}
+              step={0.05}
               min={1}
               value={markup}
               onChange={(e) => setMarkup(Number(e.target.value) || 1)}
@@ -99,6 +99,7 @@ export default function PricingPage() {
               </>
             )}
           </button>
+          <p className='text-xs text-white/30'>Suggerimento: con margine basso (+15-30%) i tuoi prezzi battono i concorrenti e converti di piu. Il profitto arriva dal volume.</p>
         </div>
 
         <div className='glass p-5 lg:col-span-2'>

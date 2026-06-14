@@ -38,6 +38,21 @@ const AUTOMATIONS: Auto[] = [
   { id: 'autoimport', label: 'Import automatico winners', desc: 'Importa i top del radar nel catalogo', status: 'Richiede Supabase' },
   { id: 'roi', label: 'Tracker profitti e ROI', desc: 'Calcolo automatico di margine e ritorno per prodotto', status: 'Richiede Supabase' },
   { id: 'report', label: 'Report giornaliero', desc: 'Riepilogo vendite e margini ogni giorno', status: 'Richiede Supabase' },
+  { id: 'amazonaff', label: 'Link affiliati Amazon', desc: 'Genera link Amazon col tuo tag Associates in automatico', status: 'Attivo' },
+  { id: 'bundles', label: 'Bundle e kit prodotti', desc: 'Suggerisce abbinamenti per alzare lo scontrino medio', status: 'Richiede AI' },
+  { id: 'upsell', label: 'Upsell e cross-sell', desc: 'Propone prodotti correlati per ogni acquisto', status: 'Richiede AI' },
+  { id: 'emailflow', label: 'Email e DM di recupero', desc: 'Messaggi automatici per carrelli e clienti', status: 'Richiede AI' },
+  { id: 'ugc', label: 'Script UGC per brand', desc: 'Genera script video da vendere come UGC creator', status: 'Richiede AI' },
+  { id: 'pod', label: 'Print on demand', desc: 'Idee grafiche e copy per magliette e poster', status: 'Richiede AI' },
+  { id: 'multilang', label: 'Traduzione multilingua', desc: 'Schede e ads tradotte dall AI per nuovi mercati', status: 'Richiede AI' },
+  { id: 'calendar', label: 'Calendario contenuti', desc: 'Piano editoriale settimanale generato dall AI', status: 'Richiede AI' },
+  { id: 'niche', label: 'Scout di nicchie', desc: 'Trova nicchie con domanda e poca concorrenza', status: 'Richiede AI' },
+  { id: 'reviews', label: 'FAQ e recensioni AI', desc: 'Genera FAQ e risposte per la scheda prodotto', status: 'Richiede AI' },
+  { id: 'thumbnail', label: 'Titoli e copertine virali', desc: 'Idee di titoli e thumbnail ottimizzate dall AI', status: 'Richiede AI' },
+  { id: 'trendalert', label: 'Alert trend TikTok', desc: 'Segnala prodotti che stanno esplodendo ora', status: 'Attivo' },
+  { id: 'pricewatch', label: 'Watcher prezzi competitor', desc: 'Confronta i tuoi prezzi con la fascia di mercato', status: 'Attivo' },
+  { id: 'lowmargin', label: 'Margine basso intelligente', desc: 'Prezzi col +15-30% per vendere di piu sul volume', status: 'Attivo' },
+  { id: 'kpigoal', label: 'KPI e obiettivo mensile', desc: 'Traccia l avanzamento verso il tuo obiettivo di guadagno', status: 'Richiede Supabase' },
 ]
 
 export default function AutomationPage() {

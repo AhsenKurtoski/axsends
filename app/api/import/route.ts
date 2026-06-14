@@ -4,8 +4,8 @@ import { isSupabaseConfigured } from '@/lib/supabaseClient'
 
 export const dynamic = 'force-dynamic'
 
-// Margine di default applicato al costo del fornitore
-const MARKUP = 2.5
+// Margine basso di default applicato al costo del fornitore: +25%.
+const MARKUP = 1.25
 
 type ImportItem = {
   externalId: string
