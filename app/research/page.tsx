@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Search, Rocket, Loader2, Download, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, Rocket, Loader2, Download, Check, Shuffle, Sparkles } from 'lucide-react'
 
 type Product = {
   id: string
@@ -18,7 +19,10 @@ type Product = {
   competitorHigh: number
 }
 
+const CATEGORIES = ['kitchen', 'fitness', 'pet', 'beauty', 'home decor', 'phone accessory', 'car accessory', 'travel']
+
 export default function ResearchPage() {
+  const router = useRouter()
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
@@ -29,7 +33,7 @@ export default function ResearchPage() {
   async function load(keyword: string) {
     setLoading(true)
     try {
-      const res = await fetch('/api/research?q=' + encodeURIComponent(keyword))
+      const res = await fetch('/api/research?q=' + encodeURIComponent(keyword) + '&t=' + Date.now())
       const data = await res.json()
       setProducts(data.products || [])
       setSource(data.source || '')
@@ -65,8 +69,12 @@ export default function ResearchPage() {
         }),
       })
     } catch (err) {
-      // ignora errori di import in modalita demo
+      // ignora errori di import
     }
+  }
+
+  function genAd(p: Product) {
+    router.push('/ads?product=' + encodeURIComponent(p.name))
   }
 
   return (
@@ -75,7 +83,7 @@ export default function ResearchPage() {
         <h1 className='flex items-center gap-2 text-2xl font-semibold'>
           <Rocket className='text-brand' size={22} /> Ricerca prodotti vincenti
         </h1>
-        <p className='text-sm text-white/50'>Trova prodotti di qualità con punteggio di potenziale (0-100)</p>
+        <p className='text-sm text-white/50'>Trova prodotti di qualita con punteggio 0-100. Ogni ricerca pesca prodotti nuovi.</p>
       </header>
 
       <form
@@ -92,10 +100,28 @@ export default function ResearchPage() {
           placeholder='Cerca per parola chiave (es. kitchen, fitness, gadget)...'
           className='w-full bg-transparent text-sm outline-none placeholder:text-white/30'
         />
+        <button type='button' onClick={() => load(q)} className='flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/5'>
+          <Shuffle size={13} /> Mescola
+        </button>
         <button type='submit' className='rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-dark'>
           Cerca
         </button>
       </form>
+
+      <div className='flex flex-wrap gap-2'>
+        {CATEGORIES.map((c) => (
+          <button
+            key={c}
+            onClick={() => {
+              setQ(c)
+              load(c)
+            }}
+            className='rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70 transition hover:border-brand/40 hover:text-white'
+          >
+            {c}
+          </button>
+        ))}
+      </div>
 
       {note ? <div className='text-xs text-white/40'>{note}</div> : null}
 
@@ -128,23 +154,31 @@ export default function ResearchPage() {
                 <div className='text-right text-xs text-emerald-400'>{p.margin}% margine</div>
               </div>
               <div className='mt-2 text-[11px] text-white/40'>
-                Competitor (stima): €{p.competitorLow} – €{p.competitorHigh}
+                Competitor (stima): €{p.competitorLow} - €{p.competitorHigh}
               </div>
-              <button
-                onClick={() => importProduct(p)}
-                disabled={imported[p.id]}
-                className='mt-3 flex items-center justify-center gap-2 rounded-xl bg-brand/15 py-2 text-xs text-white transition hover:bg-brand/25 disabled:opacity-60'
-              >
-                {imported[p.id] ? (
-                  <>
-                    <Check size={14} /> Importato
-                  </>
-                ) : (
-                  <>
-                    <Download size={14} /> Importa
-                  </>
-                )}
-              </button>
+              <div className='mt-3 flex gap-2'>
+                <button
+                  onClick={() => importProduct(p)}
+                  disabled={imported[p.id]}
+                  className='flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand/15 py-2 text-xs text-white transition hover:bg-brand/25 disabled:opacity-60'
+                >
+                  {imported[p.id] ? (
+                    <>
+                      <Check size={14} /> Importato
+                    </>
+                  ) : (
+                    <>
+                      <Download size={14} /> Importa
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => genAd(p)}
+                  className='flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-brand py-2 text-xs text-white transition hover:bg-brand-dark'
+                >
+                  <Sparkles size={14} /> Genera ad
+                </button>
+              </div>
             </div>
           ))}
         </div>

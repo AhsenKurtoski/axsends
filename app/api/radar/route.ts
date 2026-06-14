@@ -9,9 +9,11 @@ export const maxDuration = 60
 const NICHES = ['kitchen gadget', 'fitness', 'pet', 'beauty tool', 'home decor', 'phone accessory']
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+// Pagina casuale 1-4 per nicchia: ogni scansione trova prodotti diversi.
+const rndPage = () => 1 + Math.floor(Math.random() * 4)
 
 export async function GET() {
-  const probe = await searchCjProducts({ keyword: NICHES[0], pageSize: 10 })
+  const probe = await searchCjProducts({ keyword: NICHES[0], pageSize: 10, pageNum: rndPage() })
 
   if (!probe.ok) {
     return NextResponse.json({
@@ -33,7 +35,7 @@ export async function GET() {
   for (let i = 1; i < NICHES.length; i++) {
     // Rispetta il rate limit del piano free CJ (1 richiesta/secondo)
     await sleep(1100)
-    const r = await searchCjProducts({ keyword: NICHES[i], pageSize: 10 })
+    const r = await searchCjProducts({ keyword: NICHES[i], pageSize: 10, pageNum: rndPage() })
     if (r.ok) r.products.forEach((p) => map.set(p.id, p))
   }
 

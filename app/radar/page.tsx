@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Radar, Loader2, RefreshCw, Flame } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Radar, Loader2, RefreshCw, Flame, Sparkles } from 'lucide-react'
 
 type Product = {
   id: string
@@ -18,6 +19,7 @@ type Product = {
 }
 
 export default function RadarPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<Product[]>([])
   const [note, setNote] = useState('')
@@ -26,7 +28,7 @@ export default function RadarPage() {
   async function scan() {
     setLoading(true)
     try {
-      const res = await fetch('/api/radar')
+      const res = await fetch('/api/radar?t=' + Date.now())
       const data = await res.json()
       setProducts(data.products || [])
       setNote(data.note || '')
@@ -41,6 +43,10 @@ export default function RadarPage() {
   useEffect(() => {
     scan()
   }, [])
+
+  function genAd(p: Product) {
+    router.push('/ads?product=' + encodeURIComponent(p.name))
+  }
 
   return (
     <div className='space-y-6'>
@@ -63,7 +69,7 @@ export default function RadarPage() {
       {note ? (
         <div className='text-xs text-white/40'>
           {note}
-          {scannedAt ? ' · ' + new Date(scannedAt).toLocaleString('it-IT') : ''}
+          {scannedAt ? ' - ' + new Date(scannedAt).toLocaleString('it-IT') : ''}
         </div>
       ) : null}
 
@@ -95,6 +101,12 @@ export default function RadarPage() {
                 <div className='text-lg font-semibold'>€{p.suggestedPrice}</div>
                 <div className='text-right text-xs text-emerald-400'>+€{p.profit} / vendita</div>
               </div>
+              <button
+                onClick={() => genAd(p)}
+                className='mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-brand py-2 text-xs text-white transition hover:bg-brand-dark'
+              >
+                <Sparkles size={14} /> Genera ad
+              </button>
             </div>
           ))}
         </div>

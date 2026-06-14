@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Sparkles, Loader2, Film, Video, Send, Youtube, Instagram, Share2 } from 'lucide-react'
 
 type Scene = { time: string; visual: string; voiceover: string }
@@ -76,6 +76,17 @@ export default function AdsPage() {
   const [allUrl, setAllUrl] = useState('')
   const [allLoading, setAllLoading] = useState(false)
   const [allMsg, setAllMsg] = useState<string | null>(null)
+
+  // Se arrivo da Ricerca/Radar con ?product=..., precompilo il prodotto.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const pre = params.get('product')
+      if (pre) setProduct(pre)
+    } catch (err) {
+      // nessun parametro prodotto
+    }
+  }, [])
 
   async function generate(e: React.FormEvent) {
     e.preventDefault()

@@ -73,12 +73,13 @@ function mapProduct(raw: any): CjProduct {
 export async function searchCjProducts(opts: {
   keyword?: string
   pageSize?: number
+  pageNum?: number
 }): Promise<{ ok: boolean; products: CjProduct[]; error?: string }> {
   const token = await getToken()
   if (!token) return { ok: false, products: [], error: 'no-credentials' }
 
   const params = new URLSearchParams()
-  params.set('pageNum', '1')
+  params.set('pageNum', String(opts.pageNum && opts.pageNum > 0 ? opts.pageNum : 1))
   params.set('pageSize', String(opts.pageSize || 20))
   if (opts.keyword) params.set('productNameEn', opts.keyword)
 
