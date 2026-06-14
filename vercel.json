@@ -3,6 +3,10 @@
     {
       "path": "/api/monitor",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/radar",
+      "schedule": "0 7 * * *"
     }
   ]
 }

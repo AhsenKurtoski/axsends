@@ -13,12 +13,16 @@ import {
   Rocket,
   TrendingUp,
   Tag,
+  Radar,
+  Zap,
 } from 'lucide-react'
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/radar', label: 'Radar vincenti', icon: Radar },
   { href: '/research', label: 'Ricerca prodotti', icon: Rocket },
   { href: '/trends', label: 'Trend virali', icon: TrendingUp },
+  { href: '/automation', label: 'Automazioni', icon: Zap },
   { href: '/products', label: 'Prodotti', icon: Package },
   { href: '/pricing', label: 'Regole prezzo', icon: Tag },
   { href: '/orders', label: 'Ordini', icon: ShoppingCart },
