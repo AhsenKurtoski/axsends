@@ -10,6 +10,33 @@ type AdItem = {
   ok: boolean
 }
 
+// Coercizione sicura: qualsiasi valore (stringa, numero, oggetto, array) diventa
+// testo mostrabile in React. Evita il crash "Objects are not valid as a React child".
+function txt(v: any): string {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (Array.isArray(v)) return v.map(txt).filter(Boolean).join(' ')
+  if (typeof v === 'object') {
+    const keys = ['visual', 'scene', 'scena', 'text', 'description', 'descrizione', 'value']
+    for (let i = 0; i < keys.length; i++) {
+      if (typeof v[keys[i]] === 'string') return v[keys[i]]
+    }
+    return Object.keys(v).map((k) => txt(v[k])).filter(Boolean).join(' ')
+  }
+  return String(v)
+}
+
+function lines(v: any): string[] {
+  if (Array.isArray(v)) return v.map(txt).filter(Boolean)
+  const s = txt(v)
+  return s ? [s] : []
+}
+
+function hashtagText(v: any): string {
+  return lines(v).join(' ')
+}
+
 export default function AutoAdsPage() {
   const [keyword, setKeyword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -23,7 +50,7 @@ export default function AutoAdsPage() {
     setNote(null)
     setAds([])
     try {
-      const res = await fetch('/api/auto-ads?limit=6&q=' + encodeURIComponent(keyword))
+      const res = await fetch('/api/auto-ads?limit=12&q=' + encodeURIComponent(keyword))
       const data = await res.json()
       setNote(data.note || null)
       setAds(Array.isArray(data.ads) ? data.ads : [])
@@ -39,7 +66,7 @@ export default function AutoAdsPage() {
       const res = await fetch('/api/ad-queue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product, platform, title, caption, hashtags }),
+        body: JSON.stringify({ product, platform, title, caption, hashtags: hashtagText(hashtags) }),
       })
       const data = await res.json()
       if (data.ok) setNote('Salvato in coda: ' + product + ' (' + platform + '). Aprila dalla voce Coda.')
@@ -86,13 +113,13 @@ export default function AutoAdsPage() {
           <div key={a.product.id} className='glass space-y-4 p-5'>
             <div className='flex items-center gap-3'>
               {a.product.image && a.product.image.indexOf('http') === 0 ? (
-                <img src={a.product.image} alt={a.product.name} className='h-14 w-14 rounded-xl object-cover' />
+                <img src={a.product.image} alt={txt(a.product.name)} className='h-14 w-14 rounded-xl object-cover' />
               ) : (
-                <div className='grid h-14 w-14 place-items-center rounded-xl bg-white/5 text-xl'>📦</div>
+                <div className='grid h-14 w-14 place-items-center rounded-xl bg-white/5 text-xl'>\ud83d\udce6</div>
               )}
               <div className='min-w-0'>
-                <div className='truncate text-sm font-medium'>{a.product.name}</div>
-                <div className='text-xs text-white/50'>{a.product.price} euro · punteggio {a.product.score} · {a.product.label}</div>
+                <div className='truncate text-sm font-medium'>{txt(a.product.name)}</div>
+                <div className='text-xs text-white/50'>{txt(a.product.price)} euro \u00b7 punteggio {txt(a.product.score)} \u00b7 {txt(a.product.label)}</div>
               </div>
             </div>
 
@@ -101,17 +128,17 @@ export default function AutoAdsPage() {
                 <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
                   <Send size={15} className='text-brand' /> TikTok
                 </div>
-                <p className='text-sm text-white/80'>{a.tiktok.hook}</p>
-                <p className='mt-2 text-sm text-white/60'>{a.tiktok.caption}</p>
-                {Array.isArray(a.tiktok.hashtags) ? <p className='mt-1 text-sm text-brand'>{a.tiktok.hashtags.join(' ')}</p> : null}
-                {Array.isArray(a.tiktok.script) ? (
+                <p className='text-sm text-white/80'>{txt(a.tiktok.hook)}</p>
+                <p className='mt-2 text-sm text-white/60'>{txt(a.tiktok.caption)}</p>
+                <p className='mt-1 text-sm text-brand'>{hashtagText(a.tiktok.hashtags)}</p>
+                {lines(a.tiktok.script).length > 0 ? (
                   <ul className='mt-2 list-disc space-y-1 pl-5 text-xs text-white/50'>
-                    {a.tiktok.script.map((sc: string, i: number) => (
+                    {lines(a.tiktok.script).map((sc, i) => (
                       <li key={i}>{sc}</li>
                     ))}
                   </ul>
                 ) : null}
-                <button onClick={() => saveToQueue(a.product.name, 'tiktok', a.tiktok.hook || '', a.tiktok.caption || '', a.tiktok.hashtags)} className='mt-3 flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1.5 text-xs text-white transition hover:bg-brand/20'>
+                <button onClick={() => saveToQueue(txt(a.product.name), 'tiktok', txt(a.tiktok.hook), txt(a.tiktok.caption), a.tiktok.hashtags)} className='mt-3 flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1.5 text-xs text-white transition hover:bg-brand/20'>
                   <ListPlus size={13} /> Salva in coda
                 </button>
               </div>
@@ -122,17 +149,17 @@ export default function AutoAdsPage() {
                 <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
                   <Youtube size={16} className='text-rose-400' /> YouTube
                 </div>
-                <p className='text-sm font-medium text-white/80'>{a.youtube.title}</p>
-                <p className='mt-2 text-sm text-white/60'>{a.youtube.description}</p>
-                {Array.isArray(a.youtube.tags) ? <p className='mt-1 text-sm text-brand'>{a.youtube.tags.join(' ')}</p> : null}
-                {Array.isArray(a.youtube.script) ? (
+                <p className='text-sm font-medium text-white/80'>{txt(a.youtube.title)}</p>
+                <p className='mt-2 text-sm text-white/60'>{txt(a.youtube.description)}</p>
+                <p className='mt-1 text-sm text-brand'>{hashtagText(a.youtube.tags)}</p>
+                {lines(a.youtube.script).length > 0 ? (
                   <ul className='mt-2 list-disc space-y-1 pl-5 text-xs text-white/50'>
-                    {a.youtube.script.map((sc: string, i: number) => (
+                    {lines(a.youtube.script).map((sc, i) => (
                       <li key={i}>{sc}</li>
                     ))}
                   </ul>
                 ) : null}
-                <button onClick={() => saveToQueue(a.product.name, 'youtube', a.youtube.title || '', a.youtube.description || '', a.youtube.tags)} className='mt-3 flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1.5 text-xs text-white transition hover:bg-brand/20'>
+                <button onClick={() => saveToQueue(txt(a.product.name), 'youtube', txt(a.youtube.title), txt(a.youtube.description), a.youtube.tags)} className='mt-3 flex items-center gap-1.5 rounded-lg border border-brand/40 bg-brand/10 px-2.5 py-1.5 text-xs text-white transition hover:bg-brand/20'>
                   <ListPlus size={13} /> Salva in coda
                 </button>
               </div>
