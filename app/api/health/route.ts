@@ -18,7 +18,9 @@ type Svc = {
 function aiSvc(id: string, name: string, p: AiProbe): Svc {
   const powers = 'Descrizioni, ads, ebook, siti web, UGC, design'
   if (p.ok === null) return { id, name, group: 'AI (testi)', powers, status: 'missing', message: p.message }
-  return { id, name, group: 'AI (testi)', powers, status: p.ok ? 'ok' : 'error', message: p.message }
+  if (p.ok) return { id, name, group: 'AI (testi)', powers, status: 'ok', message: p.message }
+  if (p.temporary) return { id, name, group: 'AI (testi)', powers, status: 'configured', message: p.message }
+  return { id, name, group: 'AI (testi)', powers, status: 'error', message: p.message }
 }
 
 async function checkSupabase(): Promise<Svc> {
@@ -27,7 +29,16 @@ async function checkSupabase(): Promise<Svc> {
   if (!configured) return { ...base, status: 'missing', message: 'Mancano NEXT_PUBLIC_SUPABASE_URL e/o SUPABASE_SERVICE_ROLE_KEY in .env.local.' }
   try {
     const r = await supabaseAdmin.from('products').select('id').limit(1)
-    if (r.error) return { ...base, status: 'error', message: 'Connesso ma query fallita: ' + r.error.message + '. Hai eseguito supabase-schema.sql nel SQL Editor?' }
+    if (r.error) {
+      const missing = /schema cache|does not exist|relation|not find the table/i.test(r.error.message)
+      return {
+        ...base,
+        status: 'error',
+        message: missing
+          ? 'Connesso ma le tabelle non esistono ancora. Apri Supabase > SQL Editor, incolla supabase-schema.sql e premi Run.'
+          : 'Connesso ma query fallita: ' + r.error.message,
+      }
+    }
     return { ...base, status: 'ok', message: 'Connesso e tabelle raggiungibili.' }
   } catch (e) {
     return { ...base, status: 'error', message: 'Errore di connessione: ' + String(e).slice(0, 160) }

@@ -7,7 +7,19 @@ const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || ''
 const GEMINI_KEY = process.env.GEMINI_API_KEY || ''
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free'
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash'
+
+// Lista di modelli Gemini da provare in ordine: prima quello scelto (se presente),
+// poi modelli noti e attuali. Cosi anche un GEMINI_MODEL vecchio (es. 1.5-flash) si
+// auto-corregge cadendo su un modello valido.
+function geminiModels(): string[] {
+  const list: string[] = []
+  if (process.env.GEMINI_MODEL) list.push(process.env.GEMINI_MODEL)
+  const defaults = ['gemini-2.0-flash', 'gemini-2.0-flash-001', 'gemini-1.5-flash-latest', 'gemini-1.5-flash']
+  for (let i = 0; i < defaults.length; i++) {
+    if (list.indexOf(defaults[i]) < 0) list.push(defaults[i])
+  }
+  return list
+}
 
 export function aiConfigured(): boolean {
   return Boolean(GROQ_KEY || OPENROUTER_KEY || GEMINI_KEY)
@@ -85,31 +97,32 @@ async function callOpenRouter(system: string, prompt: string, maxTokens?: number
 
 async function callGemini(system: string, prompt: string, maxTokens?: number): Promise<string | null> {
   if (!GEMINI_KEY) return null
-  try {
-    const url =
-      'https://generativelanguage.googleapis.com/v1beta/models/' +
-      GEMINI_MODEL +
-      ':generateContent?key=' +
-      GEMINI_KEY
-    const genCfg: any = { temperature: 0.8 }
-    if (maxTokens) genCfg.maxOutputTokens = maxTokens
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [ { parts: [ { text: system + ' || ' + prompt } ] } ],
-        generationConfig: genCfg,
-      }),
-    })
-    if (!r.ok) return null
-    const j: any = await r.json().catch(() => null)
-    const cand = j && j.candidates && j.candidates[0]
-    const part = cand && cand.content && cand.content.parts && cand.content.parts[0]
-    const text = part && part.text
-    return text ? String(text).trim() : null
-  } catch {
-    return null
+  const genCfg: any = { temperature: 0.8 }
+  if (maxTokens) genCfg.maxOutputTokens = maxTokens
+  const models = geminiModels()
+  for (let i = 0; i < models.length; i++) {
+    try {
+      const url =
+        'https://generativelanguage.googleapis.com/v1beta/models/' + models[i] + ':generateContent?key=' + GEMINI_KEY
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [ { parts: [ { text: system + ' || ' + prompt } ] } ],
+          generationConfig: genCfg,
+        }),
+      })
+      if (!r.ok) continue
+      const j: any = await r.json().catch(() => null)
+      const cand = j && j.candidates && j.candidates[0]
+      const part = cand && cand.content && cand.content.parts && cand.content.parts[0]
+      const text = part && part.text
+      if (text) return String(text).trim()
+    } catch {
+      // provo il modello successivo
+    }
   }
+  return null
 }
 
 // Genera testo libero. Prova Groq, poi OpenRouter, poi Gemini. Null se nessuna chiave o errore.
@@ -147,7 +160,7 @@ export async function generateJson(system: string, prompt: string): Promise<any>
 
 // --- Diagnostica: prova ogni provider AI e restituisce un messaggio di errore specifico ---
 
-export type AiProbe = { configured: boolean; ok: boolean | null; message: string }
+export type AiProbe = { configured: boolean; ok: boolean | null; temporary?: boolean; message: string }
 
 export async function probeGroq(): Promise<AiProbe> {
   if (!GROQ_KEY) return { configured: false, ok: null, message: 'Chiave GROQ_API_KEY non impostata.' }
@@ -158,6 +171,7 @@ export async function probeGroq(): Promise<AiProbe> {
       body: JSON.stringify({ model: GROQ_MODEL, max_tokens: 5, messages: [ { role: 'user', content: 'OK' } ] }),
     })
     if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + GROQ_MODEL + ').' }
+    if (r.status === 429) return { configured: true, ok: false, temporary: true, message: 'Limite richieste momentaneo (HTTP 429). La chiave e valida, riprova tra poco.' }
     const t = await r.text()
     return { configured: true, ok: false, message: 'Errore HTTP ' + r.status + ': ' + t.slice(0, 160) }
   } catch (e) {
@@ -174,6 +188,7 @@ export async function probeOpenRouter(): Promise<AiProbe> {
       body: JSON.stringify({ model: OPENROUTER_MODEL, max_tokens: 5, messages: [ { role: 'user', content: 'OK' } ] }),
     })
     if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + OPENROUTER_MODEL + ').' }
+    if (r.status === 429) return { configured: true, ok: false, temporary: true, message: 'Modello gratuito momentaneamente occupato (HTTP 429). La chiave e valida: riprova piu tardi o usa Groq (gia attivo).' }
     const t = await r.text()
     return { configured: true, ok: false, message: 'Errore HTTP ' + r.status + ': ' + t.slice(0, 160) }
   } catch (e) {
@@ -183,18 +198,24 @@ export async function probeOpenRouter(): Promise<AiProbe> {
 
 export async function probeGemini(): Promise<AiProbe> {
   if (!GEMINI_KEY) return { configured: false, ok: null, message: 'Chiave GEMINI_API_KEY non impostata.' }
-  try {
-    const url =
-      'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + GEMINI_KEY
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [ { parts: [ { text: 'OK' } ] } ] }),
-    })
-    if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + GEMINI_MODEL + ').' }
-    const t = await r.text()
-    return { configured: true, ok: false, message: 'Errore HTTP ' + r.status + ': ' + t.slice(0, 160) }
-  } catch (e) {
-    return { configured: true, ok: false, message: 'Errore di rete: ' + String(e).slice(0, 140) }
+  const models = geminiModels()
+  let lastMsg = ''
+  for (let i = 0; i < models.length; i++) {
+    try {
+      const url =
+        'https://generativelanguage.googleapis.com/v1beta/models/' + models[i] + ':generateContent?key=' + GEMINI_KEY
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [ { parts: [ { text: 'OK' } ] } ] }),
+      })
+      if (r.ok) return { configured: true, ok: true, message: 'Funzionante (modello ' + models[i] + ').' }
+      if (r.status === 429) return { configured: true, ok: false, temporary: true, message: 'Limite richieste momentaneo (HTTP 429). La chiave e valida, riprova tra poco.' }
+      const t = await r.text()
+      lastMsg = 'HTTP ' + r.status + ' su ' + models[i] + ': ' + t.slice(0, 100)
+    } catch (e) {
+      lastMsg = 'Errore di rete su ' + models[i] + ': ' + String(e).slice(0, 90)
+    }
   }
+  return { configured: true, ok: false, message: 'Nessun modello Gemini disponibile per questa chiave. Ultimo errore: ' + lastMsg }
 }
