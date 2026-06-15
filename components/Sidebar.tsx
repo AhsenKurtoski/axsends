@@ -25,11 +25,13 @@ import {
   CalendarDays,
   Globe,
   Shirt,
+  Wand2,
   Settings,
 } from 'lucide-react'
 
 const nav = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/autopilot', label: 'Autopilot', icon: Wand2 },
   { href: '/money', label: 'Centro guadagni', icon: Wallet },
   { href: '/radar', label: 'Radar vincenti', icon: Radar },
   { href: '/research', label: 'Ricerca prodotti', icon: Rocket },
