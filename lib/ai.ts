@@ -29,20 +29,22 @@ export function aiStatus() {
   }
 }
 
-async function callGroq(system: string, prompt: string): Promise<string | null> {
+async function callGroq(system: string, prompt: string, maxTokens?: number): Promise<string | null> {
   if (!GROQ_KEY) return null
   try {
+    const body: any = {
+      model: GROQ_MODEL,
+      temperature: 0.8,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: prompt },
+      ],
+    }
+    if (maxTokens) body.max_tokens = maxTokens
     const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        temperature: 0.8,
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: prompt },
-        ],
-      }),
+      body: JSON.stringify(body),
     })
     if (!r.ok) return null
     const j: any = await r.json().catch(() => null)
@@ -54,20 +56,22 @@ async function callGroq(system: string, prompt: string): Promise<string | null> 
   }
 }
 
-async function callOpenRouter(system: string, prompt: string): Promise<string | null> {
+async function callOpenRouter(system: string, prompt: string, maxTokens?: number): Promise<string | null> {
   if (!OPENROUTER_KEY) return null
   try {
+    const body: any = {
+      model: OPENROUTER_MODEL,
+      temperature: 0.8,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: prompt },
+      ],
+    }
+    if (maxTokens) body.max_tokens = maxTokens
     const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + OPENROUTER_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: OPENROUTER_MODEL,
-        temperature: 0.8,
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: prompt },
-        ],
-      }),
+      body: JSON.stringify(body),
     })
     if (!r.ok) return null
     const j: any = await r.json().catch(() => null)
@@ -79,7 +83,7 @@ async function callOpenRouter(system: string, prompt: string): Promise<string | 
   }
 }
 
-async function callGemini(system: string, prompt: string): Promise<string | null> {
+async function callGemini(system: string, prompt: string, maxTokens?: number): Promise<string | null> {
   if (!GEMINI_KEY) return null
   try {
     const url =
@@ -87,12 +91,14 @@ async function callGemini(system: string, prompt: string): Promise<string | null
       GEMINI_MODEL +
       ':generateContent?key=' +
       GEMINI_KEY
+    const genCfg: any = { temperature: 0.8 }
+    if (maxTokens) genCfg.maxOutputTokens = maxTokens
     const r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [ { parts: [ { text: system + ' || ' + prompt } ] } ],
-        generationConfig: { temperature: 0.8 },
+        generationConfig: genCfg,
       }),
     })
     if (!r.ok) return null
@@ -107,12 +113,13 @@ async function callGemini(system: string, prompt: string): Promise<string | null
 }
 
 // Genera testo libero. Prova Groq, poi OpenRouter, poi Gemini. Null se nessuna chiave o errore.
-export async function generateText(system: string, prompt: string): Promise<string | null> {
-  const viaGroq = await callGroq(system, prompt)
+// maxTokens opzionale per output lunghi (es. siti web completi).
+export async function generateText(system: string, prompt: string, maxTokens?: number): Promise<string | null> {
+  const viaGroq = await callGroq(system, prompt, maxTokens)
   if (viaGroq) return viaGroq
-  const viaOpenRouter = await callOpenRouter(system, prompt)
+  const viaOpenRouter = await callOpenRouter(system, prompt, maxTokens)
   if (viaOpenRouter) return viaOpenRouter
-  return await callGemini(system, prompt)
+  return await callGemini(system, prompt, maxTokens)
 }
 
 // Genera e fa il parse di un oggetto/array JSON prodotto dall'AI. Pulisce eventuali code fence.
