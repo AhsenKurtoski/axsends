@@ -29,7 +29,7 @@ export default function StorePage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('axsends_leads')
+      const raw = localStorage.getItem('ahsends_leads') || localStorage.getItem('axsends_leads')
       if (raw) setLeads(JSON.parse(raw))
     } catch (err) {
       // nessun lead salvato
@@ -39,7 +39,7 @@ export default function StorePage() {
   function persist(next: Lead[]) {
     setLeads(next)
     try {
-      localStorage.setItem('axsends_leads', JSON.stringify(next))
+      localStorage.setItem('ahsends_leads', JSON.stringify(next))
     } catch (err) {
       // localStorage non disponibile
     }
@@ -94,11 +94,16 @@ export default function StorePage() {
 
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-          <Store className='text-brand' size={22} /> Negozio AI
-        </h1>
-        <p className='text-sm text-white/50'>Genera una landing page che vende e raccogli ordini/contatti. Modo di guadagno: vendita diretta.</p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='flex items-center gap-2 text-2xl font-semibold'>
+            <Store className='text-brand' size={22} /> Negozio AI AhsenDS
+          </h1>
+          <p className='text-sm text-white/50'>Genera una landing page che converte &bull; Costruito da Ahsen Kurtoski</p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
 
       <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>

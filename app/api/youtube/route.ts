@@ -1,11 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { uploadVideo } from '@/lib/youtube'
+import { validateBody, youtubeBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as any
+export async function POST(req: NextRequest) {
+  const rateLimitResponse = await rateLimitConfigs.social(req)
+  if (rateLimitResponse) return rateLimitResponse
+  const validation = await validateBody(req, youtubeBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
+  }
+
+  const { videoUrl, title, description, tags, privacy } = validation.data
 
   if (!process.env.YOUTUBE_ACCESS_TOKEN) {
     return NextResponse.json({
@@ -17,10 +26,11 @@ export async function POST(req: Request) {
   }
 
   const r = await uploadVideo({
-    videoUrl: body && body.videoUrl,
-    title: body && body.title,
-    description: body && body.description,
-    tags: body && body.tags,
+    videoUrl,
+    title,
+    description,
+    tags,
+    privacy,
   })
   return NextResponse.json({ configured: true, ...r })
 }

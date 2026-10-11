@@ -13,7 +13,7 @@ export default function PricingPage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('axsends_pricing')
+      const raw = localStorage.getItem('ahsends_pricing') || localStorage.getItem('axsends_pricing')
       if (raw) {
         const r = JSON.parse(raw)
         if (typeof r.markup === 'number') setMarkup(r.markup)
@@ -39,7 +39,7 @@ export default function PricingPage() {
 
   function save() {
     try {
-      localStorage.setItem('axsends_pricing', JSON.stringify({ markup, round99, minMargin }))
+      localStorage.setItem('ahsends_pricing', JSON.stringify({ markup, round99, minMargin }))
       setSaved(true)
       setTimeout(() => setSaved(false), 1500)
     } catch (err) {
@@ -49,11 +49,16 @@ export default function PricingPage() {
 
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-          <Tag className='text-brand' size={22} /> Regole di prezzo automatiche
-        </h1>
-        <p className='text-sm text-white/50'>Margine basso consigliato: markup 1.25 (+25%) e margine minimo 20% per vendere di piu</p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='flex items-center gap-2 text-2xl font-semibold'>
+            <Tag className='text-brand' size={22} /> Regole di prezzo automatiche AhsenDS
+          </h1>
+          <p className='text-sm text-white/50'>Margine calibrato &bull; Costruito da Ahsen Kurtoski</p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
 
       <div className='grid gap-6 lg:grid-cols-3'>

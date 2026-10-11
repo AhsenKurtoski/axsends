@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server'
 import { searchCjProducts } from '@/lib/cj'
 import { BaseProduct, MARKUP, scoreProduct } from '@/lib/products'
 import { generateText, generateJson, aiConfigured, aiProvider } from '@/lib/ai'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
+
+// Motore Autopilot di AhsenDS — Costruito da Ahsen Kurtoski
+// Esegue in un solo clic ricerca su CJ, analisi del potenziale, salvataggio e generazione di ads e landing page.
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -13,10 +16,6 @@ const ELECTRONICS = [
   'led strip light', 'mini projector', 'car charger gadget', 'usb hub',
   'gaming mouse', 'smart home device', 'power bank', 'webcam',
 ]
-
-function supabaseReady(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
-}
 
 // Coercizione sicura: l'AI a volte risponde con oggetti annidati o chiavi diverse.
 function toText(v: any): string {
@@ -83,13 +82,13 @@ async function buildWebsite(name: string, category: string, price: number, image
     'Colore brand principale: #7c5cff. ' +
     'Includi in ordine: header sticky con CTA, hero con immagine prodotto e bottone Acquista ora, barra vantaggi (spedizione, garanzia, pagamento sicuro), ' +
     'sezione benefici/caratteristiche a griglia, sezione come funziona in 3 step, galleria immagini, recensioni clienti con stelle e foto, ' +
-    'offerta a tempo con contatore animato e urgenza, tabella o box prezzo con sconto e CTA, FAQ a fisarmonica, garanzia e resi, footer completo. ' +
+    'offerta a tempo con contatore animato e urgenza, tabella o box prezzo con sconto e CTA, FAQ a fisarmonica, garanzia e resi, footer completo con attribuzione a AhsenDS (Costruito da Ahsen Kurtoski). ' +
     'Testi realistici e persuasivi orientati alla vendita. Deve sembrare il sito di un vero brand, non un template.'
   const raw = await generateText(system, prompt, 8000)
   if (!raw) return null
   let html = raw.trim()
-  if (html.indexOf('```') === 0) {
-    html = html.replace(/^```[a-zA-Z]*\n?/, '').replace(/```$/, '').trim()
+  if (html.startsWith('```')) {
+    html = html.replace(/^```[a-zA-Z]*\n?/, '').replace(/```\s*$/, '').trim()
   }
   const lower = html.toLowerCase()
   const dt = lower.indexOf('<!doctype')
@@ -135,7 +134,7 @@ export async function GET(req: Request) {
   // 2) Salva nel catalogo (best-effort, non blocca mai)
   let saved = 0
   let savedNote = ''
-  if (supabaseReady()) {
+  if (isSupabaseAdminConfigured) {
     try {
       const rows = top.map((p) => ({
         id: p.id,
@@ -163,12 +162,12 @@ export async function GET(req: Request) {
     savedNote = 'Aggiungi Supabase per salvare i prodotti nel catalogo permanente.'
   }
 
-  // 3) + 4) Per il prodotto migliore: genera ad + landing page (serve una chiave AI)
+  // 3) Genera ad e landing page per il top 1 (se AI configurata)
   const best = top[0]
   let ad: any = null
   let website: any = null
   let aiNote = ''
-  if (aiConfigured()) {
+  if (aiConfigured() && best) {
     ad = await buildAd(best.name, best.category, best.suggestedPrice)
     website = await buildWebsite(best.name, best.category, best.suggestedPrice, best.image)
     if (!ad && !website) aiNote = 'L AI non ha risposto, riprova tra poco.'
@@ -186,6 +185,7 @@ export async function GET(req: Request) {
     aiNote,
     products: top,
     best: { product: best, ad, website },
-    note: 'Autopilot completato: ' + top.length + ' prodotti analizzati, ad e landing page generate per il migliore.',
+    developer: 'Ahsen Kurtoski',
+    note: 'Autopilot completato: ' + top.length + ' prodotti analizzati, ad e landing page generate per il migliore. Costruito da Ahsen Kurtoski.',
   })
 }

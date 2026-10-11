@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { generateJson, aiConfigured, aiProvider } from '@/lib/ai'
+import { validateBody, generateAdBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 90
@@ -134,8 +136,17 @@ async function hfImage(prompt: string): Promise<string | null> {
   }
 }
 
-export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as Body
+export async function POST(req: NextRequest) {
+  // Rate limiting per API AI
+  const rateLimitResponse = await rateLimitConfigs.ai(req)
+  if (rateLimitResponse) return rateLimitResponse
+
+  const validation = await validateBody(req, generateAdBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
+  }
+
+  const body = validation.data
   const ai = aiConfigured() ? await aiScript(body) : null
   const script = ai || fallbackScript(body)
   const imagePrompt =

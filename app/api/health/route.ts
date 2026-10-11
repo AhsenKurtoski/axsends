@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { probeGroq, probeOpenRouter, probeGemini, type AiProbe } from '@/lib/ai'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
 import { searchCjProducts } from '@/lib/cj'
 
 export const dynamic = 'force-dynamic'
@@ -25,8 +25,7 @@ function aiSvc(id: string, name: string, p: AiProbe): Svc {
 
 async function checkSupabase(): Promise<Svc> {
   const base = { id: 'supabase', name: 'Supabase (database)', group: 'Infrastruttura', powers: 'Catalogo, ordini, fornitori, coda ads, login' }
-  const configured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
-  if (!configured) return { ...base, status: 'missing', message: 'Mancano NEXT_PUBLIC_SUPABASE_URL e/o SUPABASE_SERVICE_ROLE_KEY in .env.local.' }
+  if (!isSupabaseAdminConfigured) return { ...base, status: 'missing', message: 'Mancano NEXT_PUBLIC_SUPABASE_URL e/o SUPABASE_SERVICE_ROLE_KEY in .env.local.' }
   try {
     const r = await supabaseAdmin.from('products').select('id').limit(1)
     if (r.error) {
@@ -156,9 +155,15 @@ export async function GET() {
     aiOk,
     total: services.length,
     ok: services.filter((s) => s.status === 'ok').length,
-    errors: services.filter((s) => s.status === 'error').length,
     missing: services.filter((s) => s.status === 'missing').length,
+    error: services.filter((s) => s.status === 'error').length,
   }
 
-  return NextResponse.json({ services, summary })
+  return NextResponse.json({
+    app: 'AhsenDS',
+    developer: 'Ahsen Kurtoski',
+    built_by: 'Ahsen Kurtoski',
+    services,
+    summary,
+  })
 }

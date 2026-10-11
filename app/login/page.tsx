@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -39,7 +40,8 @@ export default function LoginPage() {
       <form onSubmit={handleLogin} className='glass w-full max-w-sm space-y-4 p-7'>
         <div className='text-center'>
           <div className='mx-auto mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-brand text-xl font-bold text-white'>A</div>
-          <h1 className='text-xl font-semibold'>Accedi ad AxsenDS</h1>
+          <h1 className='text-xl font-semibold'>Accedi ad AhsenDS</h1>
+          <p className='text-xs font-medium text-brand mt-0.5'>Costruito da Ahsen Kurtoski</p>
           <p className='text-xs text-white/40'>Area riservata</p>
         </div>
         <input
@@ -66,6 +68,12 @@ export default function LoginPage() {
           {loading ? 'Accesso...' : 'Accedi'}
         </button>
         {message ? <p className='text-center text-xs text-amber-400'>{message}</p> : null}
+        <p className='text-center text-xs text-white/40'>
+          Non hai un account? <Link href='/signup' className='text-brand underline'>Registrati</Link>
+        </p>
+        <div className='pt-3 border-t border-white/5 text-center text-[11px] text-white/40'>
+          Piattaforma creata e sviluppata da <span className='text-white/70 font-medium'>Ahsen Kurtoski</span>
+        </div>
       </form>
     </div>
   )

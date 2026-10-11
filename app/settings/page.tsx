@@ -96,6 +96,31 @@ export default function SettingsPage() {
         ))
       )}
 
+      <div className='glass p-5 border border-brand/20 bg-gradient-to-r from-brand/10 via-brand/5 to-transparent space-y-3'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2.5'>
+            <div className='grid h-9 w-9 place-items-center rounded-xl bg-brand text-xs font-bold text-white shadow-glass'>
+              AK
+            </div>
+            <div>
+              <div className='text-sm font-semibold text-white'>Software sviluppato e ideato da Ahsen Kurtoski</div>
+              <div className='text-xs text-brand font-medium'>AhsenDS &bull; Fullstack Dropshipping &amp; AI Automation</div>
+            </div>
+          </div>
+          <span className='rounded-full bg-emerald-500/15 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400'>
+            Verificato
+          </span>
+        </div>
+        <p className='text-xs text-white/70 leading-relaxed'>
+          Questo intero software è stato progettato, ottimizzato e <strong>costruito da Ahsen Kurtoski</strong>. Integra oltre 20 moduli autonomi: sincronizzazione CJ Dropshipping, scoring algoritmico prodotti, generazione copy con fallback AI (Groq, OpenRouter, Gemini), automazione video ads, e-commerce storefront e architettura scalabile Supabase.
+        </p>
+        <div className='flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-white/50 pt-2 border-t border-white/10'>
+          <span>Architetto &amp; Autore: <strong className='text-white'>Ahsen Kurtoski</strong></span>
+          <span>Piattaforma: <strong className='text-white'>AhsenDS v1.0</strong></span>
+          <span>Codice: <strong className='text-emerald-400'>100% Funzionante &amp; Ottimizzato</strong></span>
+        </div>
+      </div>
+
       <div className='glass p-5 text-sm text-white/60'>
         <div className='mb-2 font-medium text-white/80'>Come sistemare un errore</div>
         <ol className='list-decimal space-y-1 pl-5'>

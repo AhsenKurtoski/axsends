@@ -65,7 +65,7 @@ export default function AutomationPage() {
       init[a.id] = true
     })
     try {
-      const raw = localStorage.getItem('axsends_automation')
+      const raw = localStorage.getItem('ahsends_automation') || localStorage.getItem('axsends_automation')
       if (raw) init = Object.assign(init, JSON.parse(raw))
     } catch (err) {
       // nessuna preferenza salvata
@@ -77,7 +77,7 @@ export default function AutomationPage() {
     setEnabled((prev) => {
       const next = Object.assign({}, prev, { [id]: !prev[id] })
       try {
-        localStorage.setItem('axsends_automation', JSON.stringify(next))
+        localStorage.setItem('ahsends_automation', JSON.stringify(next))
       } catch (err) {
         // localStorage non disponibile
       }
@@ -91,13 +91,18 @@ export default function AutomationPage() {
 
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-          <Zap className='text-brand' size={22} /> Centro automazioni
-        </h1>
-        <p className='text-sm text-white/50'>
-          {activeCount} di {AUTOMATIONS.length} automazioni attive{saved ? ' - salvato' : ''}
-        </p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='flex items-center gap-2 text-2xl font-semibold'>
+            <Zap className='text-brand' size={22} /> Centro automazioni AhsenDS
+          </h1>
+          <p className='text-sm text-white/50'>
+            {activeCount} di {AUTOMATIONS.length} automazioni attive{saved ? ' - salvato' : ''} &bull; Costruito da Ahsen Kurtoski
+          </p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
 
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>

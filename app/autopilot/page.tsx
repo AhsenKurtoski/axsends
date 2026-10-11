@@ -92,13 +92,18 @@ export default function AutopilotPage() {
 
   return (
     <div className='space-y-6'>
-      <header className='flex items-start gap-3'>
-        <div className='grid h-11 w-11 place-items-center rounded-2xl bg-brand/15 text-brand'>
-          <Wand2 size={22} />
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div className='flex items-start gap-3'>
+          <div className='grid h-11 w-11 place-items-center rounded-2xl bg-brand/15 text-brand'>
+            <Wand2 size={22} />
+          </div>
+          <div>
+            <h1 className='text-2xl font-semibold'>Autopilot AhsenDS</h1>
+            <p className='text-sm text-white/50'>Un clic: trova prodotti reali, li salva, genera l'ad virale e la landing page &bull; Costruito da Ahsen Kurtoski</p>
+          </div>
         </div>
-        <div>
-          <h1 className='text-2xl font-semibold'>Autopilot</h1>
-          <p className='text-sm text-white/50'>Un clic: trova prodotti elettronica reali, li salva, genera l ad virale e la landing page del prodotto.</p>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
         </div>
       </header>
 

@@ -56,9 +56,9 @@ export default function AffiliatePage() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('axsends_affiliate')
+      const raw = localStorage.getItem('ahsends_affiliate') || localStorage.getItem('axsends_affiliate')
       if (raw) setLinks(JSON.parse(raw))
-      const tag = localStorage.getItem('axsends_amazon_tag')
+      const tag = localStorage.getItem('ahsends_amazon_tag') || localStorage.getItem('axsends_amazon_tag')
       if (tag) setAmazonTag(tag)
     } catch (err) {
       // nessun dato salvato
@@ -68,7 +68,7 @@ export default function AffiliatePage() {
   function persist(next: AffLink[]) {
     setLinks(next)
     try {
-      localStorage.setItem('axsends_affiliate', JSON.stringify(next))
+      localStorage.setItem('ahsends_affiliate', JSON.stringify(next))
     } catch (err) {
       // localStorage non disponibile
     }
@@ -77,7 +77,7 @@ export default function AffiliatePage() {
   function saveTag(v: string) {
     setAmazonTag(v)
     try {
-      localStorage.setItem('axsends_amazon_tag', v)
+      localStorage.setItem('ahsends_amazon_tag', v)
     } catch (err) {
       // localStorage non disponibile
     }
@@ -138,11 +138,16 @@ export default function AffiliatePage() {
 
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-          <DollarSign className='text-brand' size={22} /> Affiliate & Guadagni
-        </h1>
-        <p className='text-sm text-white/50'>Genera link affiliati automaticamente e scopri 17 modi per fare soldi oltre al dropshipping</p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='flex items-center gap-2 text-2xl font-semibold'>
+            <DollarSign className='text-brand' size={22} /> Affiliate &amp; Guadagni AhsenDS
+          </h1>
+          <p className='text-sm text-white/50'>Genera link affiliati automaticamente e monetizza &bull; Costruito da Ahsen Kurtoski</p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
 
       <div className='glass space-y-4 p-5'>

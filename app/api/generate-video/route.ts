@@ -1,4 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { validateBody, generateVideoBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -26,7 +28,11 @@ async function hfImage(prompt: string): Promise<string | null> {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Rate limiting per API AI
+  const rateLimitResponse = await rateLimitConfigs.ai(req)
+  if (rateLimitResponse) return rateLimitResponse
+
   if (!HF_TOKEN) {
     return NextResponse.json(
       { error: 'Aggiungi HUGGINGFACE_API_TOKEN in .env.local per generare i fotogrammi AI.' },
@@ -34,17 +40,20 @@ export async function POST(req: Request) {
     )
   }
 
-  const body = (await req.json().catch(() => ({}))) as any
-  const product = (body && body.product ? String(body.product) : '').trim()
-  const base = (body && body.prompt ? String(body.prompt) : 'cinematic product advertisement, vibrant colors, 4k').trim()
-  const scenes = body && Array.isArray(body.scenes) ? body.scenes : []
+  const validation = await validateBody(req, generateVideoBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
+  }
 
-  const count = scenes.length > 0 ? Math.min(3, scenes.length) : 3
+  const { prompt, product, scenes } = validation.data
+  const base = prompt.trim() || 'cinematic product advertisement, vibrant colors, 4k'
+
+  const count = scenes && scenes.length > 0 ? Math.min(3, scenes.length) : 3
   const prompts: string[] = []
   for (let i = 0; i < count; i++) {
-    const sc = scenes[i]
+    const sc = scenes?.[i]
     let visual = ''
-    if (sc && typeof sc === 'object') visual = String(sc.visual || sc.scene || '')
+    if (sc && typeof sc === 'object') visual = String(sc.visual || '')
     const text = visual ? visual : base
     prompts.push(
       'Cinematic vertical advertising frame, ' + text + (product ? ', product: ' + product : '') +

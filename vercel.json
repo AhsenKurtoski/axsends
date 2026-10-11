@@ -1,12 +1,14 @@
 {
+  "framework": "nextjs",
   "crons": [
     {
       "path": "/api/monitor",
       "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/radar",
-      "schedule": "0 7 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/autopilot/route.ts": {
+      "maxDuration": 60
+    }
+  }
 }

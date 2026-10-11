@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { isSupabaseConfigured } from '@/lib/supabaseClient'
+import { NextResponse, NextRequest } from 'next/server'
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
+import { validateBody, importBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,15 +29,18 @@ function mapSupplierItem(raw: any): ImportItem {
   }
 }
 
-export async function POST(req: Request) {
-  let payload: any
-  try {
-    payload = await req.json()
-  } catch {
-    return NextResponse.json({ error: 'Body JSON non valido' }, { status: 400 })
+export async function POST(req: NextRequest) {
+  // Rate limiting per API di import
+  const rateLimitResponse = await rateLimitConfigs.import(req)
+  if (rateLimitResponse) return rateLimitResponse
+
+  // Validazione body con Zod
+  const validation = await validateBody(req, importBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
-  const rawItems: any[] = Array.isArray(payload?.items) ? payload.items : [payload]
+  const rawItems = validation.data.items
   const items = rawItems.map(mapSupplierItem).filter((i) => i.externalId && i.name)
 
   if (items.length === 0) {
@@ -44,6 +48,9 @@ export async function POST(req: Request) {
   }
 
   const rows = items.map((i) => ({
+    // id (primary key) e external_id: usiamo l'id del fornitore per entrambi,
+    // cosi il re-import aggiorna lo stesso prodotto invece di duplicarlo.
+    id: i.externalId,
     external_id: i.externalId,
     name: i.name,
     image: i.image,
@@ -53,9 +60,10 @@ export async function POST(req: Request) {
     stock: i.stock,
     sold: 0,
     status: 'active',
+    updated_at: new Date().toISOString(),
   }))
 
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseAdminConfigured) {
     return NextResponse.json({
       source: 'mock',
       message: 'Supabase non configurato: anteprima import (nessun salvataggio).',

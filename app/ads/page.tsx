@@ -244,11 +244,16 @@ export default function AdsPage() {
 
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-          <Sparkles className='text-brand' size={22} /> AI Ads Generator
-        </h1>
-        <p className='text-sm text-white/50'>Genera script, copy e creativita per i tuoi video ads con AI</p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='flex items-center gap-2 text-2xl font-semibold'>
+            <Sparkles className='text-brand' size={22} /> AI Ads Generator
+          </h1>
+          <p className='text-sm text-white/50'>Genera script, copy e creatività per i tuoi video ads con AI &bull; Costruito da Ahsen Kurtoski</p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
 
       <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>

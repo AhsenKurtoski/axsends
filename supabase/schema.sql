@@ -1,4 +1,5 @@
--- AxsenDS — Schema database (Supabase / PostgreSQL)
+-- AhsenDS — Schema database (Supabase / PostgreSQL)
+-- Costruito da Ahsen Kurtoski
 -- Incolla questo file nell'SQL Editor di Supabase ed esegui.
 
 create table if not exists suppliers (

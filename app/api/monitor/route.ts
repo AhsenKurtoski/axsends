@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { isSupabaseConfigured } from '@/lib/supabaseClient'
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
 
 export const dynamic = 'force-dynamic'
 
 // Endpoint richiamato dal cron di Vercel (vedi vercel.json) per registrare
-// lo storico prezzi/stock.
-export async function GET() {
-  if (!isSupabaseConfigured) {
+// lo storico prezzi/stock. Gira in background: nessun utente collegato.
+export async function GET(req: Request) {
+  // Il cron di Vercel non ha cookie utente: accettiamo la chiamata solo se
+  // arriva con il CRON_SECRET (quando configurato) per evitare abusi.
+  const secret = process.env.CRON_SECRET
+  if (secret) {
+    const auth = req.headers.get('authorization')
+    if (auth !== 'Bearer ' + secret) {
+      return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+    }
+  }
+
+  if (!isSupabaseAdminConfigured) {
     return NextResponse.json({
       source: 'mock',
       message: 'Supabase non configurato: monitor in modalità demo.',

@@ -6,7 +6,7 @@ import StatCard from '@/components/StatCard'
 import StatusBadge from '@/components/StatusBadge'
 import RevenueChart from '@/components/RevenueChart'
 import type { Product, Order, PricePoint } from '@/lib/types'
-import { DollarSign, ShoppingCart, Package, TrendingUp, Rocket } from 'lucide-react'
+import { DollarSign, ShoppingCart, Package, TrendingUp, Rocket, ShieldCheck, Sparkles } from 'lucide-react'
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -46,10 +46,39 @@ export default function DashboardPage() {
 
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='text-2xl font-semibold'>Dashboard</h1>
-        <p className='text-sm text-white/50'>Panoramica del tuo business dropshipping</p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='text-2xl font-semibold'>Dashboard AhsenDS</h1>
+          <p className='text-sm text-white/50'>Panoramica del tuo business dropshipping &bull; Costruito da Ahsen Kurtoski</p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <ShieldCheck size={14} className='text-brand' />
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
+
+      {/* Banner rapido di presentazione della piattaforma */}
+      <div className='glass p-4 rounded-2xl border border-brand/20 bg-gradient-to-r from-brand/15 via-brand/5 to-transparent flex flex-col md:flex-row items-start md:items-center justify-between gap-4'>
+        <div className='flex items-center gap-3'>
+          <div className='grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand text-white font-bold'>
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <div className='text-sm font-semibold text-white'>AhsenDS Automation Engine</div>
+            <div className='text-xs text-white/60'>
+              Software completo di automazione dropshipping e generazione contenuti con AI &bull; Progettato e costruito da <strong>Ahsen Kurtoski</strong>
+            </div>
+          </div>
+        </div>
+        <div className='flex items-center gap-2 self-end md:self-auto'>
+          <Link
+            href='/autopilot'
+            className='inline-flex items-center gap-1.5 rounded-xl bg-brand px-3.5 py-2 text-xs font-medium text-white transition hover:bg-brand-dark'
+          >
+            <Rocket size={14} /> Avvia Autopilot
+          </Link>
+        </div>
+      </div>
 
       {loading ? (
         <div className='glass grid min-h-[200px] place-items-center p-8 text-sm text-white/40'>Caricamento...</div>
@@ -59,9 +88,10 @@ export default function DashboardPage() {
             <div className='mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand/15 text-brand'>
               <Rocket size={26} />
             </div>
-            <h2 className='text-lg font-medium'>Inizia da zero, con dati reali</h2>
+            <h2 className='text-lg font-medium'>Inizia da zero con AhsenDS</h2>
+            <p className='text-xs font-semibold text-brand'>Costruito e sviluppato da Ahsen Kurtoski</p>
             <p className='text-sm text-white/50'>
-              Non ci sono dati demo. Collega CJ Dropshipping per trovare prodotti reali e Supabase per salvare catalogo e ordini. Poi parti dal Radar per scoprire i prodotti vincenti.
+              Collega CJ Dropshipping per trovare prodotti reali e Supabase per salvare catalogo e ordini. Poi parti dal Radar o dall Autopilot per scoprire e vendere i prodotti vincenti.
             </p>
             <Link href='/radar' className='inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-dark'>
               <Rocket size={16} /> Apri il Radar prodotti
@@ -100,21 +130,23 @@ export default function DashboardPage() {
                         )}
                       </span>
                       <div className='min-w-0 flex-1'>
-                        <div className='truncate text-sm'>{p.name}</div>
-                        <div className='text-xs text-white/40'>{p.sold || 0} venduti</div>
+                        <div className='truncate text-sm font-medium'>{p.name}</div>
+                        <div className='text-xs text-white/40'>{p.sold} venduti &bull; €{p.price}</div>
                       </div>
-                      <span className='text-sm text-emerald-400'>€{p.price}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className='text-sm text-white/40'>Nessun prodotto nel catalogo.</p>
+                <p className='py-10 text-center text-sm text-white/40'>Nessun prodotto venduto ancora.</p>
               )}
             </div>
           </section>
 
           <section className='glass p-5'>
-            <h2 className='mb-4 font-medium'>Ordini recenti</h2>
+            <div className='mb-4 flex items-center justify-between'>
+              <h2 className='font-medium'>Ultimi ordini</h2>
+              <Link href='/orders' className='text-xs text-brand hover:underline'>Tutti gli ordini &rarr;</Link>
+            </div>
             {recent.length > 0 ? (
               <div className='overflow-x-auto'>
                 <table className='w-full text-sm'>

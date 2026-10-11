@@ -1,11 +1,9 @@
-import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { NextResponse, NextRequest } from 'next/server'
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
+import { validateBody, adQueueBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
-
-function configured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
-}
 
 function dbNote(msg: string): string {
   if (/schema cache|does not exist|relation|not find the table/i.test(msg)) {
@@ -15,7 +13,7 @@ function dbNote(msg: string): string {
 }
 
 export async function GET() {
-  if (!configured()) {
+  if (!isSupabaseAdminConfigured) {
     return NextResponse.json({ configured: false, note: 'Aggiungi le chiavi Supabase per usare la coda di pubblicazione.', data: [] })
   }
   const { data, error } = await supabaseAdmin
@@ -27,21 +25,28 @@ export async function GET() {
   return NextResponse.json({ configured: true, data: data || [] })
 }
 
-export async function POST(req: Request) {
-  if (!configured()) {
+export async function POST(req: NextRequest) {
+  const rateLimitResponse = await rateLimitConfigs.default(req)
+  if (rateLimitResponse) return rateLimitResponse
+  if (!isSupabaseAdminConfigured) {
     return NextResponse.json({ configured: false, ok: false, note: 'Aggiungi le chiavi Supabase per salvare in coda.' })
   }
-  const b = (await req.json().catch(() => ({}))) as any
-  const hashtags = Array.isArray(b && b.hashtags) ? b.hashtags.join(' ') : (b && b.hashtags) || ''
+
+  const validation = await validateBody(req, adQueueBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
+  }
+
+  const { product, platform, title, caption, hashtags, videoUrl, status, scheduledAt } = validation.data
   const row = {
-    product: b && b.product ? String(b.product) : 'Prodotto',
-    platform: b && b.platform ? String(b.platform) : 'tiktok',
-    title: (b && b.title) || '',
-    caption: (b && b.caption) || '',
-    hashtags,
-    video_url: (b && b.videoUrl) || '',
-    status: 'queued',
-    scheduled_at: (b && b.scheduledAt) || null,
+    product,
+    platform: platform || 'tiktok',
+    title: title || '',
+    caption: caption || '',
+    hashtags: hashtags || '',
+    video_url: videoUrl || '',
+    status: status || 'queued',
+    scheduled_at: scheduledAt || null,
   }
   const { data, error } = await supabaseAdmin.from('ad_queue').insert(row).select().single()
   if (error) return NextResponse.json({ configured: true, ok: false, note: dbNote(error.message) })

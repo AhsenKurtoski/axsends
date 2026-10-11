@@ -1,13 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { publishVideo } from '@/lib/tiktok'
+import { validateBody, tiktokBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as any
-  const videoUrl = body && body.videoUrl
-  const caption = body && body.caption
+export async function POST(req: NextRequest) {
+  const rateLimitResponse = await rateLimitConfigs.social(req)
+  if (rateLimitResponse) return rateLimitResponse
+  const validation = await validateBody(req, tiktokBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
+  }
+
+  const { videoUrl, caption } = validation.data
 
   if (!process.env.TIKTOK_ACCESS_TOKEN) {
     return NextResponse.json({

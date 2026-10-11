@@ -16,11 +16,16 @@ const MODES = [
 export default function MoneyPage() {
   return (
     <div className='space-y-6'>
-      <header>
-        <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-          <Wallet className='text-brand' size={22} /> Centro guadagni
-        </h1>
-        <p className='text-sm text-white/50'>Tutti i tuoi modi di fare soldi in un posto. Inizia da uno e poi aggiungi gli altri.</p>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+        <div>
+          <h1 className='flex items-center gap-2 text-2xl font-semibold'>
+            <Wallet className='text-brand' size={22} /> Centro guadagni AhsenDS
+          </h1>
+          <p className='text-sm text-white/50'>Tutti i tuoi modi di fare soldi in un unico posto &bull; Costruito da Ahsen Kurtoski</p>
+        </div>
+        <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
+          <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
+        </div>
       </header>
 
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>

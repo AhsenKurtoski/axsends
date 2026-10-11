@@ -50,20 +50,25 @@ export default function RadarPage() {
 
   return (
     <div className='space-y-6'>
-      <header className='flex items-center justify-between gap-3'>
+      <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
         <div>
           <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-            <Radar className='text-brand' size={22} /> Radar prodotti vincenti
+            <Radar className='text-brand' size={22} /> Radar prodotti vincenti AhsenDS
           </h1>
-          <p className='text-sm text-white/50'>Scansione automatica multi-nicchia, ordinata per potenziale</p>
+          <p className='text-sm text-white/50'>Scansione automatica multi-nicchia, ordinata per potenziale &bull; Costruito da Ahsen Kurtoski</p>
         </div>
-        <button
-          onClick={scan}
-          disabled={loading}
-          className='flex items-center gap-2 rounded-xl bg-brand px-3 py-2 text-xs font-medium text-white hover:bg-brand-dark disabled:opacity-60'
-        >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Scansiona ora
-        </button>
+        <div className='flex items-center gap-2'>
+          <span className='hidden lg:inline-flex items-center gap-1.5 rounded-xl border border-brand/20 bg-brand/10 px-3 py-1.5 text-xs text-brand-light'>
+            Costruito da <strong className='text-white'>Ahsen Kurtoski</strong>
+          </span>
+          <button
+            onClick={scan}
+            disabled={loading}
+            className='flex items-center gap-2 rounded-xl bg-brand px-3 py-2 text-xs font-medium text-white hover:bg-brand-dark disabled:opacity-60'
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Scansiona ora
+          </button>
+        </div>
       </header>
 
       {note ? (

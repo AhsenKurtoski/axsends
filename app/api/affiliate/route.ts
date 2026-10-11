@@ -1,16 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { generateJson, aiConfigured, aiProvider } from '@/lib/ai'
+import { validateBody, affiliateBodySchema } from '@/lib/validations'
+import { rateLimitConfigs } from '@/lib/rateLimit'
+
+// Contenuti promozionali per affiliate marketing — AhsenDS
+// Costruito da Ahsen Kurtoski
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
 
-// Contenuti promozionali per un link affiliato, scritti dall'AI (Groq/Gemini).
-export async function POST(req: Request) {
-  const body = (await req.json().catch(() => ({}))) as any
-  const product = (body && body.product) || 'questo prodotto'
-  const link = (body && body.link) || ''
-  const platform = (body && body.platform) || 'TikTok'
-  const network = (body && body.network) || 'Amazon'
+export async function POST(req: NextRequest) {
+  const rateLimitResponse = await rateLimitConfigs.ai(req)
+  if (rateLimitResponse) return rateLimitResponse
+  const validation = await validateBody(req, affiliateBodySchema)
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error }, { status: 400 })
+  }
+
+  const { product, platform, network: rawNetwork, link, tone } = validation.data
+  const network = rawNetwork || platform || 'Amazon'
 
   const disclosure =
     'Disclosure: contenuto con link affiliati ' + network +
@@ -21,19 +29,24 @@ export async function POST(req: Request) {
       configured: false,
       provider: 'none',
       note: 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY in .env.local per generare contenuti affiliate con AI.',
-      title: null,
-      body: '',
-      captions: [],
-      hashtags: [],
+      title: 'Scopri ' + product,
+      body: 'Recensione e guida all acquisto di ' + product + ' su ' + network + '.',
+      captions: [
+        'Ecco perche tutti parlano di ' + product + '! Link in bio.',
+        'Miglior scelta per il rapporto qualita prezzo: ' + product + '.',
+        'Offerta speciale limitata su ' + network + ' per ' + product + '!',
+      ],
+      hashtags: ['#affiliate', '#offerta', '#shopping', '#recensione'],
       disclosure,
-      cta: '',
-      platform,
+      cta: 'Tocca il link per scoprire ' + product + ' su ' + network + '.',
+      platform: network,
+      link: link || '',
     })
   }
 
   const system =
     'Sei un social media marketer esperto di affiliate marketing. Scrivi in italiano, naturale e adatto a ' +
-    platform + '.'
+    network + '. Tono: ' + (tone || 'energico') + '.'
   const prompt =
     'Genera contenuti per promuovere "' + product + '" tramite link affiliato ' + network + '. ' +
     'Restituisci un JSON con: title (stringa), body (2-3 frasi), captions (array di 3 caption brevi e diverse), ' +
@@ -45,13 +58,14 @@ export async function POST(req: Request) {
       configured: true,
       provider: aiProvider(),
       note: 'L AI non ha risposto, riprova tra poco.',
-      title: null,
-      body: '',
-      captions: [],
-      hashtags: [],
+      title: product,
+      body: 'Recensione per ' + product + ' su ' + network + '.',
+      captions: ['Scopri ' + product + ' con la migliore offerta online!'],
+      hashtags: ['#affiliate', '#shopping'],
       disclosure,
-      cta: '',
-      platform,
+      cta: 'Visita il link su ' + network,
+      platform: network,
+      link: link || '',
     })
   }
 
@@ -60,11 +74,12 @@ export async function POST(req: Request) {
     provider: aiProvider(),
     title: data.title || product,
     body: data.body || '',
-    captions: Array.isArray(data.captions) ? data.captions : [],
+    captions: Array.isArray(data.captions) ? data.captions : [data.captions].filter(Boolean),
     hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],
     disclosure: data.disclosure || disclosure,
     cta: data.cta || ('Tocca il link per ' + product + ' su ' + network + '.'),
-    platform,
-    link,
+    platform: network,
+    link: link || '',
+    developer: 'Ahsen Kurtoski',
   })
 }
