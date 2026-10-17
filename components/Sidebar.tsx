@@ -32,6 +32,8 @@ import {
   LogOut,
   User,
   ShieldCheck,
+  Menu,
+  X,
 } from 'lucide-react'
 
 const nav = [
@@ -66,6 +68,12 @@ export default function Sidebar() {
   const router = useRouter()
   const [user, setUser] = useState<{ email: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Chiudi menu mobile al cambio di rotta
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const configured = Boolean(
@@ -106,96 +114,219 @@ export default function Sidebar() {
   )
 
   return (
-    <aside className='glass m-3 w-64 shrink-0 p-5 hidden md:flex flex-col gap-2 sticky top-3 h-[calc(100vh-1.5rem)] overflow-y-auto'>
-      <div className='mb-4 flex items-center gap-3 px-2'>
-        <div className='grid h-10 w-10 place-items-center rounded-xl bg-brand text-lg font-bold text-white shadow-glass'>
-          A
-        </div>
-        <div className='min-w-0 flex-1'>
-          <div className='text-lg font-semibold leading-tight tracking-tight text-white'>AhsenDS</div>
-          <div className='text-[10px] font-medium text-brand truncate'>Costruito da Ahsen Kurtoski</div>
-        </div>
-      </div>
+    <>
+      {/* Mobile Top Header */}
+      <header className='md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-slate-950/95 backdrop-blur px-4 py-3'>
+        <Link href='/' className='flex items-center gap-2.5'>
+          <div className='grid h-9 w-9 place-items-center rounded-xl bg-brand text-base font-bold text-white shadow-glass'>
+            A
+          </div>
+          <div>
+            <div className='text-sm font-bold leading-tight text-white'>AhsenDS</div>
+            <div className='text-[10px] font-medium text-brand'>Costruito da Ahsen Kurtoski</div>
+          </div>
+        </Link>
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label='Menu di navigazione'
+          className='grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-white'
+        >
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </header>
 
-      <nav className='flex flex-col gap-1'>
-        {nav.map((item) => {
-          const active =
-            item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ' +
-                (active
-                  ? 'bg-brand/20 text-white border border-brand/40'
-                  : 'text-white/60 hover:bg-white/5 hover:text-white')
-              }
+      {/* Mobile Navigation Drawer Modal */}
+      {mobileOpen && (
+        <div className='fixed inset-0 z-50 md:hidden flex flex-col bg-slate-950/95 backdrop-blur overflow-y-auto animate-in fade-in duration-200'>
+          <div className='flex items-center justify-between border-b border-white/10 px-4 py-3'>
+            <div className='flex items-center gap-2.5'>
+              <div className='grid h-9 w-9 place-items-center rounded-xl bg-brand text-base font-bold text-white shadow-glass'>
+                A
+              </div>
+              <div>
+                <div className='text-sm font-bold leading-tight text-white'>AhsenDS</div>
+                <div className='text-[10px] font-medium text-brand'>Costruito da Ahsen Kurtoski</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setMobileOpen(false)}
+              aria-label='Chiudi menu'
+              className='grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-white'
             >
-              <Icon size={18} />
-              {item.label}
-            </Link>
-          )
-        })}
-      </nav>
-
-      <div className='mt-auto pt-3 flex flex-col gap-2'>
-        {/* Badge sviluppatore Ahsen Kurtoski */}
-        <div className='rounded-xl border border-brand/25 bg-gradient-to-r from-brand/15 to-transparent p-2.5'>
-          <div className='flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-brand'>
-            <ShieldCheck size={13} />
-            <span>Creatore &amp; Sviluppatore</span>
+              <X size={20} />
+            </button>
           </div>
-          <div className='text-xs font-semibold text-white mt-0.5'>Ahsen Kurtoski</div>
-          <div className='text-[10px] text-white/50'>Architettura AhsenDS v1.0</div>
+
+          <nav className='flex-1 p-4 flex flex-col gap-1'>
+            {nav.map((item) => {
+              const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={
+                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ' +
+                    (active
+                      ? 'bg-brand/20 text-white border border-brand/40 font-medium'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white')
+                  }
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className='p-4 border-t border-white/10 flex flex-col gap-2'>
+            <div className='rounded-xl border border-brand/25 bg-gradient-to-r from-brand/15 to-transparent p-2.5'>
+              <div className='flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-brand'>
+                <ShieldCheck size={13} />
+                <span>Creatore &amp; Sviluppatore</span>
+              </div>
+              <div className='text-xs font-semibold text-white mt-0.5'>Ahsen Kurtoski</div>
+              <div className='text-[10px] text-white/50'>Architettura AhsenDS v1.0</div>
+            </div>
+
+            {configured ? (
+              <>
+                {user ? (
+                  <div className='glass p-3 space-y-2'>
+                    <div className='flex items-center gap-2 text-sm'>
+                      <User className='text-white/50' size={16} />
+                      <div className='flex-1 min-w-0'>
+                        <div className='font-medium truncate'>{user.email}</div>
+                        <div className='text-xs text-white/40'>Amministratore</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        setMobileOpen(false)
+                        await handleLogout()
+                      }}
+                      className='w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/60 transition hover:bg-white/5 hover:text-white'
+                    >
+                      <LogOut size={14} /> Esci
+                    </button>
+                  </div>
+                ) : (
+                  <div className='flex gap-2'>
+                    <Link
+                      href='/login'
+                      onClick={() => setMobileOpen(false)}
+                      className='flex-1 text-center rounded-xl bg-brand/20 py-2.5 text-xs font-semibold text-brand transition hover:bg-brand/30'
+                    >
+                      Accedi
+                    </Link>
+                    <Link
+                      href='/signup'
+                      onClick={() => setMobileOpen(false)}
+                      className='flex-1 text-center rounded-xl border border-white/10 py-2.5 text-xs text-white/80 transition hover:bg-white/5'
+                    >
+                      Registrati
+                    </Link>
+                  </div>
+                )}
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      <aside className='glass m-3 w-64 shrink-0 p-5 hidden md:flex flex-col gap-2 sticky top-3 h-[calc(100vh-1.5rem)] overflow-y-auto'>
+        <div className='mb-4 flex items-center gap-3 px-2'>
+          <div className='grid h-10 w-10 place-items-center rounded-xl bg-brand text-lg font-bold text-white shadow-glass'>
+            A
+          </div>
+          <div className='min-w-0 flex-1'>
+            <div className='text-lg font-semibold leading-tight tracking-tight text-white'>AhsenDS</div>
+            <div className='text-[10px] font-medium text-brand truncate'>Costruito da Ahsen Kurtoski</div>
+          </div>
         </div>
 
-        {configured ? (
-          <>
-            {user ? (
-              <div className='glass p-3 space-y-2'>
-                <div className='flex items-center gap-2 text-sm'>
-                  <User className='text-white/50' size={16} />
-                  <div className='flex-1 min-w-0'>
-                    <div className='font-medium truncate'>{user.email}</div>
-                    <div className='text-xs text-white/40'>Amministratore</div>
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className='w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/60 transition hover:bg-white/5 hover:text-white'
-                >
-                  <LogOut size={14} /> Esci
-                </button>
-              </div>
-            ) : loading ? (
-              <div className='glass p-3 text-center text-xs text-white/40'>Caricamento utente...</div>
-            ) : (
-              <div className='glass p-3 space-y-2 text-center'>
-                <p className='text-xs text-white/50'>Non autenticato</p>
-                <Link
-                  href='/login'
-                  className='block w-full rounded-xl bg-brand/15 py-2 text-xs text-brand transition hover:bg-brand/25'
-                >
-                  Accedi
-                </Link>
-                <Link
-                  href='/signup'
-                  className='block w-full rounded-xl border border-white/10 py-2 text-xs text-white/60 transition hover:bg-white/5'
-                >
-                  Registrati
-                </Link>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className='glass p-3 text-xs text-white/50'>
-            <div className='font-medium text-white/70'>Modalita Demo</div>
-            Aggiungi le chiavi Supabase in .env.local per attivare l'autenticazione.
+        <nav className='flex flex-col gap-1'>
+          {nav.map((item) => {
+            const active =
+              item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ' +
+                  (active
+                    ? 'bg-brand/20 text-white border border-brand/40'
+                    : 'text-white/60 hover:bg-white/5 hover:text-white')
+                }
+              >
+                <Icon size={18} />
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className='mt-auto pt-3 flex flex-col gap-2'>
+          {/* Badge sviluppatore Ahsen Kurtoski */}
+          <div className='rounded-xl border border-brand/25 bg-gradient-to-r from-brand/15 to-transparent p-2.5'>
+            <div className='flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-brand'>
+              <ShieldCheck size={13} />
+              <span>Creatore &amp; Sviluppatore</span>
+            </div>
+            <div className='text-xs font-semibold text-white mt-0.5'>Ahsen Kurtoski</div>
+            <div className='text-[10px] text-white/50'>Architettura AhsenDS v1.0</div>
           </div>
-        )}
-      </div>
-    </aside>
+
+          {configured ? (
+            <>
+              {user ? (
+                <div className='glass p-3 space-y-2'>
+                  <div className='flex items-center gap-2 text-sm'>
+                    <User className='text-white/50' size={16} />
+                    <div className='flex-1 min-w-0'>
+                      <div className='font-medium truncate'>{user.email}</div>
+                      <div className='text-xs text-white/40'>Amministratore</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className='w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/60 transition hover:bg-white/5 hover:text-white'
+                  >
+                    <LogOut size={14} /> Esci
+                  </button>
+                </div>
+              ) : loading ? (
+                <div className='glass p-3 text-center text-xs text-white/40'>Caricamento utente...</div>
+              ) : (
+                <div className='glass p-3 space-y-2 text-center'>
+                  <p className='text-xs text-white/50'>Non autenticato</p>
+                  <Link
+                    href='/login'
+                    className='block w-full rounded-xl bg-brand/15 py-2 text-xs text-brand transition hover:bg-brand/25'
+                  >
+                    Accedi
+                  </Link>
+                  <Link
+                    href='/signup'
+                    className='block w-full rounded-xl border border-white/10 py-2 text-xs text-white/60 transition hover:bg-white/5'
+                  >
+                    Registrati
+                  </Link>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className='glass p-3 text-xs text-white/50'>
+              <div className='font-medium text-white/70'>Modalita Demo</div>
+              Aggiungi le chiavi Supabase in .env.local per attivare l'autenticazione.
+            </div>
+          )}
+        </div>
+      </aside>
+    </>
   )
 }
