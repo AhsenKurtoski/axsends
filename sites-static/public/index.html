@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AhsenDS — Launch Kit 2026 · Ahsen Kurtoski</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  :root{
+    --bg:#05060d;--panel:rgba(255,255,255,.045);--line:rgba(255,255,255,.10);
+    --text:#f6f7ff;--muted:rgba(236,239,255,.62);--faint:rgba(236,239,255,.38);
+    --brand:#8b5cf6;--cyan:#22d3ee;--pink:#f472b6;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:
+      radial-gradient(900px 600px at 8% 0%,rgba(139,92,246,.20),transparent 60%),
+      radial-gradient(800px 540px at 94% 12%,rgba(34,211,238,.12),transparent 60%),
+      var(--bg);
+    color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  .wrap{max-width:1320px;margin:0 auto;padding:34px 28px 80px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 0 28px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .mark{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#a78bfa,#6d28d9 60%,#312e81);font-weight:900;font-size:20px;box-shadow:0 12px 34px rgba(109,40,217,.4),inset 0 1px 0 rgba(255,255,255,.35)}
+  .brand b{display:block;font-size:20px;letter-spacing:-.045em}
+  .brand small{display:block;margin-top:2px;font-size:9px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+  .top .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .chip{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.56)}
+  .chip.live{border-color:rgba(52,211,153,.24);background:rgba(52,211,153,.08);color:#8ee9c8}
+
+  .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:34px;align-items:center;margin:10px 0 34px}
+  .kicker{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#c4b5fd}
+  .kicker:before{content:'';width:22px;height:1px;background:linear-gradient(90deg,#a78bfa,transparent)}
+  h1{font-family:'Space Grotesk','Inter',sans-serif;margin:14px 0 0;font-size:64px;line-height:.95;letter-spacing:-.055em;font-weight:600}
+  h1 em{font-style:normal;background:linear-gradient(100deg,#c4b5fd,#8b5cf6 40%,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{margin:20px 0 0;font-size:16px;line-height:1.65;color:var(--muted);max-width:560px}
+  .lead strong{color:#fff;font-weight:500}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:12px 17px;border-radius:11px;text-decoration:none;font-size:11px;font-weight:600;letter-spacing:.02em;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:rgba(255,255,255,.82);transition:.2s}
+  .btn:hover{background:rgba(255,255,255,.09);transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(100deg,#8b5cf6,#6d28d9);border-color:rgba(255,255,255,.18);box-shadow:0 16px 40px rgba(109,40,217,.32)}
+  .btn.primary:hover{background:linear-gradient(100deg,#9d75ff,#7c3aed)}
+
+  .video-card{position:relative;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#0b0d18;box-shadow:0 35px 90px rgba(0,0,0,.5)}
+  .video-card video{display:block;width:100%;aspect-ratio:16/9;background:#05060d}
+  .video-card .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;border-top:1px solid rgba(255,255,255,.08);background:rgba(10,11,20,.9)}
+  .video-card .bar span{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .video-card .bar a{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#c4b5fd;text-decoration:none}
+  .video-card .bar a:hover{text-decoration:underline}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:30px 0 42px}
+  .stat{padding:18px 18px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  .stat b{display:block;font-size:24px;letter-spacing:-.04em}
+  .stat small{display:block;margin-top:5px;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .section{margin:42px 0 0}
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
+  .section-head h2{font-family:'Space Grotesk','Inter',sans-serif;margin:0;font-size:28px;letter-spacing:-.035em;font-weight:600}
+  .section-head p{margin:0;font-size:12px;color:var(--faint)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .shot{display:block;text-decoration:none;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.03);transition:.2s}
+  .shot:hover{border-color:rgba(139,92,246,.4);transform:translateY(-2px)}
+  .shot img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+  .shot span{display:block;padding:10px 12px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+  .poster-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:start}
+  .poster-card{display:block;text-decoration:none;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:rgba(255,255,255,.03)}
+  .poster-card img{display:block;width:100%}
+  .vertical-grid{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start}
+  .vertical-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0b0d18;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+  .vertical-card video{display:block;width:100%;aspect-ratio:9/16;background:#05060d}
+  .vertical-copy{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:24px}
+  .vertical-copy h3{margin:0;font-size:18px;letter-spacing:-.02em}
+  .vertical-copy p{margin:10px 0 0;font-size:12px;line-height:1.65;color:var(--faint);max-width:620px}
+  .side-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:22px}
+  .side-card h3{margin:0;font-size:15px;font-weight:600}
+  .side-card p{margin:9px 0 0;font-size:11px;line-height:1.6;color:var(--faint)}
+  .side-card .row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid rgba(255,255,255,.07);font-size:10px}
+  .side-card .row:first-of-type{margin-top:14px}
+  .side-card .row span{color:var(--faint)}
+  .side-card .row b{font-weight:500;color:rgba(255,255,255,.8)}
+  .note{margin-top:14px;padding:13px 14px;border:1px solid rgba(251,191,36,.18);background:rgba(251,191,36,.055);border-radius:11px;font-size:10px;line-height:1.6;color:rgba(252,216,138,.78)}
+  footer{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:var(--faint)}
+  footer b{color:rgba(255,255,255,.72);font-weight:500}
+  @media(max-width:980px){
+    .hero,.poster-grid,.vertical-grid{grid-template-columns:1fr}
+    h1{font-size:46px}
+    .stats,.grid{grid-template-columns:repeat(2,1fr)}
+    .top{align-items:flex-start;flex-direction:column}
+    .top .meta{justify-content:flex-start}
+  }
+  @media(max-width:560px){
+    .wrap{padding:22px 16px 56px}
+    h1{font-size:38px}
+    .stats,.grid{grid-template-columns:1fr}
+    .section-head{align-items:flex-start;flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">A</span>
+      <div><b>AhsenDS</b><small>Launch Kit 2026</small></div>
+    </div>
+    <div class="meta">
+      <span class="chip live">● Live product</span>
+      <span class="chip">Open source · MIT</span>
+      <span class="chip">Ahsen Kurtoski</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="kicker">Launch film · 44 secondi</div>
+      <h1>Il decollo di <em>AhsenDS.</em></h1>
+      <p class="lead">Un launch kit completo: film 1080p con musica originale, teaser verticale 9:16, otto schermate reali del prodotto, poster, contact sheet, copy social e press kit. <strong>Watermark Ahsen Kurtoski</strong> su ogni asset.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#film">▶ Guarda il film</a>
+        <a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/video/ahsends-launch-16x9.mp4" download>Scarica MP4</a>
+        <a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/poster.png" download>Scarica poster</a>
+        <a class="btn" href="https://github.com/AhsenKurtoski/axsends/raw/main/assets/launch/ahsends-launch-kit.zip" target="_blank" rel="noopener">Scarica il kit (.zip)</a>
+        <a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/README.md" target="_blank" rel="noopener">Press kit</a>
+      </div>
+    </div>
+    <div class="video-card" id="film">
+      <video controls playsinline preload="metadata" poster="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/poster.png">
+        <source src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/video/ahsends-launch-16x9.mp4" type="video/mp4" />
+        Il tuo browser non supporta il video HTML5.
+      </video>
+      <div class="bar">
+        <span>1920 × 1080 · 30 fps · H.264 / AAC</span>
+        <a href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/video/ahsends-launch-16x9.mp4" download>Apri / scarica MP4 →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><b>44s</b><small>Durata film</small></div>
+    <div class="stat"><b>1080p</b><small>Risoluzione</small></div>
+    <div class="stat"><b>9:16</b><small>Teaser social</small></div>
+    <div class="stat"><b>8</b><small>Screenshot reali</small></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Teaser verticale.</h2>
+      <p>9:16 · 18 secondi · TikTok, Reels, Shorts</p>
+    </div>
+    <div class="vertical-grid">
+      <div class="vertical-card">
+        <video controls playsinline preload="metadata" poster="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/teaser-vertical-poster.png">
+          <source src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/video/ahsends-teaser-9x16.mp4" type="video/mp4" />
+          Il tuo browser non supporta il video HTML5.
+        </video>
+      </div>
+      <div class="vertical-copy">
+        <h3>Un taglio per i social.</h3>
+        <p>Diciotto secondi pensati per Reels, TikTok e YouTube Shorts: brand, dashboard, autopilot, catalogo e end card. Stessa musica originale del launch film, watermark incluso.</p>
+        <div class="hero-actions" style="margin-top:18px">
+          <a class="btn primary" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/video/ahsends-teaser-9x16.mp4" download>Scarica teaser MP4</a>
+          <a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/teaser-vertical-poster.png" target="_blank" rel="noopener">Apri poster verticale</a>
+          <a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/social-copy.md" target="_blank" rel="noopener">Copy social</a>
+          <a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/teaser-publish-kit.md" target="_blank" rel="noopener">Kit pubblicazione</a>
+        </div>
+        <div class="note">Hook, caption e hashtag pronti per il lancio. Nessuna promessa di guadagno: il copy descrive solo ciò che il software fa davvero.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Il prodotto, live.</h2>
+      <p>Otto schermate 1920×1080 · UI reale · dati demo temporanei</p>
+    </div>
+    <div class="grid">
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/01-landing.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/01-landing.png" alt="Landing AhsenDS" /><span>01 · Landing</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/02-dashboard.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/02-dashboard.png" alt="Dashboard AhsenDS" /><span>02 · Dashboard</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/03-autopilot.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/03-autopilot.png" alt="Autopilot AhsenDS" /><span>03 · Autopilot</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/04-products.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/04-products.png" alt="Catalogo AhsenDS" /><span>04 · Catalogo</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/05-orders.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/05-orders.png" alt="Ordini AhsenDS" /><span>05 · Ordini</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/06-analytics.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/06-analytics.png" alt="Analytics AhsenDS" /><span>06 · Analytics</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/07-radar.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/07-radar.png" alt="Radar AhsenDS" /><span>07 · Radar</span></a>
+      <a class="shot" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/08-landing-features.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/screens/08-landing-features.png" alt="Feature AhsenDS" /><span>08 · Feature</span></a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Poster &amp; contact sheet.</h2>
+      <p>Pronti per presentazioni, social e press kit</p>
+    </div>
+    <div class="poster-grid">
+      <a class="poster-card" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/poster.png" target="_blank" rel="noopener"><img src="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/poster.png" alt="Poster AhsenDS" /></a>
+      <div class="side-card">
+        <h3>Specifiche tecniche</h3>
+        <div class="row"><span>Video master</span><b>1920×1080 · 44s</b></div>
+        <div class="row"><span>Codec</span><b>H.264 / AAC 48 kHz</b></div>
+        <div class="row"><span>Loudness</span><b>−14 LUFS</b></div>
+        <div class="row"><span>Musica</span><b>Originale, no sample</b></div>
+        <div class="row"><span>Watermark</span><b>Ahsen Kurtoski</b></div>
+        <div class="row"><span>Screenshot</span><b>8 · 1920×1080</b></div>
+        <div class="note">Le schermate usano prodotti e ordini demo per mostrare la UI popolata. Il prodotto e i flussi mostrati sono reali; i dati E2E restano nel database per i test end-to-end.</div>
+        <p style="margin-top:16px"><a class="btn" href="https://cdn.jsdelivr.net/gh/AhsenKurtoski/axsends@main/assets/launch/contact-sheet.png" target="_blank" rel="noopener">Apri contact sheet</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Progettato, sviluppato e raccontato da <b>Ahsen Kurtoski</b>.</div>
+    <div>AhsenDS · Launch Kit 2026 · <b>Open source, MIT</b></div>
+  </footer>
+</div>
+</body>
+</html>

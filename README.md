@@ -52,6 +52,8 @@ Tecnologie: **Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase**, 
 
 Film di lancio, teaser verticale, otto schermate reali, poster e press kit completo. La pagina pubblica è **`/launch`**.
 
+**Live:** [Launch Kit su Cloudflare Sites](https://site-03f75a10e2254b60a2b392f043f61d49.freebuff.page/launch)
+
 | Asset | Formato | File |
 |---|---|---|
 | Launch film | MP4 · 1920×1080 · 44 s | [Guarda / scarica](assets/launch/video/ahsends-launch-16x9.mp4) |

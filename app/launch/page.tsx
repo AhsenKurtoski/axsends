@@ -18,6 +18,9 @@ const SHOTS = [
   { file: '08-landing-features.png', label: '08 · Feature' },
 ]
 
+const KIT_ZIP =
+  'https://github.com/AhsenKurtoski/axsends/raw/main/assets/launch/ahsends-launch-kit.zip'
+
 const SPECS = [
   ['Video master', '1920×1080 · 44s'],
   ['Teaser verticale', '1080×1920 · 18s'],
@@ -70,7 +73,7 @@ export default function LaunchKitPage() {
               <a href='/launch/kit/video/ahsends-launch-16x9.mp4' download className='rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/10'>
                 Scarica MP4
               </a>
-              <a href='/launch/kit/ahsends-launch-kit.zip' download className='rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/10'>
+              <a href={KIT_ZIP} download className='rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/10'>
                 Scarica il kit (.zip)
               </a>
             </div>
@@ -182,7 +185,7 @@ export default function LaunchKitPage() {
             {[
               ['Launch film', 'MP4 · 16:9 · 44s', '/launch/kit/video/ahsends-launch-16x9.mp4'],
               ['Teaser', 'MP4 · 9:16 · 18s', '/launch/kit/video/ahsends-teaser-9x16.mp4'],
-              ['Press kit ZIP', 'Video, teaser e press kit', '/launch/kit/ahsends-launch-kit.zip'],
+              ['Press kit ZIP', 'Video, teaser e press kit', KIT_ZIP],
               ['Copy social', 'Hook, caption, hashtag', '/launch/kit/social-copy.md'],
             ].map(([title, sub, href]) => (
               <a

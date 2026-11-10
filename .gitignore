@@ -16,3 +16,5 @@ next-env.d.ts
 *.tsbuildinfo
 .vscode
 assets/launch/video/vertical-frames/
+.sites/
+freebuff-sites-build/
