@@ -6,7 +6,7 @@ import { rateLimitConfigs } from '@/lib/rateLimit'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 30
 
-// Descrizione prodotto generata dall'AI (Groq/Gemini). Niente template.
+// Descrizione prodotto generata dall'AI (Groq/OpenRouter/Gemini). Niente template.
 export async function POST(req: NextRequest) {
   const rateLimitResponse = await rateLimitConfigs.ai(req)
   if (rateLimitResponse) return rateLimitResponse
@@ -15,26 +15,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
-  const { product: name, features, tone } = validation.data
-  const category = 'lifestyle'
-  const price = null
+  const { product, name: alias, category, price, features, tone } = validation.data
+  const name = (product || alias || '').trim()
+  if (!name) {
+    return NextResponse.json(
+      { error: 'Specifica il nome del prodotto (campo "product" o "name").' },
+      { status: 400 }
+    )
+  }
+  const categoryLabel = category || 'lifestyle'
 
   if (!aiConfigured()) {
-    return NextResponse.json({
-      configured: false,
-      provider: 'none',
-      note: 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY in .env.local per generare descrizioni reali con AI.',
-      title: null,
-      description: null,
-      bullets: [],
-      tags: [],
-    })
+    return NextResponse.json(
+      {
+        error:
+          'Nessuna AI configurata. Imposta GROQ_API_KEY, OPENROUTER_API_KEY o GEMINI_API_KEY in .env.local per generare descrizioni reali.',
+      },
+      { status: 503 }
+    )
   }
 
   const system =
     'Sei un copywriter e-commerce esperto di dropshipping. Scrivi in italiano, persuasivo ma onesto, ottimizzato per conversione e SEO. Tono: ' + (tone || 'energico') + '.'
   const prompt =
-    'Crea la scheda prodotto per: "' + name + '". Categoria: ' + category + '. ' +
+    'Crea la scheda prodotto per: "' + name + '". Categoria: ' + categoryLabel + '. ' +
     (features && features.length > 0 ? 'Caratteristiche principali: ' + features.join(', ') + '. ' : '') +
     (price ? 'Prezzo di vendita: ' + price + ' euro. ' : '') +
     'Restituisci un JSON con questi campi esatti: title (titolo SEO accattivante, max 70 caratteri), ' +
@@ -42,15 +46,13 @@ export async function POST(req: NextRequest) {
 
   const data = await generateJson(system, prompt)
   if (!data || !data.description) {
-    return NextResponse.json({
-      configured: true,
-      provider: aiProvider(),
-      note: 'L AI non ha risposto correttamente, riprova tra poco.',
-      title: null,
-      description: null,
-      bullets: [],
-      tags: [],
-    })
+    return NextResponse.json(
+      {
+        error:
+          'L AI non ha restituito una descrizione valida. Riprova tra poco o controlla la chiave nella pagina Diagnostica.',
+      },
+      { status: 502 }
+    )
   }
 
   return NextResponse.json({

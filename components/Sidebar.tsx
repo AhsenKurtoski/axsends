@@ -37,30 +37,30 @@ import {
 } from 'lucide-react'
 
 const nav = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/autopilot', label: 'Autopilot', icon: Wand2 },
-  { href: '/money', label: 'Centro guadagni', icon: Wallet },
-  { href: '/radar', label: 'Radar vincenti', icon: Radar },
-  { href: '/research', label: 'Ricerca prodotti', icon: Rocket },
-  { href: '/trends', label: 'Trend virali', icon: TrendingUp },
-  { href: '/automation', label: 'Automazioni', icon: Zap },
-  { href: '/products', label: 'Prodotti', icon: Package },
-  { href: '/pricing', label: 'Regole prezzo', icon: Tag },
-  { href: '/orders', label: 'Ordini', icon: ShoppingCart },
-  { href: '/suppliers', label: 'Fornitori', icon: Truck },
-  { href: '/monitoring', label: 'Monitoraggio', icon: Activity },
-  { href: '/ads', label: 'AI Ads', icon: Sparkles },
-  { href: '/auto-ads', label: 'Ads automatiche', icon: Megaphone },
-  { href: '/calendar', label: 'Calendario', icon: CalendarDays },
-  { href: '/queue', label: 'Coda', icon: CalendarClock },
-  { href: '/store', label: 'Negozio AI', icon: Store },
-  { href: '/digital', label: 'Prodotti digitali', icon: BookOpen },
-  { href: '/ugc', label: 'UGC Studio', icon: Clapperboard },
-  { href: '/website', label: 'Web Studio', icon: Globe },
-  { href: '/pod', label: 'Print on Demand', icon: Shirt },
-  { href: '/affiliate', label: 'Affiliate', icon: DollarSign },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/settings', label: 'Stato AI e chiavi', icon: Settings },
+  { href: '/app', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/app/autopilot', label: 'Autopilot', icon: Wand2 },
+  { href: '/app/money', label: 'Centro guadagni', icon: Wallet },
+  { href: '/app/radar', label: 'Radar vincenti', icon: Radar },
+  { href: '/app/research', label: 'Ricerca prodotti', icon: Rocket },
+  { href: '/app/trends', label: 'Trend virali', icon: TrendingUp },
+  { href: '/app/automation', label: 'Automazioni', icon: Zap },
+  { href: '/app/products', label: 'Prodotti', icon: Package },
+  { href: '/app/pricing', label: 'Regole prezzo', icon: Tag },
+  { href: '/app/orders', label: 'Ordini', icon: ShoppingCart },
+  { href: '/app/suppliers', label: 'Fornitori', icon: Truck },
+  { href: '/app/monitoring', label: 'Monitoraggio', icon: Activity },
+  { href: '/app/ads', label: 'AI Ads', icon: Sparkles },
+  { href: '/app/auto-ads', label: 'Ads automatiche', icon: Megaphone },
+  { href: '/app/calendar', label: 'Calendario', icon: CalendarDays },
+  { href: '/app/queue', label: 'Coda', icon: CalendarClock },
+  { href: '/app/store', label: 'Negozio AI', icon: Store },
+  { href: '/app/digital', label: 'Prodotti digitali', icon: BookOpen },
+  { href: '/app/ugc', label: 'UGC Studio', icon: Clapperboard },
+  { href: '/app/website', label: 'Web Studio', icon: Globe },
+  { href: '/app/pod', label: 'Print on Demand', icon: Shirt },
+  { href: '/app/affiliate', label: 'Affiliate', icon: DollarSign },
+  { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/app/settings', label: 'Diagnostica', icon: Settings },
 ]
 
 export default function Sidebar() {
@@ -103,21 +103,25 @@ export default function Sidebar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    setUser(null)
-    router.push('/login')
+  function handleLogout() {
+    fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+      setUser(null)
+      router.push('/')
+    })
   }
 
   const configured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
 
+  // Landing e login sono pagine pubbliche: niente sidebar dell'app.
+  if (pathname === '/' || pathname === '/login') return null
+
   return (
     <>
       {/* Mobile Top Header */}
       <header className='md:hidden sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-slate-950/95 backdrop-blur px-4 py-3'>
-        <Link href='/' className='flex items-center gap-2.5'>
+          <Link href='/app' className='flex items-center gap-2.5'>
           <div className='grid h-9 w-9 place-items-center rounded-xl bg-brand text-base font-bold text-white shadow-glass'>
             A
           </div>
@@ -159,7 +163,7 @@ export default function Sidebar() {
 
           <nav className='flex-1 p-4 flex flex-col gap-1'>
             {nav.map((item) => {
-              const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+              const active = item.href === '/app' ? pathname === '/app' : pathname.startsWith(item.href)
               const Icon = item.icon
               return (
                 <Link
@@ -202,9 +206,9 @@ export default function Sidebar() {
                       </div>
                     </div>
                     <button
-                      onClick={async () => {
+                      onClick={() => {
                         setMobileOpen(false)
-                        await handleLogout()
+                        handleLogout()
                       }}
                       className='w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/60 transition hover:bg-white/5 hover:text-white'
                     >
@@ -220,13 +224,6 @@ export default function Sidebar() {
                     >
                       Accedi
                     </Link>
-                    <Link
-                      href='/signup'
-                      onClick={() => setMobileOpen(false)}
-                      className='flex-1 text-center rounded-xl border border-white/10 py-2.5 text-xs text-white/80 transition hover:bg-white/5'
-                    >
-                      Registrati
-                    </Link>
                   </div>
                 )}
               </>
@@ -237,20 +234,20 @@ export default function Sidebar() {
 
       {/* Desktop Sidebar */}
       <aside className='glass m-3 w-64 shrink-0 p-5 hidden md:flex flex-col gap-2 sticky top-3 h-[calc(100vh-1.5rem)] overflow-y-auto'>
-        <div className='mb-4 flex items-center gap-3 px-2'>
-          <div className='grid h-10 w-10 place-items-center rounded-xl bg-brand text-lg font-bold text-white shadow-glass'>
-            A
-          </div>
-          <div className='min-w-0 flex-1'>
-            <div className='text-lg font-semibold leading-tight tracking-tight text-white'>AhsenDS</div>
-            <div className='text-[10px] font-medium text-brand truncate'>Costruito da Ahsen Kurtoski</div>
-          </div>
+          <div className='mb-4 flex items-center gap-3 px-2'>
+          <Link href='/app' className='flex items-center gap-3'>
+            <div className='grid h-10 w-10 place-items-center rounded-xl bg-brand text-lg font-bold text-white shadow-glass'>A</div>
+            <div className='min-w-0 flex-1'>
+              <div className='text-lg font-semibold leading-tight tracking-tight text-white'>AhsenDS</div>
+              <div className='text-[10px] font-medium text-brand truncate'>Costruito da Ahsen Kurtoski</div>
+            </div>
+          </Link>
         </div>
 
         <nav className='flex flex-col gap-1'>
           {nav.map((item) => {
             const active =
-              item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+              item.href === '/app' ? pathname === '/app' : pathname.startsWith(item.href)
             const Icon = item.icon
             return (
               <Link
@@ -309,12 +306,6 @@ export default function Sidebar() {
                     className='block w-full rounded-xl bg-brand/15 py-2 text-xs text-brand transition hover:bg-brand/25'
                   >
                     Accedi
-                  </Link>
-                  <Link
-                    href='/signup'
-                    className='block w-full rounded-xl border border-white/10 py-2 text-xs text-white/60 transition hover:bg-white/5'
-                  >
-                    Registrati
                   </Link>
                 </div>
               )}

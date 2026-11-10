@@ -2,12 +2,10 @@ import { NextResponse, NextRequest } from 'next/server'
 import { generateJson, aiConfigured, aiProvider } from '@/lib/ai'
 import { validateBody, generateAdBodySchema } from '@/lib/validations'
 import { rateLimitConfigs } from '@/lib/rateLimit'
+import { generateImage, hfConfigured } from '@/lib/hf'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 90
-
-const HF_TOKEN = process.env.HUGGINGFACE_API_TOKEN || ''
-const IMAGE_MODEL = process.env.HF_IMAGE_MODEL || 'black-forest-labs/FLUX.1-schnell'
 
 type Body = {
   product?: string
@@ -47,37 +45,6 @@ function normalizeScenes(arr: any): Array<{ time: string; visual: string; voiceo
     }
     return { time: '0-' + ((i + 1) * 4) + 's', visual: toText(s), voiceover: '' }
   })
-}
-
-function fallbackScript(b: Body) {
-  const product = (b.product || 'il tuo prodotto').trim()
-  const audience = (b.audience || 'chi cerca qualcosa di nuovo').trim()
-  const tone = b.tone || 'energico'
-  const platform = b.platform || 'TikTok'
-  const price = b.price ? 'solo ' + b.price + '\u20ac' : 'a un prezzo speciale'
-
-  const hook = 'POV: hai appena scoperto ' + product + ' e non potrai piu farne a meno'
-
-  const variants = [
-    'Non comprare altro finche non vedi ' + product,
-    '3 motivi per cui ' + product + ' sta diventando virale',
-    'Ho provato ' + product + ' per 7 giorni: ecco cosa e successo',
-  ]
-
-  const scenes = [
-    { time: '0-2s', visual: 'Primo piano dinamico di ' + product + ' con luci al neon e zoom rapido', voiceover: 'Stop! Se sei ' + audience + ', guarda qui.' },
-    { time: '2-6s', visual: 'Mostra il problema quotidiano che ' + product + ' risolve, taglio veloce', voiceover: 'Basta perdere tempo con soluzioni che non funzionano.' },
-    { time: '6-12s', visual: 'Demo del prodotto in uso, testo a schermo con i 3 benefici principali', voiceover: product + ' e facile, veloce e ti cambia la giornata.' },
-    { time: '12-16s', visual: 'Recensioni a 5 stelle che scorrono e badge spedizione veloce', voiceover: 'Migliaia di persone lo adorano gia.' },
-    { time: '16-20s', visual: 'Prodotto e prezzo in evidenza, animazione del bottone Acquista ora', voiceover: 'Tutto questo ' + price + '. Approfittane ora!' },
-  ]
-
-  const cta = 'Tocca il link e ordina ' + product + ' prima che finisca!'
-  const caption = product + ' sta diventando virale su ' + platform + '. Perfetto per ' + audience + '. Link in bio!'
-  const hashtags = ['#fyp', '#perte', '#tiktokmademebuyit', '#dropshipping', '#offerta', '#trending', '#shopping', '#viral']
-  const targeting = 'Pubblico consigliato: ' + audience + '. Eta 18-45, dispositivi mobile, interessi collegati alla categoria del prodotto.'
-
-  return { hook, variants, scenes, cta, caption, hashtags, targeting, tone, platform }
 }
 
 async function tryScript(b: Body, strict: boolean) {
@@ -120,22 +87,6 @@ async function aiScript(b: Body) {
   return await tryScript(b, true)
 }
 
-async function hfImage(prompt: string): Promise<string | null> {
-  if (!HF_TOKEN) return null
-  try {
-    const r = await fetch('https://api-inference.huggingface.co/models/' + IMAGE_MODEL, {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + HF_TOKEN, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ inputs: prompt }),
-    })
-    if (!r.ok) return null
-    const buf = Buffer.from(await r.arrayBuffer())
-    return 'data:image/png;base64,' + buf.toString('base64')
-  } catch {
-    return null
-  }
-}
-
 export async function POST(req: NextRequest) {
   // Rate limiting per API AI
   const rateLimitResponse = await rateLimitConfigs.ai(req)
@@ -146,25 +97,46 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
+  // Nessuna simulazione: senza una chiave AI non inventiamo uno script.
+  if (!aiConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          'Nessuna AI configurata. Imposta GROQ_API_KEY, OPENROUTER_API_KEY o GEMINI_API_KEY in .env.local: senza chiave non viene generato nessuno script.',
+      },
+      { status: 503 }
+    )
+  }
+
   const body = validation.data
-  const ai = aiConfigured() ? await aiScript(body) : null
-  const script = ai || fallbackScript(body)
+  const script = await aiScript(body)
+  if (!script) {
+    return NextResponse.json(
+      {
+        error:
+          'L AI non ha restituito uno script valido. Riprova tra poco o controlla la chiave nella pagina Diagnostica.',
+      },
+      { status: 502 }
+    )
+  }
+
   const imagePrompt =
     'Premium professional advertising poster for ' +
     (body.product || 'product') +
     ', ' +
     (body.tone || 'modern') +
     ' style, studio lighting, cinematic, vibrant colors, ultra detailed, e-commerce hero shot, no text'
-  const image = await hfImage(imagePrompt)
+  const image = await generateImage(imagePrompt)
+
   return NextResponse.json({
-    configured: Boolean(HF_TOKEN),
-    aiText: Boolean(ai),
+    aiText: true,
     provider: aiProvider(),
-    note: ai
-      ? 'Script premium generato con AI (' + aiProvider() + ').'
-      : HF_TOKEN
-      ? 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY per script scritti dall AI.'
-      : 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY (testo) e HUGGINGFACE_API_TOKEN (immagine) in .env.local.',
+    imageConfigured: hfConfigured(),
+    note: image
+      ? 'Script e immagine generati con AI (' + aiProvider() + ' + Hugging Face).'
+      : hfConfigured()
+        ? 'Script generato con AI (' + aiProvider() + '). Immagine non disponibile: Hugging Face non ha risposto.'
+        : 'Script generato con AI (' + aiProvider() + '). Aggiungi HUGGINGFACE_API_TOKEN per generare anche l immagine.',
     imagePrompt,
     image,
     script,

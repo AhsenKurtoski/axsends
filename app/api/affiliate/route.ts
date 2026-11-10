@@ -20,28 +20,21 @@ export async function POST(req: NextRequest) {
   const { product, platform, network: rawNetwork, link, tone } = validation.data
   const network = rawNetwork || platform || 'Amazon'
 
+  // La disclosure e' un obbligo legale, non un contenuto generato: la teniamo
+  // sempre, anche se l'AI riscrive il resto.
   const disclosure =
     'Disclosure: contenuto con link affiliati ' + network +
     '. Acquistando dal link posso ricevere una commissione, senza costi extra per te.'
 
+  // Nessuna simulazione: senza chiave AI non inventiamo caption o hashtag.
   if (!aiConfigured()) {
-    return NextResponse.json({
-      configured: false,
-      provider: 'none',
-      note: 'Aggiungi GROQ_API_KEY o GEMINI_API_KEY in .env.local per generare contenuti affiliate con AI.',
-      title: 'Scopri ' + product,
-      body: 'Recensione e guida all acquisto di ' + product + ' su ' + network + '.',
-      captions: [
-        'Ecco perche tutti parlano di ' + product + '! Link in bio.',
-        'Miglior scelta per il rapporto qualita prezzo: ' + product + '.',
-        'Offerta speciale limitata su ' + network + ' per ' + product + '!',
-      ],
-      hashtags: ['#affiliate', '#offerta', '#shopping', '#recensione'],
-      disclosure,
-      cta: 'Tocca il link per scoprire ' + product + ' su ' + network + '.',
-      platform: network,
-      link: link || '',
-    })
+    return NextResponse.json(
+      {
+        error:
+          'Nessuna AI configurata. Imposta GROQ_API_KEY, OPENROUTER_API_KEY o GEMINI_API_KEY in .env.local per generare i contenuti affiliate.',
+      },
+      { status: 503 }
+    )
   }
 
   const system =
@@ -53,33 +46,25 @@ export async function POST(req: NextRequest) {
     'hashtags (array di 6 hashtag con #), cta (stringa breve).'
 
   const data = await generateJson(system, prompt)
-  if (!data) {
-    return NextResponse.json({
-      configured: true,
-      provider: aiProvider(),
-      note: 'L AI non ha risposto, riprova tra poco.',
-      title: product,
-      body: 'Recensione per ' + product + ' su ' + network + '.',
-      captions: ['Scopri ' + product + ' con la migliore offerta online!'],
-      hashtags: ['#affiliate', '#shopping'],
-      disclosure,
-      cta: 'Visita il link su ' + network,
-      platform: network,
-      link: link || '',
-    })
+  if (!data || !data.title) {
+    return NextResponse.json(
+      {
+        error:
+          'L AI non ha restituito contenuti validi. Riprova tra poco o controlla la chiave nella pagina Diagnostica.',
+      },
+      { status: 502 }
+    )
   }
 
   return NextResponse.json({
-    configured: true,
     provider: aiProvider(),
-    title: data.title || product,
+    title: data.title,
     body: data.body || '',
     captions: Array.isArray(data.captions) ? data.captions : [data.captions].filter(Boolean),
     hashtags: Array.isArray(data.hashtags) ? data.hashtags : [],
     disclosure: data.disclosure || disclosure,
-    cta: data.cta || ('Tocca il link per ' + product + ' su ' + network + '.'),
+    cta: data.cta || '',
     platform: network,
     link: link || '',
-    developer: 'Ahsen Kurtoski',
   })
 }

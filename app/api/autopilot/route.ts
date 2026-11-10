@@ -143,8 +143,9 @@ export async function GET(req: Request) {
         supplier: 'CJ Dropshipping',
         cost: p.cost,
         price: p.suggestedPrice,
-        stock: 999,
-        sold: 0,
+        // stock e sold non vengono scritti: l'Autopilot non conosce la
+        // disponibilita' reale CJ ne' le vendite. Omettere i campi preserva
+        // i valori gia' presenti in catalogo.
         status: 'active',
       }))
       const r = await supabaseAdmin.from('products').upsert(rows, { onConflict: 'id' }).select('id')

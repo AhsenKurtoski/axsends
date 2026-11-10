@@ -106,7 +106,7 @@ export const adQueueBodySchema = z.object({
   platform: z.enum(['tiktok', 'instagram', 'youtube', 'facebook']).optional(),
   title: z.string().max(300).optional(),
   caption: z.string().max(5000).optional(),
-  hashtags: z.string().max(2000).optional(),
+  hashtags: z.union([z.string().max(2000), z.array(z.string().max(100)).max(30)]).optional(),
   videoUrl: z.union([z.string().url().max(2000), z.literal('')]).optional(),
   status: z.enum(['queued', 'scheduled', 'published', 'failed']).optional(),
   scheduledAt: z.string().max(40).optional().nullable(),

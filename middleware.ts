@@ -6,7 +6,15 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions }
 
-const PUBLIC_PATHS = ['/login', '/signup', '/api/health']
+// Percorsi sempre accessibili senza sessione.
+// /api/monitor e' richiamato dal cron di Vercel, che non ha cookie utente:
+// l'endpoint si protegge da solo con CRON_SECRET (o con una sessione valida).
+const PUBLIC_PATHS = ['/login', '/api/health', '/api/monitor', '/launch']
+
+function isPublicPath(pathname: string): boolean {
+  if (pathname === '/') return true
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
+}
 
 export async function middleware(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -17,9 +25,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Permetti percorsi pubblici
   const pathname = req.nextUrl.pathname
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+  if (isPublicPath(pathname)) {
     return NextResponse.next()
   }
 
@@ -42,6 +49,15 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    // Le API rispondono in JSON (non con un redirect HTML): il client client
+    // capisce cosi' che la sessione non e' valida.
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'Non autenticato. Effettua il login per usare questa API.' },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      )
+    }
+
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/login'
     redirectUrl.searchParams.set('redirect', pathname)

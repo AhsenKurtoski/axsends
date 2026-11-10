@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     platform: platform || 'tiktok',
     title: title || '',
     caption: caption || '',
-    hashtags: hashtags || '',
+    hashtags: Array.isArray(hashtags) ? hashtags.join(' ') : hashtags || '',
     video_url: videoUrl || '',
     status: status || 'queued',
     scheduled_at: scheduledAt || null,

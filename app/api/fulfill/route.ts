@@ -31,12 +31,12 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    mode: hasCj ? 'cj-ready' : 'demo',
+    mode: hasCj ? 'cj-ready' : 'not-configured',
     status: 'fulfillment_prepared',
     costTotal: Math.round(costTotal * 100) / 100,
     cjPayload,
     note: hasCj
       ? 'Payload pronto per CJ. Conferma manuale richiesta prima dell addebito reale.'
-      : 'Demo: collega CJ (CJ_EMAIL + CJ_API_KEY) per evadere ordini reali.',
+      : 'CJ non configurato: collega CJ_EMAIL + CJ_API_KEY per preparare ordini reali.',
   })
 }

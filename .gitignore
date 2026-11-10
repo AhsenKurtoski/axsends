@@ -5,6 +5,9 @@ build
 .env
 .env.local
 .env*.local
+.env.production
+.env.development
+tsc-errors.txt
 .DS_Store
 *.pem
 npm-debug.log*
@@ -12,3 +15,4 @@ npm-debug.log*
 next-env.d.ts
 *.tsbuildinfo
 .vscode
+assets/launch/video/vertical-frames/

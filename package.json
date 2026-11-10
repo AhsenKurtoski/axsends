@@ -4,6 +4,14 @@
   "description": "AhsenDS — Piattaforma di automazione dropshipping costruita da Ahsen Kurtoski",
   "author": "Ahsen Kurtoski",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AhsenKurtoski/axsends.git"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

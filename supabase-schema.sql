@@ -28,9 +28,12 @@ create table if not exists products (
 alter table products add column if not exists external_id text;
 alter table products add column if not exists updated_at timestamptz default now();
 
--- Un external_id non puo essere duplicato (solo quando valorizzato).
+-- Un external_id non puo essere duplicato. L'indice e' pieno (non parziale)
+-- perche PostgREST lo riconosce nell'upsert ON CONFLICT (external_id);
+-- in Postgres gli indici unici consentono comunque piu righe con NULL.
+drop index if exists products_external_id_key;
 create unique index if not exists products_external_id_key
-  on products (external_id) where external_id is not null;
+  on products (external_id);
 create index if not exists products_sold_idx on products (sold desc);
 
 -- ---------- ORDINI ----------
@@ -94,8 +97,9 @@ create table if not exists settings (
 -- L'app e personale: con la RLS attiva, solo gli utenti autenticati
 -- (login su /login) possono leggere e scrivere. Gli accessi anonimi
 -- (chiave anon senza sessione) vengono bloccati a livello database.
--- Le API che usano la service role key (import, monitor, autopilot)
--- restano autorizzate perche girano solo server-side.
+-- Le API che usano la service role key (monitor, autopilot) restano
+-- autorizzate perche girano solo server-side; l'import usa la service role
+-- se presente, altrimenti la sessione dell'utente autenticato.
 -- =============================================================
 
 alter table products enable row level security;
