@@ -46,6 +46,26 @@ Tecnologie: **Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase**, 
 
 ---
 
+## 🎬 Launch Kit
+
+[![Poster ufficiale AhsenDS](assets/launch/poster.png)](assets/launch/video/ahsends-launch-16x9.mp4)
+
+Film di lancio, teaser verticale, otto schermate reali, poster e press kit completo. La pagina pubblica è **`/launch`**.
+
+| Asset | Formato | File |
+|---|---|---|
+| Launch film | MP4 · 1920×1080 · 44 s | [Guarda / scarica](assets/launch/video/ahsends-launch-16x9.mp4) |
+| Teaser social | MP4 · 1080×1920 · 18 s | [Scarica](assets/launch/video/ahsends-teaser-9x16.mp4) |
+| Poster verticale | PNG · 1080×1920 | [Apri](assets/launch/teaser-vertical-poster.png) |
+| Screenshot | PNG · 1920×1080 · 8 file | [Contact sheet](assets/launch/contact-sheet.png) · [Gallery](assets/launch/gallery.html) |
+| Copy social | Markdown | [Hook, caption e piano 7 giorni](assets/launch/social-copy.md) |
+| Kit pubblicazione teaser | Markdown | [TikTok e Reels, pronto al caricamento](assets/launch/teaser-publish-kit.md) |
+| Press kit | ZIP · 26,7 MB | [Scarica tutto](assets/launch/ahsends-launch-kit.zip) |
+
+Tutti gli asset hanno il watermark **AhsenDS · Ahsen Kurtoski**. Musica originale, nessun sample di terzi.
+
+---
+
 ## 🚀 Avvio Rapido
 
 Requisiti: **Node.js 18.17+** e npm.

@@ -147,6 +147,7 @@ export default function LaunchKitPage() {
               <a href='/launch/kit/video/ahsends-teaser-9x16.mp4' download className='rounded-xl bg-brand px-4 py-2.5 text-xs font-medium transition hover:bg-brand-dark'>Scarica teaser MP4</a>
               <a href='/launch/kit/teaser-vertical-poster.png' target='_blank' rel='noopener noreferrer' className='rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/10'>Apri poster verticale</a>
               <a href='/launch/kit/social-copy.md' target='_blank' rel='noopener noreferrer' className='rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/10'>Copy social</a>
+              <a href='/launch/kit/teaser-publish-kit.md' target='_blank' rel='noopener noreferrer' className='rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/10'>Kit pubblicazione</a>
             </div>
           </div>
         </section>

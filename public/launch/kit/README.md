@@ -10,6 +10,7 @@ Launch kit completo per **AhsenDS**, progettato e raccontato da **Ahsen Kurtoski
 | `video/ahsends-teaser-9x16.mp4` | Teaser verticale 18s, 1080×1920, 30 fps, H.264/AAC |
 | `teaser-vertical-poster.png` | Poster verticale del teaser |
 | `social-copy.md` | Hook, caption, hashtag e piano di pubblicazione |
+| `teaser-publish-kit.md` | Checklist e testi pronti per caricare il teaser su TikTok, Reels e Shorts |
 | `poster.png` | Poster 1920×1080 estratto dal film |
 | `contact-sheet.png` | Contact sheet con le 8 schermate |
 | `screens/01-landing.png` | Landing pubblica |
