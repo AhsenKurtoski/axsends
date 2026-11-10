@@ -52,7 +52,7 @@ Tecnologie: **Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase**, 
 
 Film di lancio, teaser verticale, otto schermate reali, poster e press kit completo. La pagina pubblica è **`/launch`**.
 
-**Live:** [Launch Kit su Cloudflare Sites](https://site-03f75a10e2254b60a2b392f043f61d49.freebuff.page/launch)
+**Live:** [App completa su Vercel](https://axsends.vercel.app) · [Launch Kit](https://axsends.vercel.app/launch) · [Mirror statico Cloudflare](https://site-03f75a10e2254b60a2b392f043f61d49.freebuff.page/launch)
 
 | Asset | Formato | File |
 |---|---|---|
@@ -83,6 +83,14 @@ npm run dev
 Apri `http://localhost:3000` per la landing pubblica, `http://localhost:3000/launch` per il launch kit (film, teaser 9:16, screenshot e download), `http://localhost:3000/app` per la dashboard.
 
 Se Supabase è configurato l'accesso è obbligatorio: crea il tuo utente in **Supabase > Authentication > Users** e accedi da `/login`.
+
+---
+
+## ☁️ Deploy
+
+Produzione: **[axsends.vercel.app](https://axsends.vercel.app)**. Il progetto Vercel è collegato al branch `main` per il deploy automatico: ogni push su GitHub avvia una nuova build. Il piano Hobby consente un solo cron al giorno, configurato alle 03:00 in `vercel.json`.
+
+Per un deploy manuale dalla root del progetto: `npx vercel --prod`.
 
 ---
 
