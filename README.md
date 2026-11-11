@@ -18,6 +18,32 @@ Tecnologie: **Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase**, 
 
 ---
 
+## 📊 Project impact & development
+
+| Indicatore | Dato |
+|---|---|
+| **Tempo di sviluppo** | Circa **4 mesi** |
+| **Utilizzo dichiarato** | Numero di utilizzatori non attualmente verificato |
+| **Diffusione / notorietà** | Dato di notorietà non misurato |
+| **Costo del software** | **€0** — software open source, MIT, senza abbonamento |
+
+### Il problema che risolve
+
+AhsenDS (Ahsen Dropshipping System) nasce per ridurre la frammentazione e il lavoro ripetitivo nel dropshipping e nell'affiliate marketing. Riunisce in un solo ambiente strumenti che spesso vengono gestiti separatamente:
+
+- ricerca e valutazione dei prodotti, per evitare di analizzare manualmente tanti cataloghi e opportunità;
+- monitoraggio di prezzi e disponibilità, per individuare cambiamenti e ridurre il rischio di promuovere prodotti non disponibili o non convenienti;
+- creazione di descrizioni, testi SEO e contenuti promozionali, senza dover scrivere ogni scheda da zero;
+- preparazione di script, storyboard e creatività pubblicitarie con strumenti AI;
+- generazione di landing page e siti per presentare i prodotti;
+- organizzazione di catalogo, fornitori e ordini, con strumenti di automazione e pubblicazione sui canali social supportati.
+
+### Costi e chiavi API
+
+**AhsenDS non richiede un abbonamento per utilizzare il software.** L'applicazione può essere avviata senza chiavi API; per attivare le funzioni collegate a servizi esterni (AI, database, cataloghi, immagini o social) occorrono le relative credenziali. Sono supportati più provider e alcuni offrono piani gratuiti, soggetti ai rispettivi limiti e condizioni. Eventuali costi dipendono dai servizi esterni scelti e dal loro utilizzo: non sono inclusi né garantiti dal progetto.
+
+---
+
 ## ✨ Funzionalità Principali
 
 - 📡 **Radar prodotti vincenti** — Scansione multi-nicchia su richiesta su CJ Dropshipping; il cron giornaliero copre il monitoraggio prezzi/stock.
