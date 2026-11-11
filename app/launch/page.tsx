@@ -110,13 +110,13 @@ export default function LaunchKitPage() {
           <div className='mb-5 flex flex-wrap items-end justify-between gap-3'>
             <div>
               <h2 className='text-2xl font-semibold tracking-tight'>Il prodotto, live.</h2>
-              <p className='mt-1 text-xs text-white/40'>Otto schermate 1920×1080 · UI reale · watermark Ahsen Kurtoski</p>
+              <p className='mt-1 text-xs text-white/40'>Otto schermate 1920×1080 · UI reale · clicca per aprirle a piena risoluzione</p>
             </div>
             <a href='/launch/kit/contact-sheet.png' target='_blank' rel='noopener noreferrer' className='text-[10px] uppercase tracking-[0.12em] text-violet-300 hover:underline'>
               Apri contact sheet →
             </a>
           </div>
-          <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
             {SHOTS.map((shot) => (
               <a
                 key={shot.file}
@@ -125,7 +125,7 @@ export default function LaunchKitPage() {
                 rel='noopener noreferrer'
                 className='group overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-brand/50'
               >
-                <img src={'/launch/kit/screens/' + shot.file} alt={shot.label} loading='lazy' className='aspect-video w-full object-cover' />
+                <img src={'/launch/kit/screens/' + shot.file} alt={shot.label} loading='lazy' className='aspect-video w-full bg-[#0a0d16] object-contain' />
                 <span className='block px-3 py-2.5 text-[9px] uppercase tracking-[0.14em] text-white/45'>{shot.label}</span>
               </a>
             ))}
@@ -155,8 +155,8 @@ export default function LaunchKitPage() {
           </div>
         </section>
 
-        <section className='mt-12 grid gap-4 lg:grid-cols-[1.2fr_.8fr]'>
-          <a href='/launch/kit/poster.png' target='_blank' rel='noopener noreferrer' className='block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]'>
+        <section className='mt-12 grid gap-4 lg:grid-cols-[.85fr_1.15fr]'>
+          <a href='/launch/kit/poster.png' target='_blank' rel='noopener noreferrer' className='mx-auto block w-full max-w-[500px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]'>
             <img src='/launch/kit/poster.png' alt='Poster AhsenDS' className='w-full' />
           </a>
           <div className='rounded-2xl border border-white/10 bg-white/[0.035] p-6'>
@@ -222,9 +222,20 @@ export default function LaunchKitPage() {
       </main>
 
       <footer className='border-t border-white/10 px-5 py-6'>
-        <div className='mx-auto flex max-w-6xl flex-col justify-between gap-2 text-[10px] text-white/35 sm:flex-row'>
+        <div className='mx-auto flex max-w-6xl flex-col justify-between gap-3 text-[10px] text-white/35 sm:flex-row sm:items-center'>
           <span>Progettato, sviluppato e raccontato da <strong className='font-medium text-white/70'>Ahsen Kurtoski</strong>.</span>
-          <span>AhsenDS · Launch Kit 2026 · <strong className='font-medium text-white/70'>Open source, MIT</strong></span>
+          <div className='flex flex-wrap items-center gap-x-4 gap-y-1'>
+            <a href='mailto:ahsenkurtoski@financier.com' className='transition hover:text-white'>ahsenkurtoski@financier.com</a>
+            <a
+              href='https://wa.me/393312053485?text=Ciao%20Ahsen%2C%20vorrei%20parlare%20di%20una%20collaborazione%20con%20AhsenDS.'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='transition hover:text-white'
+            >
+              WhatsApp +39 331 205 3485
+            </a>
+            <span>AhsenDS · Launch Kit 2026 · <strong className='font-medium text-white/70'>Open source, MIT</strong></span>
+          </div>
         </div>
       </footer>
     </div>

@@ -14,6 +14,7 @@ import {
   LineChart,
   ListChecks,
   Mail,
+  MessageCircle,
   Megaphone,
   Package,
   Radar,
@@ -138,6 +139,10 @@ const STATS = [
 
 const CONTACT_EMAIL = 'ahsenkurtoski@financier.com'
 const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Collaborazione istituzionale — AhsenDS')}`
+const WHATSAPP_DISPLAY = '+39 331 205 3485'
+const WHATSAPP_HREF =
+  'https://wa.me/393312053485?text=' +
+  encodeURIComponent('Ciao Ahsen, vorrei parlare di una collaborazione con AhsenDS.')
 
 export default function HomePage() {
   return (
@@ -330,6 +335,17 @@ export default function HomePage() {
                 Preferisci l’email?{' '}
                 <a href={CONTACT_HREF} className='inline-flex items-center gap-1 text-brand underline-offset-2 hover:underline'>
                   <Mail size={12} /> {CONTACT_EMAIL}
+                </a>
+              </p>
+              <p className='text-xs text-white/40'>
+                WhatsApp Business:{' '}
+                <a
+                  href={WHATSAPP_HREF}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='inline-flex items-center gap-1 text-emerald-300 underline-offset-2 hover:underline'
+                >
+                  <MessageCircle size={12} /> {WHATSAPP_DISPLAY}
                 </a>
               </p>
               <a

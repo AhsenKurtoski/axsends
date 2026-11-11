@@ -80,7 +80,7 @@ Film di lancio, teaser verticale, otto schermate reali, poster e press kit compl
 
 **Live:** [App completa su Vercel](https://axsends.vercel.app) · [Launch Kit](https://axsends.vercel.app/launch) · [English presentation](https://axsends.vercel.app/en) · [Mirror statico Cloudflare](https://site-03f75a10e2254b60a2b392f043f61d49.freebuff.page/launch)
 
-**Collaborazioni:** [ahsenkurtoski@financier.com](mailto:ahsenkurtoski@financier.com?subject=Collaborazione%20istituzionale%20%E2%80%94%20AhsenDS)
+**Collaborazioni:** [ahsenkurtoski@financier.com](mailto:ahsenkurtoski@financier.com?subject=Collaborazione%20istituzionale%20%E2%80%94%20AhsenDS) · **WhatsApp Business:** [+39 331 205 3485](https://wa.me/393312053485)
 
 **Modulo contatti:** attivo sulla landing italiana e su `/en`. Le richieste vengono validate, limitate a 5 invii al minuto e salvate in **Supabase > Table Editor > `settings`**, con chiave `contact_request:<uuid>`. Non serve creare una nuova tabella.
 

@@ -62,7 +62,8 @@
     .nav-links a { text-decoration: none; }
     .nav-links a:hover { color: var(--text); }
     .nav-cta { border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px 12px; color: var(--text) !important; }
-    .hero { padding: 86px 0 54px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+    .hero { padding: 76px 0 50px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 34px; align-items: start; }
+    .hero-copy { max-width: 840px; }
     .eyebrow { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(52,211,153,.28); background: rgba(52,211,153,.08); color: #a7f3d0; border-radius: 999px; padding: 6px 11px; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 4px rgba(52,211,153,.12); }
     h1 { margin: 20px 0 0; font-size: clamp(38px, 5.6vw, 68px); line-height: 1.02; letter-spacing: -.045em; font-weight: 720; }
@@ -75,8 +76,14 @@
     .btn-primary:hover { background: #6ee7b7; }
     .btn-ghost:hover { background: rgba(255,255,255,.05); }
     .hero-note { color: #7f8b9b; font-size: 11px; margin: 14px 0 0; }
-    .hero-card { position: relative; }
-    .hero-card:before { content: ""; position: absolute; inset: -1px; border-radius: calc(var(--radius) + 2px); background: linear-gradient(135deg, rgba(52,211,153,.55), rgba(34,211,238,.18), transparent 65%); z-index: -1; }
+    .hero-card { position: relative; width: 100%; max-width: 1100px; }
+    .browser { display: block; overflow: hidden; border: 1px solid var(--line-strong); border-radius: 18px; background: #0b111a; box-shadow: 0 22px 58px rgba(0,0,0,.34); text-decoration: none; }
+    .browser-bar { display: flex; align-items: center; gap: 7px; padding: 10px 14px; border-bottom: 1px solid #dbe4ee; background: #eef2f7; }
+    .browser-dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+    .browser-dot:nth-child(2) { background: #cbd5e1; }
+    .browser-dot:nth-child(3) { background: #e2e8f0; }
+    .browser-url { margin-left: 8px; padding: 3px 10px; border: 1px solid #dbe4ee; border-radius: 999px; background: #fff; color: #64748b; font-size: 9px; letter-spacing: .04em; }
+    .browser img { display: block; width: 100%; height: auto; }
     .shot { display: block; width: 100%; border-radius: var(--radius); border: 1px solid var(--line-strong); box-shadow: 0 30px 80px rgba(0,0,0,.42); background: var(--panel); }
     .caption { display: flex; justify-content: space-between; gap: 12px; color: #7f8b9b; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; margin-top: 10px; }
     .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--line); }
@@ -93,8 +100,8 @@
     .card .num { color: #5eead4; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
     .card h3 { margin: 12px 0 7px; font-size: 16px; letter-spacing: -.01em; }
     .card p { margin: 0; color: var(--muted); font-size: 13px; }
-    .proof { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; }
-    .proof-list { display: grid; gap: 12px; }
+    .proof { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: start; }
+    .proof-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
     .proof-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
     .proof-item:last-child { border-bottom: 0; }
     .check { width: 22px; height: 22px; flex: 0 0 auto; border-radius: 7px; display: grid; place-items: center; background: rgba(52,211,153,.12); color: var(--brand); font-size: 12px; font-weight: 800; }
@@ -128,7 +135,7 @@
     .contact-form .btn { width: 100%; cursor: pointer; font-family: inherit; }
     .contact-form .btn:disabled { opacity: .65; cursor: wait; }
     .hp { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; }
-    .email { color: #a7f3d0; text-decoration: none; border-bottom: 1px solid rgba(167,243,208,.3); }
+    .email, .whatsapp { color: #a7f3d0; text-decoration: none; border-bottom: 1px solid rgba(167,243,208,.3); }
     footer { border-top: 1px solid var(--line); padding: 28px 0 36px; color: #7f8b9b; font-size: 11px; }
     .footer-inner { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
@@ -137,6 +144,7 @@
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 58px; }
       .proof { grid-template-columns: 1fr; }
+      .proof-list { grid-template-columns: 1fr; }
       .grid-3 { grid-template-columns: 1fr 1fr; }
       .steps { grid-template-columns: 1fr 1fr; }
       .notice { grid-template-columns: 1fr; }
@@ -155,7 +163,7 @@
     }
     @media print {
       body { background: #fff; color: #111; }
-      .nav, .actions, .hero-card, .contact-actions, .contact-form { display: none; }
+      .nav, .actions, .hero-card, .contact-actions, .contact-form, .browser-bar { display: none; }
       .card, .notice, .contact { background: #fff; border-color: #ddd; }
       .muted, .lead, .card p, .proof-item span, .step p, .notice p, .notice ul, .contact p { color: #333; }
       section { padding: 26px 0; }
@@ -182,7 +190,7 @@
   <main id="main">
     <div class="wrap">
       <section class="hero" aria-labelledby="hero-title">
-        <div>
+        <div class="hero-copy">
           <span class="eyebrow"><span class="dot"></span> Working prototype · Open source (MIT)</span>
           <h1 id="hero-title">Digital systems that <span>work in the real world.</span></h1>
           <p class="lead">
@@ -196,8 +204,14 @@
           <p class="hero-note">Login required for the private dashboard · The product is in Italian; this page is the English overview.</p>
         </div>
         <div class="hero-card">
-          <img class="shot" src="/launch/kit/screens/01-landing.png" width="1920" height="1080" alt="AhsenDS live product landing page" />
-          <div class="caption"><span>Live product · 2026</span><span>Web app / AI / automation</span></div>
+          <div class="browser">
+            <div class="browser-bar" aria-hidden="true">
+              <span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span>
+              <span class="browser-url">axsends.vercel.app/app</span>
+            </div>
+            <img src="/launch/kit/screens/02-dashboard.png" width="1920" height="1080" alt="AhsenDS live dashboard" />
+          </div>
+          <div class="caption"><span>Live dashboard · 2026</span><span>Real product · demo data</span></div>
         </div>
       </section>
 
@@ -235,8 +249,12 @@
           <p>The current build is online and connected. The health page reports the real state of each integration.</p>
         </div>
         <div class="proof">
-          <a href="https://axsends.vercel.app/launch" aria-label="Open the AhsenDS launch kit">
-            <img class="shot" src="/launch/kit/screens/02-dashboard.png" width="1920" height="1080" alt="AhsenDS live dashboard" loading="lazy" />
+          <a class="browser" href="https://axsends.vercel.app/launch" aria-label="Open the AhsenDS launch kit">
+            <div class="browser-bar" aria-hidden="true">
+              <span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span>
+              <span class="browser-url">axsends.vercel.app</span>
+            </div>
+            <img src="/launch/kit/screens/01-landing.png" width="1920" height="1080" alt="AhsenDS live product landing page" loading="lazy" />
           </a>
           <div class="proof-list">
             <div class="proof-item"><span class="check">✓</span><div><b>Live application</b><span>Public site, authenticated dashboard and a documented launch kit.</span></div></div>
@@ -286,6 +304,7 @@
             <h2 id="contact-title">Bring a real problem. We will bring a working demo.</h2>
             <p>For institutional collaborations, technical pilots or a short product walkthrough, send a short request. We will reply as soon as possible.</p>
             <p>Prefer email? <a class="email" href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">ahsenkurtoski@financier.com</a></p>
+            <p>WhatsApp Business: <a class="whatsapp" href="https://wa.me/393312053485?text=Ciao%20Ahsen%2C%20vorrei%20parlare%20di%20una%20collaborazione%20con%20AhsenDS." target="_blank" rel="noopener noreferrer">+39 331 205 3485</a></p>
             <div class="contact-actions">
               <a class="btn btn-primary" href="#contact-form">Start a conversation</a>
               <a class="btn btn-ghost" href="https://axsends.vercel.app/launch">View launch kit</a>
@@ -302,7 +321,7 @@
             <label class="consent"><input type="checkbox" name="consent" required /> <span>I agree to be contacted about this request. My details will only be used to reply.</span></label>
             <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
             <button class="btn btn-primary" type="submit">Send request</button>
-            <noscript><p class="form-status">JavaScript is required to send this form. Please email <a class="email" href="mailto:ahsenkurtoski@financier.com">ahsenkurtoski@financier.com</a> directly.</p></noscript>
+            <noscript><p class="form-status">JavaScript is required to send this form. Please email <a class="email" href="mailto:ahsenkurtoski@financier.com">ahsenkurtoski@financier.com</a> or message <a class="whatsapp" href="https://wa.me/393312053485" target="_blank" rel="noopener noreferrer">WhatsApp +39 331 205 3485</a>.</p></noscript>
           </form>
         </div>
       </section>
@@ -316,7 +335,8 @@
         <a href="https://axsends.vercel.app/app">Live product</a>
         <a href="https://axsends.vercel.app/launch">Launch kit</a>
         <a href="https://github.com/AhsenKurtoski/axsends" rel="noopener">GitHub</a>
-        <a href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">Email</a>
+        <a href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">ahsenkurtoski@financier.com</a>
+        <a href="https://wa.me/393312053485?text=Ciao%20Ahsen%2C%20vorrei%20parlare%20di%20una%20collaborazione%20con%20AhsenDS." target="_blank" rel="noopener noreferrer">WhatsApp +39 331 205 3485</a>
       </div>
     </div>
   </footer>

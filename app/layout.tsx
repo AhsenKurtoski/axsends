@@ -52,8 +52,23 @@ export default function RootLayout({
                   <span className='h-2 w-2 rounded-full bg-emerald-400 animate-pulse' />
                   <span>AhsenDS &bull; Piattaforma E-commerce &amp; Dropshipping</span>
                 </div>
-                <div className='font-medium text-white/70'>
-                  Costruito con cura e dedizione da <span className='text-brand font-semibold'>Ahsen Kurtoski</span>
+                <div className='flex flex-col items-center gap-1 text-center sm:items-end sm:text-right'>
+                  <div className='font-medium text-white/70'>
+                    Costruito con cura e dedizione da <span className='text-brand font-semibold'>Ahsen Kurtoski</span>
+                  </div>
+                  <div className='flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px]'>
+                    <a href='mailto:ahsenkurtoski@financier.com' className='transition hover:text-white'>
+                      ahsenkurtoski@financier.com
+                    </a>
+                    <a
+                      href='https://wa.me/393312053485?text=Ciao%20Ahsen%2C%20vorrei%20parlare%20di%20una%20collaborazione%20con%20AhsenDS.'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='transition hover:text-white'
+                    >
+                      WhatsApp +39 331 205 3485
+                    </a>
+                  </div>
                 </div>
               </footer>
             </div>

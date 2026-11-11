@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         code: 'unavailable',
-        error: 'Modulo contatti non configurato. Scrivi direttamente a ahsenkurtoski@financier.com.',
+        error: 'Modulo contatti non configurato. Scrivi a ahsenkurtoski@financier.com oppure su WhatsApp +39 331 205 3485',
       },
       { status: 503, headers: { 'Cache-Control': 'no-store' } }
     )
@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
       {
         ok: false,
         code: 'server',
-        error: 'Invio non riuscito. Riprova o scrivi a ahsenkurtoski@financier.com.',
+        error: 'Invio non riuscito. Riprova o scrivi a ahsenkurtoski@financier.com oppure su WhatsApp +39 331 205 3485',
       },
       { status: 500, headers: { 'Cache-Control': 'no-store' } }
     )

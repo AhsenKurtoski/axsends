@@ -42,14 +42,14 @@ export default function ContactForm() {
 
       if (!res.ok) {
         let message =
-          'Invio non riuscito. Riprova o scrivi direttamente a ahsenkurtoski@financier.com.'
+          'Invio non riuscito. Riprova o scrivi a ahsenkurtoski@financier.com oppure su WhatsApp +39 331 205 3485'
         if (res.status === 400) {
           message = 'Controlla i campi: nome, email, messaggio e consenso sono obbligatori.'
         } else if (res.status === 429) {
           message = 'Hai inviato troppe richieste. Attendi un minuto e riprova.'
         } else if (res.status === 503) {
           message =
-            'Il modulo non è disponibile in questo momento. Scrivi direttamente a ahsenkurtoski@financier.com.'
+            'Il modulo non è disponibile in questo momento. Scrivi a ahsenkurtoski@financier.com oppure su WhatsApp +39 331 205 3485'
         }
         setError(message)
         setStatus('error')
@@ -60,7 +60,7 @@ export default function ContactForm() {
       setStatus('success')
     } catch {
       setError(
-        'Errore di rete. Controlla la connessione o scrivi direttamente a ahsenkurtoski@financier.com.'
+        'Errore di rete. Controlla la connessione o scrivi a ahsenkurtoski@financier.com oppure su WhatsApp +39 331 205 3485'
       )
       setStatus('error')
     }
