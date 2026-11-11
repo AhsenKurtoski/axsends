@@ -93,13 +93,7 @@ export default function ContactForm() {
           </button>
         </div>
       ) : (
-        <form
-          onSubmit={handleSubmit}
-          action='mailto:ahsenkurtoski@financier.com'
-          method='post'
-          encType='text/plain'
-          className='space-y-3.5'
-        >
+        <form onSubmit={handleSubmit} className='space-y-3.5'>
           <div className='grid gap-3 sm:grid-cols-2'>
             <label className={labelClass}>
               Nome e cognome *
