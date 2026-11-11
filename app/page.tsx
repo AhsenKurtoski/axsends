@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ContactForm from '@/components/ContactForm'
 import {
   ArrowRight,
   BarChart3,
@@ -302,7 +303,7 @@ export default function HomePage() {
       </section>
 
       <section id='collaborazioni' className='glass border border-brand/20 p-7'>
-        <div className='flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between'>
+        <div className='grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:items-start'>
           <div>
             <p className='text-[11px] font-medium uppercase tracking-[0.18em] text-brand'>Collaborazioni</p>
             <h2 className='mt-1 text-xl font-semibold'>Web app, AI e automazioni per organizzazioni</h2>
@@ -310,27 +311,36 @@ export default function HomePage() {
               Lavoriamo con istituzioni, PMI e team di innovazione su siti, web app, UI/UX, integrazioni AI e
               automazioni. Raccontaci il progetto: prepariamo una proposta concreta e un demo tecnico.
             </p>
-            <p className='mt-2 text-xs text-white/40'>
-              Contatto diretto:{' '}
-              <a href={CONTACT_HREF} className='text-brand underline-offset-2 hover:underline'>
-                {CONTACT_EMAIL}
+            <ul className='mt-4 space-y-2 text-xs text-white/55'>
+              <li className='flex gap-2'>
+                <CheckCircle2 size={14} className='mt-0.5 shrink-0 text-emerald-400' /> Web app e portali su misura
+              </li>
+              <li className='flex gap-2'>
+                <CheckCircle2 size={14} className='mt-0.5 shrink-0 text-emerald-400' /> UI/UX e accessibilità da valutare insieme
+              </li>
+              <li className='flex gap-2'>
+                <CheckCircle2 size={14} className='mt-0.5 shrink-0 text-emerald-400' /> Integrazioni AI, API e automazioni
+              </li>
+              <li className='flex gap-2'>
+                <CheckCircle2 size={14} className='mt-0.5 shrink-0 text-emerald-400' /> Documentazione e passaggio di consegne
+              </li>
+            </ul>
+            <div className='mt-5 space-y-3'>
+              <p className='text-xs text-white/40'>
+                Preferisci l’email?{' '}
+                <a href={CONTACT_HREF} className='inline-flex items-center gap-1 text-brand underline-offset-2 hover:underline'>
+                  <Mail size={12} /> {CONTACT_EMAIL}
+                </a>
+              </p>
+              <a
+                href='/en'
+                className='inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-xs font-medium text-white/80 transition hover:bg-white/5'
+              >
+                <Globe size={14} /> English presentation
               </a>
-            </p>
+            </div>
           </div>
-          <div className='flex shrink-0 flex-col gap-2 sm:flex-row'>
-            <a
-              href={CONTACT_HREF}
-              className='inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-dark'
-            >
-              <Mail size={15} /> Scrivici
-            </a>
-            <a
-              href='/en'
-              className='inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/5'
-            >
-              <Globe size={15} /> English presentation
-            </a>
-          </div>
+          <ContactForm />
         </div>
       </section>
 

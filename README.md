@@ -82,6 +82,8 @@ Film di lancio, teaser verticale, otto schermate reali, poster e press kit compl
 
 **Collaborazioni:** [ahsenkurtoski@financier.com](mailto:ahsenkurtoski@financier.com?subject=Collaborazione%20istituzionale%20%E2%80%94%20AhsenDS)
 
+**Modulo contatti:** attivo sulla landing italiana e su `/en`. Le richieste vengono validate, limitate a 5 invii al minuto e salvate in **Supabase > Table Editor > `settings`**, con chiave `contact_request:<uuid>`. Non serve creare una nuova tabella.
+
 | Asset | Formato | File |
 |---|---|---|
 | Launch film | MP4 · 1920×1080 · 44 s | [Guarda / scarica](assets/launch/video/ahsends-launch-16x9.mp4) |
@@ -179,6 +181,7 @@ I modelli predefiniti sono allineati ai cataloghi attuali — GPT-OSS 120B per G
 | `/api/generate-ad` | POST | Script storyboard, copy persuasivo e prompt creativo |
 | `/api/generate-video` | POST | Fotogrammi verticali pubblicitari via Hugging Face |
 | `/api/website` | POST | Generazione sito web e landing page completa |
+| `/api/contact` | POST | Modulo contatti pubblico: validazione, honeypot, rate limit 5/min e salvataggio in Supabase (`settings`) |
 | `/api/tiktok` | POST | Pubblicazione video su TikTok |
 | `/api/youtube` | POST | Caricamento video Shorts su YouTube |
 | `/api/products` | GET | Catalogo prodotti (richiede sessione) |

@@ -14,6 +14,8 @@ function isPublicPath(pathname: string): boolean {
   if (pathname === '/login' || pathname.startsWith('/login/')) return true
   if (pathname === '/launch' || pathname.startsWith('/launch/')) return true
   if (pathname === '/api/health' || pathname === '/api/monitor') return true
+  // Modulo contatti pubblico: l'endpoint valida input, origine e rate limit.
+  if (pathname === '/api/contact') return true
   return false
 }
 

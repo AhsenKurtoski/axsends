@@ -69,6 +69,8 @@ export const rateLimitConfigs = {
   import: rateLimit({ windowMs: 60_000, maxRequests: 10 }),
   // Login/registrazione: 5 richieste al minuto
   auth: rateLimit({ windowMs: 60_000, maxRequests: 5 }),
+  // Modulo contatti pubblico: 5 invii al minuto per IP
+  contact: rateLimit({ windowMs: 60_000, maxRequests: 5 }),
 }
 
 // Helper: applica un limiter e restituisci la risposta 429 oppure null
