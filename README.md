@@ -78,7 +78,9 @@ AhsenDS (Ahsen Dropshipping System) nasce per ridurre la frammentazione e il lav
 
 Film di lancio, teaser verticale, otto schermate reali, poster e press kit completo. La pagina pubblica è **`/launch`**.
 
-**Live:** [App completa su Vercel](https://axsends.vercel.app) · [Launch Kit](https://axsends.vercel.app/launch) · [Mirror statico Cloudflare](https://site-03f75a10e2254b60a2b392f043f61d49.freebuff.page/launch)
+**Live:** [App completa su Vercel](https://axsends.vercel.app) · [Launch Kit](https://axsends.vercel.app/launch) · [English presentation](https://axsends.vercel.app/en) · [Mirror statico Cloudflare](https://site-03f75a10e2254b60a2b392f043f61d49.freebuff.page/launch)
+
+**Collaborazioni:** [ahsenkurtoski@financier.com](mailto:ahsenkurtoski@financier.com?subject=Collaborazione%20istituzionale%20%E2%80%94%20AhsenDS)
 
 | Asset | Formato | File |
 |---|---|---|

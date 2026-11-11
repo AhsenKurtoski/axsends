@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LineChart,
   ListChecks,
+  Mail,
   Megaphone,
   Package,
   Radar,
@@ -133,6 +134,9 @@ const STATS = [
   { value: '3', label: 'provider AI' },
   { value: 'MIT', label: 'licenza, uso libero' },
 ]
+
+const CONTACT_EMAIL = 'ahsenkurtoski@financier.com'
+const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Collaborazione istituzionale — AhsenDS')}`
 
 export default function HomePage() {
   return (
@@ -295,6 +299,39 @@ export default function HomePage() {
           rispondere con un errore temporaneo (lo vedi in Diagnostica) o chiedere un piano a pagamento.
           Nessun guadagno è garantito: il software automatizza il lavoro, non i risultati.
         </p>
+      </section>
+
+      <section id='collaborazioni' className='glass border border-brand/20 p-7'>
+        <div className='flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between'>
+          <div>
+            <p className='text-[11px] font-medium uppercase tracking-[0.18em] text-brand'>Collaborazioni</p>
+            <h2 className='mt-1 text-xl font-semibold'>Web app, AI e automazioni per organizzazioni</h2>
+            <p className='mt-2 max-w-2xl text-sm leading-relaxed text-white/60'>
+              Lavoriamo con istituzioni, PMI e team di innovazione su siti, web app, UI/UX, integrazioni AI e
+              automazioni. Raccontaci il progetto: prepariamo una proposta concreta e un demo tecnico.
+            </p>
+            <p className='mt-2 text-xs text-white/40'>
+              Contatto diretto:{' '}
+              <a href={CONTACT_HREF} className='text-brand underline-offset-2 hover:underline'>
+                {CONTACT_EMAIL}
+              </a>
+            </p>
+          </div>
+          <div className='flex shrink-0 flex-col gap-2 sm:flex-row'>
+            <a
+              href={CONTACT_HREF}
+              className='inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-dark'
+            >
+              <Mail size={15} /> Scrivici
+            </a>
+            <a
+              href='/en'
+              className='inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium text-white/80 transition hover:bg-white/5'
+            >
+              <Globe size={15} /> English presentation
+            </a>
+          </div>
+        </div>
       </section>
 
       <section className='space-y-3'>

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AhsenDS — Digital systems, AI and automation | Institutional presentation</title>
+  <meta name="description" content="AhsenDS is a live web application for product discovery, AI content, automation and e-commerce operations. A technical demo and collaboration proposal for organisations and public-sector teams." />
+  <meta name="theme-color" content="#070b12" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://axsends.vercel.app/en" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AhsenDS" />
+  <meta property="og:title" content="AhsenDS — Digital systems, AI and automation" />
+  <meta property="og:description" content="A live web application and technical demo for web apps, AI integration, UI/UX and workflow automation." />
+  <meta property="og:url" content="https://axsends.vercel.app/en" />
+  <meta property="og:image" content="https://axsends.vercel.app/launch/kit/screens/01-landing.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AhsenDS — Digital systems, AI and automation" />
+  <meta name="twitter:description" content="A live web application and technical demo for web apps, AI integration, UI/UX and workflow automation." />
+  <meta name="twitter:image" content="https://axsends.vercel.app/launch/kit/screens/01-landing.png" />
+  <style>
+    :root {
+      --bg: #070b12;
+      --panel: #0d1420;
+      --panel-2: #101a29;
+      --line: rgba(255,255,255,.09);
+      --line-strong: rgba(255,255,255,.16);
+      --text: #f4f7fb;
+      --muted: #9aa7b8;
+      --brand: #34d399;
+      --brand-2: #22d3ee;
+      --amber: #fbbf24;
+      --radius: 18px;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(900px 500px at 12% -10%, rgba(52,211,153,.16), transparent 60%),
+        radial-gradient(800px 450px at 100% 0%, rgba(34,211,238,.12), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap { width: min(calc(100% - 40px), var(--max)); margin: 0 auto; }
+    .nav {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(16px);
+      background: rgba(7,11,18,.78);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; text-decoration: none; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #04120d; font-weight: 900; }
+    .brand small { display: block; color: var(--muted); font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+    .nav-links { display: flex; align-items: center; gap: 18px; font-size: 12px; color: var(--muted); }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px 12px; color: var(--text) !important; }
+    .hero { padding: 86px 0 54px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(52,211,153,.28); background: rgba(52,211,153,.08); color: #a7f3d0; border-radius: 999px; padding: 6px 11px; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 4px rgba(52,211,153,.12); }
+    h1 { margin: 20px 0 0; font-size: clamp(38px, 5.6vw, 68px); line-height: 1.02; letter-spacing: -.045em; font-weight: 720; }
+    h1 span { color: var(--brand); }
+    .lead { color: var(--muted); font-size: 17px; max-width: 620px; margin: 20px 0 0; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 11px; border: 1px solid var(--line-strong); font-size: 13px; font-weight: 650; text-decoration: none; transition: transform .15s ease, background .15s ease, border-color .15s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--brand); border-color: var(--brand); color: #04120d; }
+    .btn-primary:hover { background: #6ee7b7; }
+    .btn-ghost:hover { background: rgba(255,255,255,.05); }
+    .hero-note { color: #7f8b9b; font-size: 11px; margin: 14px 0 0; }
+    .hero-card { position: relative; }
+    .hero-card:before { content: ""; position: absolute; inset: -1px; border-radius: calc(var(--radius) + 2px); background: linear-gradient(135deg, rgba(52,211,153,.55), rgba(34,211,238,.18), transparent 65%); z-index: -1; }
+    .shot { display: block; width: 100%; border-radius: var(--radius); border: 1px solid var(--line-strong); box-shadow: 0 30px 80px rgba(0,0,0,.42); background: var(--panel); }
+    .caption { display: flex; justify-content: space-between; gap: 12px; color: #7f8b9b; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; margin-top: 10px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--line); }
+    .stat { background: rgba(13,20,32,.86); padding: 20px; }
+    .stat b { display: block; font-size: 24px; letter-spacing: -.03em; }
+    .stat span { color: var(--muted); font-size: 11px; }
+    section { padding: 74px 0; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+    .kicker { color: var(--brand); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    h2 { margin: 6px 0 0; font-size: clamp(26px, 3vw, 38px); line-height: 1.1; letter-spacing: -.035em; }
+    .section-head p { max-width: 520px; color: var(--muted); font-size: 13px; margin: 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { background: linear-gradient(180deg, rgba(16,26,41,.92), rgba(13,20,32,.92)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+    .card .num { color: #5eead4; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
+    .card h3 { margin: 12px 0 7px; font-size: 16px; letter-spacing: -.01em; }
+    .card p { margin: 0; color: var(--muted); font-size: 13px; }
+    .proof { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; }
+    .proof-list { display: grid; gap: 12px; }
+    .proof-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .proof-item:last-child { border-bottom: 0; }
+    .check { width: 22px; height: 22px; flex: 0 0 auto; border-radius: 7px; display: grid; place-items: center; background: rgba(52,211,153,.12); color: var(--brand); font-size: 12px; font-weight: 800; }
+    .proof-item b { display: block; font-size: 13px; }
+    .proof-item span { display: block; color: var(--muted); font-size: 12px; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .step { border-left: 1px solid var(--line-strong); padding: 4px 0 4px 18px; }
+    .step b { display: block; color: var(--brand); font-size: 11px; letter-spacing: .1em; }
+    .step h3 { margin: 8px 0 5px; font-size: 14px; }
+    .step p { margin: 0; color: var(--muted); font-size: 12px; }
+    .notice { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; align-items: start; border: 1px solid rgba(251,191,36,.22); background: rgba(251,191,36,.05); border-radius: var(--radius); padding: 24px; }
+    .notice h2 { font-size: 24px; }
+    .notice p { color: #c9b98f; font-size: 13px; margin: 10px 0 0; }
+    .notice ul { margin: 0; padding-left: 18px; color: #c9b98f; font-size: 12px; }
+    .notice li + li { margin-top: 7px; }
+    .contact { display: flex; justify-content: space-between; align-items: center; gap: 28px; border: 1px solid rgba(52,211,153,.28); background: linear-gradient(110deg, rgba(52,211,153,.11), rgba(34,211,238,.05) 55%, transparent); border-radius: var(--radius); padding: 30px; }
+    .contact h2 { font-size: 27px; }
+    .contact p { color: var(--muted); font-size: 13px; margin: 8px 0 0; max-width: 620px; }
+    .contact-actions { display: flex; flex-wrap: wrap; gap: 9px; flex: 0 0 auto; }
+    .email { color: #a7f3d0; text-decoration: none; border-bottom: 1px solid rgba(167,243,208,.3); }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 36px; color: #7f8b9b; font-size: 11px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
+    .footer-links a { text-decoration: none; }
+    .footer-links a:hover { color: var(--text); }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 58px; }
+      .proof { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .notice { grid-template-columns: 1fr; }
+      .contact { flex-direction: column; align-items: flex-start; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+    @media (max-width: 620px) {
+      .wrap { width: min(calc(100% - 28px), var(--max)); }
+      .hero { padding: 46px 0 34px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .grid-3, .steps { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 10px; }
+      .contact { padding: 22px; }
+    }
+    @media print {
+      body { background: #fff; color: #111; }
+      .nav, .actions, .hero-card, .contact-actions { display: none; }
+      .card, .notice, .contact { background: #fff; border-color: #ddd; }
+      .muted, .lead, .card p, .proof-item span, .step p, .notice p, .notice ul, .contact p { color: #333; }
+      section { padding: 26px 0; }
+      h1 span, .kicker, .card .num, .step b { color: #047857; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/en" aria-label="AhsenDS English presentation">
+        <span class="brand-mark">A</span>
+        <span>AhsenDS<small>Built by Ahsen Kurtoski</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#capabilities">Capabilities</a>
+        <a href="#proof">Live proof</a>
+        <a href="#collaboration">Collaboration</a>
+        <a class="nav-cta" href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <span class="eyebrow"><span class="dot"></span> Working prototype · Open source (MIT)</span>
+          <h1 id="hero-title">Digital systems that <span>work in the real world.</span></h1>
+          <p class="lead">
+            AhsenDS is a live web application built around a simple idea: useful software should show its
+            real state, connect to real services and automate work without inventing results.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://axsends.vercel.app/app">Open the live product <span aria-hidden="true">↗</span></a>
+            <a class="btn btn-ghost" href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20demo%20request%20%E2%80%94%20AhsenDS">Request a technical demo</a>
+          </div>
+          <p class="hero-note">Login required for the private dashboard · The product is in Italian; this page is the English overview.</p>
+        </div>
+        <div class="hero-card">
+          <img class="shot" src="/launch/kit/screens/01-landing.png" width="1920" height="1080" alt="AhsenDS live product landing page" />
+          <div class="caption"><span>Live product · 2026</span><span>Web app / AI / automation</span></div>
+        </div>
+      </section>
+
+      <div class="stats" aria-label="Product facts">
+        <div class="stat"><b>24</b><span>dashboard modules</span></div>
+        <div class="stat"><b>6</b><span>connected services</span></div>
+        <div class="stat"><b>3</b><span>AI providers</span></div>
+        <div class="stat"><b>MIT</b><span>open-source licence</span></div>
+      </div>
+
+      <section id="capabilities" aria-labelledby="capabilities-title">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Capabilities</div>
+            <h2 id="capabilities-title">What we can build together</h2>
+          </div>
+          <p>From a focused prototype to an integrated service: we can scope the work around a real public-sector or business need.</p>
+        </div>
+        <div class="grid-3">
+          <article class="card"><div class="num">01</div><h3>Web applications</h3><p>Next.js and TypeScript products with authentication, dashboards, role-aware data and a clear operational UI.</p></article>
+          <article class="card"><div class="num">02</div><h3>UI / UX</h3><p>Interfaces designed for real workflows: information hierarchy, empty states, error handling and mobile support.</p></article>
+          <article class="card"><div class="num">03</div><h3>AI integration</h3><p>Provider-agnostic text and image generation with fallback chains, explicit failures and no fake content.</p></article>
+          <article class="card"><div class="num">04</div><h3>Workflow automation</h3><p>APIs, scheduled jobs, queues and integrations that remove repeated work while keeping humans in control.</p></article>
+          <article class="card"><div class="num">05</div><h3>Commerce infrastructure</h3><p>Product catalogues, supplier data, orders, pricing rules and operational analytics in one environment.</p></article>
+          <article class="card"><div class="num">06</div><h3>Handover & training</h3><p>Documentation, environment setup and technical training so the team can operate and evolve the system.</p></article>
+        </div>
+      </section>
+
+      <section id="proof" aria-labelledby="proof-title">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Live proof</div>
+            <h2 id="proof-title">Not a slide deck.</h2>
+          </div>
+          <p>The current build is online and connected. The health page reports the real state of each integration.</p>
+        </div>
+        <div class="proof">
+          <a href="https://axsends.vercel.app/launch" aria-label="Open the AhsenDS launch kit">
+            <img class="shot" src="/launch/kit/screens/02-dashboard.png" width="1920" height="1080" alt="AhsenDS live dashboard" loading="lazy" />
+          </a>
+          <div class="proof-list">
+            <div class="proof-item"><span class="check">✓</span><div><b>Live application</b><span>Public site, authenticated dashboard and a documented launch kit.</span></div></div>
+            <div class="proof-item"><span class="check">✓</span><div><b>Real integrations</b><span>Supabase, CJ Dropshipping, Groq, OpenRouter, Gemini and Hugging Face.</span></div></div>
+            <div class="proof-item"><span class="check">✓</span><div><b>Explicit failure states</b><span>If a key or service is missing, the product says so instead of generating placeholder data.</span></div></div>
+            <div class="proof-item"><span class="check">✓</span><div><b>Open source</b><span>The code is available under the MIT licence and can be inspected or self-hosted.</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="collaboration" aria-labelledby="collaboration-title">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Collaboration</div>
+            <h2 id="collaboration-title">A practical way to start</h2>
+          </div>
+          <p>A short discovery phase is usually enough to decide whether there is a useful pilot.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><b>01</b><h3>Discovery</h3><p>A focused conversation about the problem, users, constraints and success criteria.</p></div>
+          <div class="step"><b>02</b><h3>Prototype</h3><p>A small, testable slice of the product with real data flows and a clear demo.</p></div>
+          <div class="step"><b>03</b><h3>Integration</h3><p>Authentication, database, APIs and automation connected to the institution's environment.</p></div>
+          <div class="step"><b>04</b><h3>Handover</h3><p>Documentation, training and a maintainable codebase, with no lock-in.</p></div>
+        </div>
+      </section>
+
+      <section aria-label="Current status and transparency">
+        <div class="notice">
+          <div>
+            <div class="kicker" style="color: var(--amber);">Current status</div>
+            <h2>Transparent by design.</h2>
+            <p>This is a working prototype, not a certified public-administration platform. We prefer to state the boundary clearly before a technical evaluation.</p>
+          </div>
+          <ul>
+            <li>The core app, database and AI providers are live.</li>
+            <li>Optional social publishing needs each platform's approval and credentials.</li>
+            <li>Security, privacy, accessibility and procurement requirements can be scoped with your team.</li>
+            <li>No user numbers or government references are claimed without verification.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="contact-title" style="padding-top: 20px;">
+        <div class="contact">
+          <div>
+            <div class="kicker">Next step</div>
+            <h2 id="contact-title">Bring a real problem. We will bring a working demo.</h2>
+            <p>For institutional collaborations, technical pilots or a short product walkthrough, write directly to <a class="email" href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">ahsenkurtoski@financier.com</a>.</p>
+          </div>
+          <div class="contact-actions">
+            <a class="btn btn-primary" href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">Start a conversation</a>
+            <a class="btn btn-ghost" href="https://axsends.vercel.app/launch">View launch kit</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div>AhsenDS · Independent product built by Ahsen Kurtoski · <a href="https://axsends.vercel.app/">Italian site</a></div>
+      <div class="footer-links">
+        <a href="https://axsends.vercel.app/app">Live product</a>
+        <a href="https://axsends.vercel.app/launch">Launch kit</a>
+        <a href="https://github.com/AhsenKurtoski/axsends" rel="noopener">GitHub</a>
+        <a href="mailto:ahsenkurtoski@financier.com?subject=Institutional%20collaboration%20%E2%80%94%20AhsenDS">Email</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
