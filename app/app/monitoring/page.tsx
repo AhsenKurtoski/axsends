@@ -26,7 +26,7 @@ export default function MonitoringPage() {
       </header>
       <div className='glass p-5'>
         <div className='mb-4 flex items-center gap-2 text-sm text-white/60'>
-          <Activity size={16} className='text-brand' /> Controllo automatico ogni 6 ore
+          <Activity size={16} className='text-brand' /> Controllo automatico giornaliero
         </div>
         {loading ? (
           <p className='py-10 text-center text-sm text-white/40'>Caricamento...</p>

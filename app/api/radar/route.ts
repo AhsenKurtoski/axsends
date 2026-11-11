@@ -5,7 +5,7 @@ import { BaseProduct, MARKUP, scoreProduct } from '@/lib/products'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-// Nicchie scansionate automaticamente dal radar
+// Nicchie scansionate dal radar su richiesta
 const NICHES = ['kitchen gadget', 'fitness', 'pet', 'beauty tool', 'home decor', 'phone accessory']
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -54,7 +54,7 @@ export async function GET() {
     scannedAt: new Date().toISOString(),
     niches: NICHES,
     count: top.length,
-    note: 'Radar: scansione automatica multi-nicchia su CJ Dropshipping.',
+    note: 'Radar: scansione multi-nicchia su richiesta.',
     products: top,
   })
 }

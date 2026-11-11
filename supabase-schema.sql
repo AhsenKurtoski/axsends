@@ -60,7 +60,7 @@ create table if not exists suppliers (
   created_at timestamptz default now()
 );
 
--- ---------- STORICO PREZZI/STOCK (monitoraggio ogni 6 ore) ----------
+-- ---------- STORICO PREZZI/STOCK (monitoraggio giornaliero) ----------
 create table if not exists price_history (
   id bigint generated always as identity primary key,
   product_id text,

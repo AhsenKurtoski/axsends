@@ -20,10 +20,10 @@ Tecnologie: **Next.js 14 (App Router) + TypeScript + Tailwind CSS + Supabase**, 
 
 ## ✨ Funzionalità Principali
 
-- 📡 **Radar prodotti vincenti** — Scansione automatica multi-nicchia su CJ Dropshipping con cron giornaliero.
+- 📡 **Radar prodotti vincenti** — Scansione multi-nicchia su richiesta su CJ Dropshipping; il cron giornaliero copre il monitoraggio prezzi/stock.
 - 🚀 **Ricerca prodotti con AI Scoring** — Algoritmo proprietario che calcola un punteggio di potenziale da 0 a 100.
 - 📈 **Trend virali** — Monitoraggio delle categorie ed elementi ad alta richiesta.
-- ⚡ **Centro automazioni (47+ automazioni)** — Attivazione e gestione flussi con un clic.
+- ⚡ **Catalogo automazioni (47+ voci)** — Stato reale dei servizi richiesti e preferenze salvate in locale.
 - 🏷️ **Regole di prezzo dinamiche** — Markup intelligente, margine minimo protetto, arrotondamento psicologico a .99.
 - 📝 **Copywriting & Schede Prodotto AI** — Generazione testi SEO persuasivi senza template fissi.
 - 🎬 **AI Ads Generator** — Script, storyboard scena per scena, copy ad alta conversione, fotogrammi AI (Hugging Face).

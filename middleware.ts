@@ -9,11 +9,12 @@ type CookieToSet = { name: string; value: string; options?: CookieOptions }
 // Percorsi sempre accessibili senza sessione.
 // /api/monitor e' richiamato dal cron di Vercel, che non ha cookie utente:
 // l'endpoint si protegge da solo con CRON_SECRET (o con una sessione valida).
-const PUBLIC_PATHS = ['/login', '/api/health', '/api/monitor', '/launch']
-
 function isPublicPath(pathname: string): boolean {
   if (pathname === '/') return true
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  if (pathname === '/login' || pathname.startsWith('/login/')) return true
+  if (pathname === '/launch' || pathname.startsWith('/launch/')) return true
+  if (pathname === '/api/health' || pathname === '/api/monitor') return true
+  return false
 }
 
 export async function middleware(req: NextRequest) {
@@ -27,6 +28,14 @@ export async function middleware(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname
   if (isPublicPath(pathname)) {
+    return NextResponse.next()
+  }
+
+  // Proteggi solo la dashboard e le API private. Le URL sconosciute devono
+  // arrivare al 404 di Next, non essere redirette al login.
+  const isDashboard = pathname === '/app' || pathname.startsWith('/app/')
+  const isPrivateApi = pathname.startsWith('/api/')
+  if (!isDashboard && !isPrivateApi) {
     return NextResponse.next()
   }
 

@@ -87,7 +87,7 @@ const GROUPS: Group[] = [
       { icon: Truck, title: 'Fornitori', desc: 'Anagrafica fornitori con paese, rating e tempi di spedizione.' },
       { icon: Tag, title: 'Regole di prezzo', desc: 'Markup, margine minimo e arrotondamento .99 con anteprima in tempo reale.' },
       { icon: BarChart3, title: 'Analytics', desc: 'Ricavi, margine medio, prodotti e andamento per data.' },
-      { icon: Zap, title: 'Monitoraggio 6 ore', desc: 'Cron che registra prezzi e stock e segnala quando un prodotto sta finendo.' },
+      { icon: Zap, title: 'Monitoraggio giornaliero', desc: 'Cron che registra prezzi e stock e segnala quando un prodotto sta finendo.' },
       { icon: ShieldCheck, title: 'Diagnostica', desc: 'Stato reale di ogni chiave, con verifica delle tabelle e istruzioni di riparazione.' },
     ],
   },

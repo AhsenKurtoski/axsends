@@ -6,13 +6,13 @@ import { Zap } from 'lucide-react'
 type Auto = { id: string; label: string; desc: string; status: string }
 
 const AUTOMATIONS: Auto[] = [
-  { id: 'radar', label: 'Radar prodotti vincenti', desc: 'Scansione automatica multi-nicchia ogni giorno', status: 'Attivo' },
+  { id: 'radar', label: 'Radar prodotti vincenti', desc: 'Scansione multi-nicchia su richiesta', status: 'Su richiesta' },
   { id: 'scoring', label: 'Punteggio potenziale', desc: 'Calcolo automatico 0-100 per ogni prodotto', status: 'Attivo' },
   { id: 'autoprice', label: 'Auto-prezzo', desc: 'Markup e margine minimo applicati agli import', status: 'Attivo' },
   { id: 'round99', label: 'Arrotondamento .99', desc: 'Prezzi psicologici automatici', status: 'Attivo' },
   { id: 'competitor', label: 'Analisi competitor', desc: 'Stima fascia prezzi dei concorrenti', status: 'Attivo' },
   { id: 'trends', label: 'Trend virali', desc: 'Classifica automatica per domanda', status: 'Attivo' },
-  { id: 'monitor', label: 'Monitoraggio prezzi', desc: 'Controllo automatico ogni 6 ore (cron)', status: 'Attivo' },
+  { id: 'monitor', label: 'Monitoraggio prezzi', desc: 'Controllo automatico giornaliero (cron)', status: 'Attivo' },
   { id: 'besttime', label: 'Orari migliori per postare', desc: 'Suggerisce le fasce orarie con piu engagement', status: 'Attivo' },
   { id: 'desc', label: 'Descrizione + SEO AI', desc: 'Schede prodotto scritte dall AI, niente template', status: 'Richiede AI' },
   { id: 'caption', label: 'Caption + hashtag AI', desc: 'Testi social generati dall AI per ogni ad', status: 'Richiede AI' },
@@ -94,16 +94,21 @@ export default function AutomationPage() {
       <header className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
         <div>
           <h1 className='flex items-center gap-2 text-2xl font-semibold'>
-            <Zap className='text-brand' size={22} /> Centro automazioni AhsenDS
+            <Zap className='text-brand' size={22} /> Catalogo automazioni AhsenDS
           </h1>
           <p className='text-sm text-white/50'>
-            {activeCount} di {AUTOMATIONS.length} automazioni attive{saved ? ' - salvato' : ''} &bull; Costruito da Ahsen Kurtoski
+            {activeCount} di {AUTOMATIONS.length} preferenze attive{saved ? ' - salvato' : ''} &bull; Catalogo operativo
           </p>
         </div>
         <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
           <span>Costruito da <strong className='text-white'>Ahsen Kurtoski</strong></span>
         </div>
       </header>
+
+      <div className='rounded-xl border border-brand/20 bg-brand/5 p-4 text-xs leading-relaxed text-white/60'>
+        <strong className='text-white/80'>Nota trasparente:</strong> i toggle salvano la preferenza su questo browser. Le voci
+        &quot;Richiede...&quot; si attivano configurando il servizio indicato e non sono processi backend già in esecuzione.
+      </div>
 
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         {AUTOMATIONS.map((a) => {

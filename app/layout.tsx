@@ -4,11 +4,34 @@ import Sidebar from '@/components/Sidebar'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://axsends.vercel.app'),
   title: 'AhsenDS — Dropshipping Automation | Costruito da Ahsen Kurtoski',
   description: 'Piattaforma avanzata di automazione dropshipping, AI copy, video ads e web studio costruita da Ahsen Kurtoski.',
   authors: [{ name: 'Ahsen Kurtoski' }],
   creator: 'Ahsen Kurtoski',
   publisher: 'Ahsen Kurtoski',
+  openGraph: {
+    type: 'website',
+    locale: 'it_IT',
+    url: '/',
+    siteName: 'AhsenDS',
+    title: 'AhsenDS — Dropshipping Automation',
+    description: 'Prodotti reali, AI, ads, landing e automazioni in un’unica piattaforma self-hosted.',
+    images: [
+      {
+        url: '/launch/kit/screens/01-landing.png',
+        width: 1920,
+        height: 1080,
+        alt: 'AhsenDS — dashboard e landing',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AhsenDS — Dropshipping Automation',
+    description: 'Prodotti reali, AI, ads, landing e automazioni in un’unica piattaforma self-hosted.',
+    images: ['/launch/kit/screens/01-landing.png'],
+  },
 }
 
 export default function RootLayout({
