@@ -6,6 +6,7 @@ import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
 import { searchCjProducts } from '@/lib/cj'
 import { rateLimitConfigs } from '@/lib/rateLimit'
 import { hfConfigured, hfImageModel } from '@/lib/hf'
+import { contactNotifyFrom, contactNotifyTo, emailNotificationsConfigured } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 45
@@ -217,6 +218,30 @@ async function checkInstagram(): Promise<HealthService> {
   }
 }
 
+function checkEmailNotifications(): HealthService {
+  const base = {
+    id: 'email',
+    name: 'Email notifiche',
+    group: 'Infrastruttura',
+    powers: 'Notifica al proprietario per ogni nuova richiesta dal modulo contatti',
+    fix: { env: ['SENDGRID_API_KEY', 'CONTACT_NOTIFY_TO', 'CONTACT_NOTIFY_FROM'] },
+  }
+  if (!emailNotificationsConfigured()) {
+    return {
+      ...base,
+      status: 'missing',
+      message:
+        'Manca SENDGRID_API_KEY: le richieste restano salvate, ma non parte la notifica email. Configura SendGrid e verifica il Single Sender.',
+    }
+  }
+  return {
+    ...base,
+    status: 'configured',
+    message:
+      'Chiave presente. Mittente: ' + contactNotifyFrom() + ' · destinatario: ' + contactNotifyTo() + '. La verifica avviene al primo invio.',
+  }
+}
+
 function checkTikTok(): HealthService {
   const base = {
     id: 'tiktok',
@@ -255,6 +280,9 @@ const SYSTEM_ENV_KEYS = [
   'INSTAGRAM_ACCESS_TOKEN',
   'FACEBOOK_PAGE_ACCESS_TOKEN',
   'TIKTOK_ACCESS_TOKEN',
+  'SENDGRID_API_KEY',
+  'CONTACT_NOTIFY_TO',
+  'CONTACT_NOTIFY_FROM',
 ]
 
 function envFileInfo(): { exists: boolean; path: string; fromSystemEnv: boolean } {
@@ -287,6 +315,7 @@ export async function GET(req: NextRequest) {
     aiSvc('openrouter', 'OpenRouter', openrouter, ['OPENROUTER_API_KEY', 'OPENROUTER_MODEL']),
     aiSvc('gemini', 'Google Gemini', gemini, ['GEMINI_API_KEY', 'GEMINI_MODEL']),
     supabase,
+    checkEmailNotifications(),
     cj,
     hf,
     youtube,

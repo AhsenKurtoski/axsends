@@ -3,8 +3,10 @@ import { z } from 'zod'
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
 import { rateLimitConfigs } from '@/lib/rateLimit'
 import { validateBody } from '@/lib/validations'
+import { sendContactNotification } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 15
 
 // Modulo contatti pubblico. Le richieste sono salvate nella tabella settings
 // (chiave contact_request:<uuid>) tramite service role: nessuna nuova tabella
@@ -105,8 +107,29 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // La richiesta è già salvata: una notifica email fallita non deve perdere
+  // il contatto né mostrare un errore al visitatore. Lo stato resta visibile
+  // nella risposta e nei log server-side.
+  const notification = await sendContactNotification({
+    id,
+    name: data.name,
+    email: data.email,
+    organisation: data.organisation || null,
+    message: data.message,
+    locale: data.locale,
+    createdAt,
+  })
+
+  if (!notification.ok && !notification.skipped) {
+    console.error('[contact] notifica email non inviata (richiesta salvata)')
+  }
+
   return NextResponse.json(
-    { ok: true, id },
+    {
+      ok: true,
+      id,
+      email: notification.ok ? 'sent' : notification.skipped ? 'not_configured' : 'failed',
+    },
     { status: 201, headers: { 'Cache-Control': 'no-store' } }
   )
 }
