@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { recordAd, downloadBlob, rendererSupported } from '@/lib/adRender'
+import { recordAd, downloadBlob, rendererSupported, hasAudioTrack } from '@/lib/adRender'
 import { subtitleLines } from '@/lib/subtitles'
 import {
   Sparkles, Loader2, Film, Video, Send, Youtube, Instagram, Share2, Download, Copy, Check, Hash, FileText, Captions, Play, Pause,
@@ -98,7 +98,9 @@ function StoryboardPreview({
   const [time, setTime] = useState(0)
   const [recording, setRecording] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
   const [exportError, setExportError] = useState<string | null>(null)
+  const [exportNote, setExportNote] = useState<string | null>(null)
 
   const lastCueEnd = cues.length > 0 ? cues[cues.length - 1].end : 0
   const duration = Math.max(totalSeconds || 0, lastCueEnd, 1)
@@ -149,6 +151,7 @@ function StoryboardPreview({
   async function exportVideo() {
     if (recording) return
     setExportError(null)
+    setExportNote(null)
     const sources = (frames.length > 0 ? frames : cover ? [cover] : []).filter(Boolean) as string[]
     if (sources.length === 0) {
       setExportError('Genera prima la creativita dell ad: serve un immagine per il video.')
@@ -169,10 +172,21 @@ function StoryboardPreview({
         cues,
         images: sources,
         duration,
+        voice: { enabled: voiceEnabled, lang: 'it' },
         onProgress: setProgress,
       })
       const slug = (fileName || 'ahsends').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
       downloadBlob(rendered.blob, 'ad-' + (slug || 'ahsends') + '-sottotitoli.' + rendered.extension)
+
+      // Controllo onesto: dico se la voce c e davvero nel file, non solo se l ho chiesta.
+      if (voiceEnabled) {
+        const audioOk = rendered.hasAudio ? await hasAudioTrack(rendered.blob) : false
+        setExportNote(
+          audioOk
+            ? 'Video ' + rendered.videoWidth + 'x' + rendered.videoHeight + ' salvato con voiceover: la voce parte insieme a ogni sottotitolo.'
+            : 'Video salvato senza voce (' + (rendered.audioNote || 'traccia audio non rilevata') + '). I sottotitoli sono comunque presenti.'
+        )
+      }
     } catch (e) {
       setExportError('Non sono riuscito a creare il video: ' + String(e).slice(0, 120))
     } finally {
@@ -256,10 +270,19 @@ function StoryboardPreview({
           {recording ? <Loader2 size={13} className='animate-spin' /> : <Download size={13} />}
           {recording ? 'Registro l ad... ' + Math.round(progress * 100) + '%' : 'Scarica video completo con sottotitoli'}
         </button>
-        <span className='text-[11px] text-white/30'>{recording ? 'Tieni questa scheda aperta' : 'Durata ' + clock(duration) + ' - caption bruciate'}</span>
+        <label className='flex items-center gap-1.5 text-[11px] text-white/60'>
+          <input type='checkbox' checked={voiceEnabled} onChange={(e) => setVoiceEnabled(e.target.checked)} />
+          Voiceover TTS
+        </label>
+        <span className='text-[11px] text-white/30'>
+          {recording
+            ? 'Tieni questa scheda aperta'
+            : 'Durata ' + clock(duration) + ' - caption bruciate' + (voiceEnabled ? ' + voce' : '')}
+        </span>
       </div>
 
       {exportError ? <p className='text-[11px] text-amber-400'>{exportError}</p> : null}
+      {exportNote ? <p className='text-[11px] text-emerald-400/80'>{exportNote}</p> : null}
 
       <p className='text-[11px] text-white/40'>
         I sottotitoli seguono i tempi reali dell ad ({clock(duration)}), non la durata del clip AI: qui vedi esattamente quando
