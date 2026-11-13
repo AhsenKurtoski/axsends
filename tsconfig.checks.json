@@ -11,5 +11,5 @@
     "incremental": false,
     "skipLibCheck": true
   },
-  "include": ["lib/subtitles.ts", "lib/adkit.ts", "lib/adRender.ts"]
+  "include": ["lib/subtitles.ts", "lib/adkit.ts", "lib/adRender.ts", "lib/tts.ts"]
 }

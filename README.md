@@ -292,9 +292,56 @@ La pagina **AI Ads** produce un pacchetto pronto alla pubblicazione, non solo un
 
 - **Voiceover TTS gratuito**: la voce legge lo script e parte insieme a ogni sottotitolo (audio mixato sulla timeline, non un sottofondo), con normalizzazione morbida per evitare clipping. Si disattiva dal toggle accanto all'export. Il video dichiara se la voce e davvero nel file, non solo se e stata chiesta.
 
-La voce arriva da un endpoint pubblico di Google Translate (`/api/tts` fa da ponte, nessuna chiave e nessuna carta): e un endpoint non ufficiale, quindi se si ferma la route risponde con il motivo reale e il video viene esportato muto invece di rompersi.
+La voce arriva da `/api/tts`, che **non e legato a un singolo servizio**: e una catena di provider configurabile. Di default usa l'endpoint pubblico di Google Translate (nessuna chiave, nessuna carta); basta una variabile per passare a ElevenLabs, OpenAI o a un endpoint tuo, e se il provider scelto non risponde la catena passa al successivo invece di lasciare il video muto senza spiegazione. Se nessuno risponde, la route elenca il motivo di ognuno e il video viene esportato senza voce (non rotto).
 
-Il formato dei sottotitoli e protetto da controlli automatici: `npm run check:subtitles` compila i moduli veri e verifica che nessuna riga superi i 42 caratteri, che `maxLines` sia rispettato e che il testo dell'SRT coincida riga per riga con quello disegnato nel video. Il test esce con codice diverso da zero appena una regola si rompe, quindi puo essere usato in CI o come pre-commit.
+### Cambiare il provider voce
+
+Tutto si configura da env, in `lib/tts.ts` (la catena) e in `app/api/tts/route.ts` (la route).
+
+| Variabile | Valori | Default | A cosa serve |
+| --- | --- | --- | --- |
+| `TTS_PROVIDER` | `auto`, `google`, `elevenlabs`, `openai`, `custom` | `auto` | Con `auto` parte dal primo provider configurato; con un id lo forza in testa alla catena. Un valore sconosciuto torna a `auto`. |
+| `TTS_FALLBACK` | `1`, `0` | `1` | Con `0` usa solo il provider scelto: se fallisce non prova gli altri. |
+| `ELEVENLABS_API_KEY` | chiave | — | Attiva ElevenLabs. |
+| `ELEVENLABS_VOICE_ID` | id voce | `21m00Tcm4TlvDq8ikWAM` | Voce ElevenLabs. |
+| `ELEVENLABS_MODEL` | modello | `eleven_multilingual_v2` | Modello ElevenLabs. |
+| `OPENAI_API_KEY` | chiave | — | Attiva OpenAI (o qualsiasi API compatibile). |
+| `OPENAI_BASE_URL` | URL base | `https://api.openai.com/v1` | Per un endpoint compatibile OpenAI. |
+| `TTS_MODEL` / `TTS_VOICE` | modello / voce | `gpt-4o-mini-tts` / `alloy` | Solo per OpenAI. |
+| `TTS_CUSTOM_URL` | URL con `{text}` e `{lang}` | — | Il tuo endpoint: deve rispondere con `audio/*` (mp3, wav, ogg). |
+| `TTS_CUSTOM_API_KEY` | chiave | — | Inviata come `Authorization: Bearer ...`. Opzionale. |
+| `TTS_LANG` | codice lingua | `it` | Lingua della voce (anche via `?lang=`). |
+
+```bash
+# ElevenLabs (voce piu naturale, piano gratuito con crediti mensili)
+TTS_PROVIDER=elevenlabs
+ELEVENLABS_API_KEY=sk_...
+ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
+
+# OpenAI
+TTS_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+TTS_VOICE=nova
+
+# Endpoint tuo (Piper, XTTS, Coqui self-hosted, una Function, ...)
+TTS_PROVIDER=custom
+TTS_CUSTOM_URL=https://voce.example.com/speak?text={text}&lang={lang}
+TTS_CUSTOM_API_KEY=...   # opzionale
+```
+
+Ogni provider deve restituire un content-type `audio/*` e almeno 1 KB di dati: le risposte strane vengono scartate e si passa al provider successivo. Per vedere cosa sta usando l'app **senza generare audio** (nessuna chiamata esterna, nessun segreto mostrato) apri dal browser gia loggato:
+
+```js
+await (await fetch('/api/tts?info=1')).json()
+// { "requested": "auto", "fallback": true, "willUse": "google",
+//   "chain": ["google"], "providers": [{ "id": "google", "label": "...", "configured": true }, ...] }
+```
+
+La route sta dietro il login come le altre API (`/api/tts` risponde 401 senza sessione), quindi con `curl` serve il cookie di sessione.
+
+Lo stesso provider usato viene riportato nell'header `X-TTS-Provider` di ogni audio, quindi un export strano si diagnostica dal file stesso.
+
+Il formato dei sottotitoli e protetto da controlli automatici: `npm run check` compila i moduli veri e verifica che nessuna riga superi i 42 caratteri, che `maxLines` sia rispettato e che il testo dell'SRT coincida riga per riga con quello disegnato nel video; verifica anche la catena dei provider voce (ordine, forzatura con `TTS_PROVIDER`, `TTS_FALLBACK`, provider senza chiave) senza fare chiamate di rete. `npm run check:subtitles` esegue i soli controlli sui sottotitoli. Il test esce con codice diverso da zero appena una regola si rompe, quindi puo essere usato in CI o come pre-commit.
 
 Il clip gratuito dura 3 secondi perche la quota ZeroGPU e di 5 minuti al giorno: per un ad da 20 secondi monta il clip in loop con i fotogrammi e il file SRT (lo stesso flusso di uno studio, con strumenti gratuiti).
 
