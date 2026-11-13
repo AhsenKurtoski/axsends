@@ -341,7 +341,21 @@ La route sta dietro il login come le altre API (`/api/tts` risponde 401 senza se
 
 Lo stesso provider usato viene riportato nell'header `X-TTS-Provider` di ogni audio, quindi un export strano si diagnostica dal file stesso.
 
-Il formato dei sottotitoli e protetto da controlli automatici: `npm run check` compila i moduli veri e verifica che nessuna riga superi i 42 caratteri, che `maxLines` sia rispettato e che il testo dell'SRT coincida riga per riga con quello disegnato nel video; verifica anche la catena dei provider voce (ordine, forzatura con `TTS_PROVIDER`, `TTS_FALLBACK`, provider senza chiave) senza fare chiamate di rete. `npm run check:subtitles` esegue i soli controlli sui sottotitoli. Il test esce con codice diverso da zero appena una regola si rompe, quindi puo essere usato in CI o come pre-commit.
+Il formato dei sottotitoli e la scelta della voce sono protetti da controlli automatici: `npm run check` compila i moduli veri (non copie) ed esegue **23 test** in circa 0,2 secondi, senza chiavi e senza chiamate di rete. `npm run check:subtitles` esegue i soli controlli sui sottotitoli.
+
+| Gruppo | Cosa verifica | Test |
+| --- | --- | --- |
+| Sottotitoli | massimo 42 caratteri per riga, massimo 2 righe per cue, split bilanciato, clamp delle parole troppo lunghe con `...`, testo dell'SRT identico riga per riga a quello disegnato nel video, tempi allineati alle scene | 12 |
+| Provider voce | Google sempre in coda, provider configurato che passa avanti, ordine stabile con piu provider, `TTS_PROVIDER` che forza la testa della catena, `TTS_FALLBACK=0` che la chiude, id sconosciuto che torna a `auto`, stato `?info=1`, errore esplicito quando nessun provider e utilizzabile | 11 |
+
+I test compilano `lib/subtitles.ts`, `lib/adkit.ts`, `lib/adRender.ts` e `lib/tts.ts` con `tsconfig.checks.json` e importano il JavaScript prodotto: se un modulo non compila, il controllo fallisce prima ancora di eseguire i test. Il comando esce con codice diverso da zero appena una regola si rompe (verificato rompendo di proposito il limite a 42 caratteri: 5 test rossi, exit 1), quindi puo essere usato in CI o come pre-commit:
+
+```yaml
+# esempio di step CI
+- run: npm ci
+- run: npm run check
+- run: npm run build
+```
 
 Il clip gratuito dura 3 secondi perche la quota ZeroGPU e di 5 minuti al giorno: per un ad da 20 secondi monta il clip in loop con i fotogrammi e il file SRT (lo stesso flusso di uno studio, con strumenti gratuiti).
 
