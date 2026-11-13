@@ -15,7 +15,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check:subtitles": "tsc -p tsconfig.checks.json && node --test tests/subtitles.test.cjs",
+    "test": "npm run check:subtitles"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",

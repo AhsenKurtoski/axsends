@@ -18,3 +18,4 @@ next-env.d.ts
 assets/launch/video/vertical-frames/
 .sites/
 freebuff-sites-build/
+.checks-build/

@@ -290,6 +290,8 @@ La pagina **AI Ads** produce un pacchetto pronto alla pubblicazione, non solo un
 - **Video completo con sottotitoli bruciati**: dalla stessa scheda si scarica l'ad intera (720x1280, durata reale dello script, zoom lento per scena, vignettatura e caption disegnate ai tempi esatti del SRT). Formato MP4 H.264, con WebM come riserva se il browser non lo supporta.
 - **Video AI** generato con prompt da studio: ottica 35mm, key light + rim light, color grading, dolly-in lento, 9:16.
 
+Il formato dei sottotitoli e protetto da controlli automatici: `npm run check:subtitles` compila i moduli veri e verifica che nessuna riga superi i 42 caratteri, che `maxLines` sia rispettato e che il testo dell'SRT coincida riga per riga con quello disegnato nel video. Il test esce con codice diverso da zero appena una regola si rompe, quindi puo essere usato in CI o come pre-commit.
+
 Il clip gratuito dura 3 secondi perche la quota ZeroGPU e di 5 minuti al giorno: per un ad da 20 secondi monta il clip in loop con i fotogrammi e il file SRT (lo stesso flusso di uno studio, con strumenti gratuiti).
 
 Il video riusa l'immagine gia generata per l'ad: una sola generazione per tutto il pacchetto. Le immagini gratuite hanno un limite reale di **1 ogni 45 secondi per IP**, gestito dal codice con una coda che distanzia le richieste; con una pollen key gratuita (`POLLINATIONS_TOKEN`) il limite sparisce.

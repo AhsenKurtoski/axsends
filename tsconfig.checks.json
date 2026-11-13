@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".checks-build",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2020",
+    "declaration": false,
+    "sourceMap": false,
+    "incremental": false,
+    "skipLibCheck": true
+  },
+  "include": ["lib/subtitles.ts", "lib/adkit.ts", "lib/adRender.ts"]
+}

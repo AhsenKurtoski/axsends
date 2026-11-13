@@ -67,6 +67,13 @@ export async function loadImages(sources: string[], cache?: Map<string, HTMLImag
   return loaded.filter((img): img is HTMLImageElement => Boolean(img))
 }
 
+// Righe delle caption esattamente come vengono disegnate nel video (maiuscole
+// comprese). E' l'unico punto che le produce: i controlli automatici la usano
+// per verificare che il video mostri le stesse righe del file SRT.
+export function captionLines(text: string): string[] {
+  return subtitleLines(text).map((line) => line.toUpperCase())
+}
+
 function sceneIndexAt(time: number, scenes: RenderScene[]): number {
   if (scenes.length === 0) return 0
   for (let i = scenes.length - 1; i >= 0; i -= 1) {
@@ -123,7 +130,7 @@ export function drawFrame(
   ctx.font = '800 ' + size + 'px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  const lines = subtitleLines(cue.text).map((line) => line.toUpperCase())
+  const lines = captionLines(cue.text)
   const lineHeight = size * 1.2
   const baseY = height * 0.79 - ((lines.length - 1) * lineHeight) / 2
 
