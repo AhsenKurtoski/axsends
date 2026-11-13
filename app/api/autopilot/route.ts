@@ -3,68 +3,24 @@ import { searchCjProducts } from '@/lib/cj'
 import { BaseProduct, MARKUP, scoreProduct } from '@/lib/products'
 import { generateText, generateJson, aiConfigured, aiProvider } from '@/lib/ai'
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
+import { adSystemPrompt, adPrompt, adStrictSuffix, buildAdScript } from '@/lib/adkit'
 
 // Motore Autopilot di AhsenDS — Costruito da Ahsen Kurtoski
-// Esegue in un solo clic ricerca su CJ, analisi del potenziale, salvataggio e generazione di ads e landing page.
+// Un solo clic: cerca prodotti reali su CJ, li analizza, li salva, scrive il
+// pacchetto ad completo (script, sottotitoli, hashtag, descrizione), lo mette
+// in coda e genera la landing page. Nessun contenuto finto: se l AI o CJ non
+// rispondono, lo step viene marcato come non riuscito con il motivo reale.
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
-// Parole chiave elettronica/gadget: ruotano cosi ogni avvio trova cose diverse.
 const ELECTRONICS = [
   'wireless earbuds', 'smart watch', 'bluetooth speaker', 'phone accessory',
   'led strip light', 'mini projector', 'car charger gadget', 'usb hub',
   'gaming mouse', 'smart home device', 'power bank', 'webcam',
 ]
 
-// Coercizione sicura: l'AI a volte risponde con oggetti annidati o chiavi diverse.
-function toText(v: any): string {
-  if (v == null) return ''
-  if (typeof v === 'string') return v
-  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
-  if (Array.isArray(v)) return v.map(toText).filter(Boolean).join(' ')
-  if (typeof v === 'object') {
-    const keys = ['visual', 'scene', 'scena', 'text', 'description', 'descrizione', 'value', 'voiceover', 'azione']
-    for (let i = 0; i < keys.length; i++) {
-      if (v[keys[i]] != null) return toText(v[keys[i]])
-    }
-    return Object.values(v).map(toText).filter(Boolean).join(' ')
-  }
-  return ''
-}
-function toLines(v: any): string[] {
-  if (v == null) return []
-  if (Array.isArray(v)) return v.map(toText).filter(Boolean)
-  const s = toText(v)
-  return s ? [s] : []
-}
-
-async function buildAd(name: string, category: string, price: number) {
-  const system = 'Sei un copywriter esperto di ads virali TikTok e Reels per e-commerce. Scrivi in italiano, diretto e persuasivo.'
-  const prompt =
-    'Crea una pubblicita breve e virale per questo prodotto: "' + name + '" (categoria ' + category + ', prezzo di vendita ' + price + ' euro). ' +
-    'Restituisci SOLO un oggetto JSON con queste chiavi esatte: ' +
-    'hook (stringa: una frase di apertura che ferma lo scroll), ' +
-    'caption (stringa: didascalia pronta per il post con una call to action), ' +
-    'hashtags (array di 8 stringhe, senza il simbolo cancelletto), ' +
-    'script (array di 4 stringhe: ogni stringa una scena con i secondi e cosa mostrare o dire). ' +
-    'Niente oggetti annidati, solo stringhe.'
-  const raw = await generateJson(system, prompt)
-  if (!raw) return null
-  const hashtags = toLines(raw.hashtags)
-  const script = toLines(raw.script)
-  return {
-    hook: toText(raw.hook) || ('Scopri ' + name),
-    caption: toText(raw.caption) || ('Il prodotto che tutti vogliono: ' + name + '. Solo ' + price + ' euro.'),
-    hashtags: hashtags.length ? hashtags : ['dropshipping', 'tiktokmademebuyit', 'gadget', 'tech', 'offerta', 'novita', 'fyp', 'shopping'],
-    script: script.length ? script : [
-      '0-3s: primo piano del prodotto in azione con musica trend',
-      '3-7s: mostra il problema che risolve',
-      '7-12s: il prodotto come soluzione, testo grande a schermo',
-      '12-15s: prezzo e call to action Acquista ora',
-    ],
-  }
-}
+type Step = { id: string; label: string; status: 'ok' | 'error' | 'skipped'; message: string }
 
 async function buildWebsite(name: string, category: string, price: number, image: string) {
   const system =
@@ -84,10 +40,10 @@ async function buildWebsite(name: string, category: string, price: number, image
     'sezione benefici/caratteristiche a griglia, sezione come funziona in 3 step, galleria immagini, recensioni clienti con stelle e foto, ' +
     'offerta a tempo con contatore animato e urgenza, tabella o box prezzo con sconto e CTA, FAQ a fisarmonica, garanzia e resi, footer completo con attribuzione a AhsenDS (Costruito da Ahsen Kurtoski). ' +
     'Testi realistici e persuasivi orientati alla vendita. Deve sembrare il sito di un vero brand, non un template.'
-  const raw = await generateText(system, prompt, 8000)
+  const raw = await generateText(system, prompt, 6000, { budgetMs: 90_000 })
   if (!raw) return null
   let html = raw.trim()
-  if (html.startsWith('```')) {
+  if (html.indexOf('```') === 0) {
     html = html.replace(/^```[a-zA-Z]*\n?/, '').replace(/```\s*$/, '').trim()
   }
   const lower = html.toLowerCase()
@@ -105,14 +61,22 @@ export async function GET(req: Request) {
   const limit = Math.min(8, Math.max(1, parseInt(searchParams.get('limit') || '6', 10) || 6))
   const keyword = q || ELECTRONICS[Math.floor(Math.random() * ELECTRONICS.length)]
   const page = 1 + Math.floor(Math.random() * 4)
+  const steps: Step[] = []
 
-  // 1) Trova prodotti reali su CJ
+  // 1) Prodotti reali da CJ
   const cj = await searchCjProducts({ keyword, pageSize: 30, pageNum: page })
   if (!cj.ok || cj.products.length === 0) {
+    steps.push({
+      id: 'products',
+      label: 'Ricerca prodotti CJ',
+      status: 'error',
+      message: cj.error === 'no-credentials' ? 'Credenziali CJ mancanti' : cj.error || 'Nessun prodotto',
+    })
     return NextResponse.json({
       ok: false,
       step: 'prodotti',
       keyword,
+      steps,
       note:
         cj.error === 'no-credentials'
           ? 'Aggiungi CJ_EMAIL e CJ_API_KEY in .env.local per trovare prodotti reali. L Autopilot parte da li.'
@@ -120,7 +84,14 @@ export async function GET(req: Request) {
       products: [],
     })
   }
+  steps.push({
+    id: 'products',
+    label: 'Ricerca prodotti CJ',
+    status: 'ok',
+    message: cj.products.length + ' prodotti trovati su "' + keyword + '"',
+  })
 
+  // 2) Scoring e margini
   const base: BaseProduct[] = cj.products
   const scored = base.map((p) => {
     const s = scoreProduct(p.cost, p.popularity)
@@ -130,8 +101,14 @@ export async function GET(req: Request) {
   })
   scored.sort((a, b) => b.score - a.score)
   const top = scored.slice(0, limit)
+  steps.push({
+    id: 'scoring',
+    label: 'Punteggio potenziale',
+    status: 'ok',
+    message: 'Miglior punteggio: ' + top[0].score + '/100 (' + top[0].label + ')',
+  })
 
-  // 2) Salva nel catalogo (best-effort, non blocca mai)
+  // 3) Catalogo
   let saved = 0
   let savedNote = ''
   if (isSupabaseAdminConfigured) {
@@ -143,9 +120,6 @@ export async function GET(req: Request) {
         supplier: 'CJ Dropshipping',
         cost: p.cost,
         price: p.suggestedPrice,
-        // stock e sold non vengono scritti: l'Autopilot non conosce la
-        // disponibilita' reale CJ ne' le vendite. Omettere i campi preserva
-        // i valori gia' presenti in catalogo.
         status: 'active',
       }))
       const r = await supabaseAdmin.from('products').upsert(rows, { onConflict: 'id' }).select('id')
@@ -153,27 +127,110 @@ export async function GET(req: Request) {
         savedNote = /schema cache|not find the table|does not exist|relation/i.test(r.error.message)
           ? 'Prodotti trovati ma non salvati: esegui supabase-schema.sql su Supabase.'
           : 'Prodotti non salvati: ' + r.error.message
+        steps.push({ id: 'catalog', label: 'Salvataggio catalogo', status: 'error', message: savedNote })
       } else {
         saved = (r.data && r.data.length) || rows.length
+        steps.push({ id: 'catalog', label: 'Salvataggio catalogo', status: 'ok', message: saved + ' prodotti salvati' })
       }
     } catch (e) {
       savedNote = 'Prodotti non salvati: ' + String(e).slice(0, 120)
+      steps.push({ id: 'catalog', label: 'Salvataggio catalogo', status: 'error', message: savedNote })
     }
   } else {
-    savedNote = 'Aggiungi Supabase per salvare i prodotti nel catalogo permanente.'
+    savedNote = 'Aggiungi Supabase (service role) per salvare i prodotti nel catalogo permanente.'
+    steps.push({ id: 'catalog', label: 'Salvataggio catalogo', status: 'skipped', message: savedNote })
   }
 
-  // 3) Genera ad e landing page per il top 1 (se AI configurata)
+  // 4) Pacchetto ad completo per il prodotto migliore
   const best = top[0]
   let ad: any = null
   let website: any = null
   let aiNote = ''
+  let queueId: number | null = null
+
   if (aiConfigured() && best) {
-    ad = await buildAd(best.name, best.category, best.suggestedPrice)
+    const request = {
+      product: best.name,
+      audience: best.category,
+      tone: 'energico',
+      platform: 'TikTok',
+      price: best.suggestedPrice,
+    }
+    let data = await generateJson(adSystemPrompt(), adPrompt(request), { maxTokens: 2200, budgetMs: 70_000 })
+    if (!data || !data.hook || !Array.isArray(data.scenes)) {
+      data = await generateJson(adSystemPrompt(), adPrompt(request) + adStrictSuffix, {
+        maxTokens: 2200,
+        budgetMs: 70_000,
+      })
+    }
+    ad = buildAdScript(data, request)
+    steps.push(
+      ad
+        ? {
+            id: 'ad',
+            label: 'Ad completa',
+            status: 'ok',
+            message: ad.scenes.length + ' scene, ' + ad.hashtags.length + ' hashtag, sottotitoli pronti',
+          }
+        : {
+            id: 'ad',
+            label: 'Ad completa',
+            status: 'error',
+            message: 'L AI non ha restituito uno script valido, riprova.',
+          }
+    )
+
     website = await buildWebsite(best.name, best.category, best.suggestedPrice, best.image)
-    if (!ad && !website) aiNote = 'L AI non ha risposto, riprova tra poco.'
+    steps.push(
+      website
+        ? {
+            id: 'website',
+            label: 'Landing page',
+            status: 'ok',
+            message: website.complete ? 'HTML completo' : 'HTML generato ma potrebbe essere incompleto',
+          }
+        : { id: 'website', label: 'Landing page', status: 'error', message: 'L AI non ha generato la landing' }
+    )
+
+    if (!ad && !website) aiNote = 'L AI non ha risposto: controlla le chiavi nella Diagnostica e riprova.'
   } else {
     aiNote = 'Aggiungi una chiave AI (Groq gratis) in .env.local per generare ad e sito automaticamente.'
+    steps.push({ id: 'ad', label: 'Ad completa', status: 'skipped', message: 'Serve una chiave AI' })
+    steps.push({ id: 'website', label: 'Landing page', status: 'skipped', message: 'Serve una chiave AI' })
+  }
+
+  // 5) Coda di pubblicazione: l'ad viene salvata davvero, non solo mostrata
+  if (ad && isSupabaseAdminConfigured) {
+    try {
+      const r = await supabaseAdmin
+        .from('ad_queue')
+        .insert({
+          product: best.name,
+          platform: 'tiktok',
+          title: ad.title || ad.hook,
+          caption: ad.caption,
+          hashtags: ad.hashtags.join(' '),
+          status: 'queued',
+        })
+        .select('id')
+        .single()
+      if (r.error) {
+        const missing = /schema cache|not find the table|does not exist|relation/i.test(r.error.message)
+        steps.push({
+          id: 'queue',
+          label: 'Coda di pubblicazione',
+          status: 'error',
+          message: missing ? 'Tabella ad_queue mancante: esegui supabase-schema.sql.' : r.error.message,
+        })
+      } else {
+        queueId = r.data && r.data.id ? r.data.id : null
+        steps.push({ id: 'queue', label: 'Coda di pubblicazione', status: 'ok', message: 'Ad salvata in coda' })
+      }
+    } catch (e) {
+      steps.push({ id: 'queue', label: 'Coda di pubblicazione', status: 'error', message: String(e).slice(0, 120) })
+    }
+  } else if (ad) {
+    steps.push({ id: 'queue', label: 'Coda di pubblicazione', status: 'skipped', message: 'Serve Supabase' })
   }
 
   return NextResponse.json({
@@ -184,9 +241,12 @@ export async function GET(req: Request) {
     saved,
     savedNote,
     aiNote,
+    steps,
     products: top,
-    best: { product: best, ad, website },
+    best: { product: best, ad, website, queueId },
     developer: 'Ahsen Kurtoski',
-    note: 'Autopilot completato: ' + top.length + ' prodotti analizzati, ad e landing page generate per il migliore. Costruito da Ahsen Kurtoski.',
+    note:
+      'Autopilot completato: ' + top.length + ' prodotti analizzati, pacchetto ad e landing page generati per il migliore. ' +
+      'Costruito da Ahsen Kurtoski.',
   })
 }

@@ -13,7 +13,7 @@ const AUTOMATIONS: Auto[] = [
   { id: 'competitor', label: 'Analisi competitor', desc: 'Stima fascia prezzi dei concorrenti', status: 'Attivo' },
   { id: 'trends', label: 'Trend virali', desc: 'Classifica automatica per domanda', status: 'Attivo' },
   { id: 'monitor', label: 'Monitoraggio prezzi', desc: 'Controllo automatico giornaliero (cron)', status: 'Attivo' },
-  { id: 'besttime', label: 'Orari migliori per postare', desc: 'Suggerisce le fasce orarie con piu engagement', status: 'Attivo' },
+  { id: 'besttime', label: 'Orari migliori per postare', desc: 'Fascia oraria consigliata dentro il calendario AI', status: 'Richiede AI' },
   { id: 'desc', label: 'Descrizione + SEO AI', desc: 'Schede prodotto scritte dall AI, niente template', status: 'Richiede AI' },
   { id: 'caption', label: 'Caption + hashtag AI', desc: 'Testi social generati dall AI per ogni ad', status: 'Richiede AI' },
   { id: 'affiliate', label: 'Contenuti affiliate AI', desc: 'Post e disclosure scritti dall AI', status: 'Richiede AI' },
@@ -27,7 +27,7 @@ const AUTOMATIONS: Auto[] = [
   { id: 'facebook', label: 'Pubblicazione Facebook', desc: 'Post e video pubblicati sulla tua Pagina Facebook', status: 'Richiede Facebook' },
   { id: 'instagram', label: 'Pubblicazione Instagram', desc: 'Reels e post pubblicati sul tuo account Instagram', status: 'Richiede Instagram' },
   { id: 'tiktok', label: 'Upload TikTok', desc: 'Pubblica i video sul tuo account TikTok', status: 'Richiede TikTok' },
-  { id: 'tiktokshop', label: 'TikTok Shop', desc: 'Sincronizza i prodotti con TikTok Shop', status: 'Richiede TikTok' },
+  { id: 'tiktokshop', label: 'TikTok Shop', desc: 'Non integrato: usa la pubblicazione video su TikTok', status: 'Non disponibile' },
   { id: 'youtube', label: 'Upload YouTube', desc: 'Carica Shorts e video sul tuo canale', status: 'Richiede YouTube' },
   { id: 'publishall', label: 'Pubblica ovunque', desc: 'Stesso video su Facebook, Instagram, TikTok e YouTube in un clic', status: 'Richiede social' },
   { id: 'queue', label: 'Coda di pubblicazione', desc: 'Salva, pianifica e ritrova le ads generate', status: 'Richiede Supabase' },
@@ -38,7 +38,7 @@ const AUTOMATIONS: Auto[] = [
   { id: 'autoimport', label: 'Import automatico winners', desc: 'Importa i top del radar nel catalogo', status: 'Richiede Supabase' },
   { id: 'roi', label: 'Tracker profitti e ROI', desc: 'Calcolo automatico di margine e ritorno per prodotto', status: 'Richiede Supabase' },
   { id: 'report', label: 'Report giornaliero', desc: 'Riepilogo vendite e margini ogni giorno', status: 'Richiede Supabase' },
-  { id: 'amazonaff', label: 'Link affiliati Amazon', desc: 'Genera link Amazon col tuo tag Associates in automatico', status: 'Attivo' },
+  { id: 'amazonaff', label: 'Contenuti affiliati', desc: 'Scrive i contenuti; il link con il tuo tag lo inserisci tu', status: 'Richiede link' },
   { id: 'bundles', label: 'Bundle e kit prodotti', desc: 'Suggerisce abbinamenti per alzare lo scontrino medio', status: 'Richiede AI' },
   { id: 'upsell', label: 'Upsell e cross-sell', desc: 'Propone prodotti correlati per ogni acquisto', status: 'Richiede AI' },
   { id: 'emailflow', label: 'Email e DM di recupero', desc: 'Messaggi automatici per carrelli e clienti', status: 'Richiede AI' },
@@ -49,8 +49,8 @@ const AUTOMATIONS: Auto[] = [
   { id: 'niche', label: 'Scout di nicchie', desc: 'Trova nicchie con domanda e poca concorrenza', status: 'Richiede AI' },
   { id: 'reviews', label: 'FAQ e recensioni AI', desc: 'Genera FAQ e risposte per la scheda prodotto', status: 'Richiede AI' },
   { id: 'thumbnail', label: 'Titoli e copertine virali', desc: 'Idee di titoli e thumbnail ottimizzate dall AI', status: 'Richiede AI' },
-  { id: 'trendalert', label: 'Alert trend TikTok', desc: 'Segnala prodotti che stanno esplodendo ora', status: 'Attivo' },
-  { id: 'pricewatch', label: 'Watcher prezzi competitor', desc: 'Confronta i tuoi prezzi con la fascia di mercato', status: 'Attivo' },
+  { id: 'trendalert', label: 'Prodotti in crescita', desc: 'Ordinati per domanda reale CJ, su richiesta', status: 'Su richiesta' },
+  { id: 'pricewatch', label: 'Fascia prezzi stimata', desc: 'Stima dalla formula di ricarico, non da un monitoraggio competitor', status: 'Stima' },
   { id: 'lowmargin', label: 'Margine basso intelligente', desc: 'Prezzi col +15-30% per vendere di piu sul volume', status: 'Attivo' },
   { id: 'kpigoal', label: 'KPI e obiettivo mensile', desc: 'Traccia l avanzamento verso il tuo obiettivo di guadagno', status: 'Richiede Supabase' },
 ]
@@ -106,8 +106,9 @@ export default function AutomationPage() {
       </header>
 
       <div className='rounded-xl border border-brand/20 bg-brand/5 p-4 text-xs leading-relaxed text-white/60'>
-        <strong className='text-white/80'>Nota trasparente:</strong> i toggle salvano la preferenza su questo browser. Le voci
-        &quot;Richiede...&quot; si attivano configurando il servizio indicato e non sono processi backend già in esecuzione.
+        <strong className='text-white/80'>Nota trasparente:</strong> i toggle salvano solo la preferenza su questo browser. Sono attive le voci
+        contrassegnate come <em>Attivo</em>, <em>Su richiesta</em> o <em>Stima</em>; le altre indicano cosa serve per abilitarle e non sono
+        processi backend già in esecuzione.
       </div>
 
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>

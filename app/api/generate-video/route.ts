@@ -1,68 +1,101 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { validateBody, generateVideoBodySchema } from '@/lib/validations'
 import { rateLimitConfigs } from '@/lib/rateLimit'
-import { generateImage, hfConfigured } from '@/lib/hf'
+import { generateImage, imageFailureReason } from '@/lib/hf'
+import { animateImage, videoConfigured, videoModelLabel } from '@/lib/video'
+import { buildSubtitles, motionPrompt, normalizeScenes } from '@/lib/adkit'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+export const maxDuration = 180
 
-// La generazione video AI gratuita (text-to-video) non e affidabile sull'API
-// gratuita di Hugging Face. Qui generiamo invece dei FOTOGRAMMI AI dallo
-// storyboard con un modello immagine (FLUX), che funziona sempre. L'utente li
-// monta in un breve video verticale (es. con CapCut) aggiungendo voiceover e musica.
+// Studio video: fotogramma AI verticale -> animazione con Wan 2.2 su Hugging
+// Face ZeroGPU (gratis, senza carta) -> MP4 + sottotitoli SRT/VTT pronti.
+// Se lo Space e' in coda o la quota GPU e' finita, tornano i fotogrammi.
 
 export async function POST(req: NextRequest) {
   // Rate limiting per API AI
   const rateLimitResponse = await rateLimitConfigs.ai(req)
   if (rateLimitResponse) return rateLimitResponse
 
-  if (!hfConfigured()) {
-    return NextResponse.json(
-      { error: 'Aggiungi HUGGINGFACE_API_TOKEN in .env.local per generare i fotogrammi AI.' },
-      { status: 503 }
-    )
-  }
-
   const validation = await validateBody(req, generateVideoBodySchema)
   if (!validation.success) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
-  const { prompt, product, scenes } = validation.data
+  const { prompt, product, scenes, image } = validation.data
   const base = prompt.trim() || 'cinematic product advertisement, vibrant colors, 4k'
 
-  const count = scenes && scenes.length > 0 ? Math.min(3, scenes.length) : 3
-  const prompts: string[] = []
-  for (let i = 0; i < count; i++) {
-    const sc = scenes?.[i]
-    let visual = ''
-    if (sc && typeof sc === 'object') visual = String(sc.visual || '')
-    const text = visual ? visual : base
-    prompts.push(
-      'Cinematic vertical advertising frame, ' + text + (product ? ', product: ' + product : '') +
-        ', studio lighting, vibrant colors, ultra detailed, e-commerce hero shot, no text'
-    )
-  }
+  // Normalizza lo storyboard una volta sola: serve per frame, motion e sottotitoli.
+  const storyboard = scenes && scenes.length > 0 ? normalizeScenes(scenes) : []
+  const shots = storyboard.length > 0 ? storyboard : [{ time: '0-3s', visual: base, voiceover: '', text: '' }]
+  const subtitles = buildSubtitles(storyboard)
 
-  const frames: string[] = []
-  for (let i = 0; i < prompts.length; i++) {
-    const img = await generateImage(prompts[i])
-    if (img) frames.push(img)
-  }
+  const framePrompt = (shot: { visual: string }) =>
+    'Cinematic vertical advertising frame, ' + (shot.visual || base) + (product ? ', product: ' + product : '') +
+    ', studio lighting, vibrant colors, ultra detailed, e-commerce hero shot, no text'
 
-  if (frames.length === 0) {
+  // 1) fotogramma hero: copertina e input del video
+  // Se il client passa gia l'immagine dell'ad (o la foto prodotto) la usiamo
+  // cosi com'e: il video costa una sola chiamata GPU e la quota immagini resta.
+  const provided =
+    image && /^(data:image\/[a-z+.-]+;base64,|https?:\/\/)/i.test(image) ? image : null
+
+  const firstFrame = provided || (await generateImage(framePrompt(shots[0]), { width: 768, height: 1344 }))
+  if (!firstFrame) {
     return NextResponse.json(
       {
         error:
-          'Il generatore di immagini AI non ha risposto (il modello potrebbe essere in avvio su Hugging Face). Riprova tra 30 secondi.',
+          'Generatore immagini non disponibile: ' +
+          (imageFailureReason() || 'nessuna risposta dal servizio') +
+          '. Il piano gratuito concede 1 immagine ogni 45 secondi: attesa ultimata, riprova tra un minuto o imposta POLLINATIONS_TOKEN.',
       },
       { status: 502 }
     )
   }
 
+  const frames: string[] = [firstFrame]
+
+  // 2) animazione gratuita con prompt da studio (ottica, luce, camera, grading)
+  if (videoConfigured()) {
+    const motion = motionPrompt(product || 'prodotto', shots[0])
+    const animated = await animateImage(firstFrame, motion, { durationSeconds: 3, timeoutMs: 150_000 })
+    if (animated.ok) {
+      return NextResponse.json({
+        video: animated.video,
+        videoModel: videoModelLabel(),
+        frames,
+        provider: 'huggingface-zerogpu',
+        subtitleCues: subtitles.cues,
+        subtitles,
+        note:
+          'Video AI generato gratis con ' + videoModelLabel() +
+          '. Scarica l MP4 e i sottotitoli SRT: importali in CapCut/Premiere (1 clic) per averli bruciati nel video.',
+      })
+    }
+
+    // Video non disponibile: restituisco comunque i fotogrammi e spiego il motivo.
+    return NextResponse.json({
+      video: null,
+      videoModel: videoModelLabel(),
+      videoError: animated.error,
+      frames,
+      provider: 'pollinations-frames',
+      subtitleCues: subtitles.cues,
+      subtitles,
+      note:
+        'Video AI non disponibile ora (' + animated.error + '). Ho generato ' + frames.length +
+        ' fotogrammi AI e i sottotitoli SRT: montali in CapCut (gratis) con lo script e il voiceover.',
+    })
+  }
+
+  // Video disattivato: solo fotogrammi.
   return NextResponse.json({
+    video: null,
     frames,
+    provider: 'pollinations-frames',
+    subtitleCues: subtitles.cues,
+    subtitles,
     note:
-      'Generati ' + frames.length + ' fotogrammi AI dallo storyboard. Scaricali e montali in un video verticale di 15-20s con CapCut (gratis): aggiungi il voiceover dallo script e una musica trend. La generazione video AI gratuita non e affidabile, quindi il metodo a fotogrammi e piu veloce e funziona sempre.',
+      'Generati ' + frames.length + ' fotogrammi AI e i sottotitoli SRT. La generazione video e disattivata (HF_VIDEO_SPACE=off).',
   })
 }

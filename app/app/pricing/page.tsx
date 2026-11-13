@@ -105,6 +105,7 @@ export default function PricingPage() {
             )}
           </button>
           <p className='text-xs text-white/30'>Suggerimento: con margine basso (+15-30%) i tuoi prezzi battono i concorrenti e converti di piu. Il profitto arriva dal volume.</p>
+          <p className='text-xs text-white/40'>Queste regole vengono salvate in questo browser e applicate davvero al prossimo import di prodotti dalla pagina Ricerca.</p>
         </div>
 
         <div className='glass p-5 lg:col-span-2'>

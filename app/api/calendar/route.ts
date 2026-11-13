@@ -20,12 +20,15 @@ export async function POST(req: Request) {
   }
 
   const system =
-    'Sei uno stratega di social media marketing. Scrivi in italiano, idee concrete e pronte da girare.'
+    'Sei uno stratega di contenuti social senior. Progetti piani editoriali eseguibili da una persona sola con un telefono. ' +
+    'Scrivi in italiano, con idee concrete e hook gia pronti da dire davanti alla camera. Non proponi trend rischiosi o claim falsi.'
   const prompt =
     'Crea un piano editoriale di 7 giorni per ' + platform + ' nella nicchia "' + niche + '". ' +
-    'Restituisci un JSON con: days (array di 7 oggetti con day, idea, hook, format, hashtags array di 4 con #).'
+    'Ogni giorno deve avere un formato diverso (tutorial, unboxing, POV, prima/dopo, lista, dietro le quinte, domanda al pubblico) e un hook nei primi 2 secondi. ' +
+    'Restituisci un JSON con: days (array di 7 oggetti con day, idea (cosa girare, in 1 frase), hook (frase esatta da dire), format, ' +
+    'onScreenText (3-6 parole da mostrare a schermo), bestTime (fascia oraria consigliata), hashtags (array di 5 con #, misti grandi e di nicchia)).'
 
-  const data = await generateJson(system, prompt)
+  const data = await generateJson(system, prompt, { maxTokens: 1600, budgetMs: 45_000 })
   if (!data || !data.days) {
     return NextResponse.json({
       configured: true,

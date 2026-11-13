@@ -26,6 +26,11 @@ export const importItemSchema = z.object({
 
 export const importBodySchema = z.object({
   items: z.array(importItemSchema).min(1).max(100),
+  // Regole di prezzo salvate nella pagina "Regole prezzo": se presenti vengono
+  // applicate all'import, altrimenti si usa il ricarico predefinito.
+  markup: z.number().min(1).max(10).optional(),
+  round99: z.boolean().optional(),
+  minMargin: z.number().min(0).max(95).optional(),
 })
 
 // --- Ordini ---
@@ -51,6 +56,10 @@ export const generateAdBodySchema = z.object({
 export const generateVideoBodySchema = z.object({
   prompt: z.string().max(1000).optional().default(''),
   product: z.string().max(300).optional(),
+  // Immagine gia generata (fotogramma dell'ad o foto prodotto) da animare:
+  // evita di consumare una seconda generazione, che sul piano gratuito
+  // significherebbe aspettare altri 45 secondi.
+  image: z.string().max(4_000_000).optional(),
   scenes: z
     .array(
       z.union([

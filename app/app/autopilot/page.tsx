@@ -1,7 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { Wand2, Loader2, Sparkles, Globe, Download, ExternalLink, Package, ListPlus, Check, Search } from 'lucide-react'
+import {
+  Wand2,
+  Loader2,
+  Sparkles,
+  Globe,
+  Download,
+  ExternalLink,
+  Package,
+  ListPlus,
+  Check,
+  Search,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
+  FileText,
+} from 'lucide-react'
 
 function txt(v: any): string {
   if (v == null) return ''
@@ -22,6 +37,16 @@ function lines(v: any): string[] {
   if (Array.isArray(v)) return v.map(txt).filter(Boolean)
   const s = txt(v)
   return s ? [s] : []
+}
+
+function download(text: string, name: string, type: string) {
+  const blob = new Blob([text], { type })
+  const u = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = u
+  a.download = name
+  a.click()
+  URL.revokeObjectURL(u)
 }
 
 export default function AutopilotPage() {
@@ -48,13 +73,7 @@ export default function AutopilotPage() {
   }
 
   function downloadHtml(html: string, name: string) {
-    const blob = new Blob([html], { type: 'text/html' })
-    const u = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = u
-    a.download = name
-    a.click()
-    URL.revokeObjectURL(u)
+    download(html, name, 'text/html')
   }
 
   function openHtml(html: string) {
@@ -75,7 +94,7 @@ export default function AutopilotPage() {
         body: JSON.stringify({
           product: txt(best.product && best.product.name),
           platform: 'tiktok',
-          title: best.ad.hook,
+          title: best.ad.title || best.ad.hook,
           caption: best.ad.caption,
           hashtags: lines(best.ad.hashtags).join(' '),
         }),
@@ -92,6 +111,13 @@ export default function AutopilotPage() {
   const best = data && data.best
   const ad = best && best.ad
   const website = best && best.website
+  const steps = data && Array.isArray(data.steps) ? data.steps : []
+
+  function stepIcon(status: string) {
+    if (status === 'ok') return <CheckCircle2 size={15} className='text-emerald-400' />
+    if (status === 'error') return <XCircle size={15} className='text-rose-400' />
+    return <MinusCircle size={15} className='text-white/30' />
+  }
 
   return (
     <div className='space-y-6'>
@@ -102,7 +128,7 @@ export default function AutopilotPage() {
           </div>
           <div>
             <h1 className='text-2xl font-semibold'>Autopilot AhsenDS</h1>
-            <p className='text-sm text-white/50'>Un clic: trova prodotti reali, li salva, genera l'ad virale e la landing page &bull; Costruito da Ahsen Kurtoski</p>
+            <p className='text-sm text-white/50'>Un clic: trova prodotti reali, li salva, genera il pacchetto ad completo (sottotitoli inclusi) e la landing page &bull; Costruito da Ahsen Kurtoski</p>
           </div>
         </div>
         <div className='inline-flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-1.5 text-xs text-brand-light self-start sm:self-auto'>
@@ -130,14 +156,15 @@ export default function AutopilotPage() {
             {loading ? 'Sto lavorando...' : 'Avvia Autopilot'}
           </button>
         </div>
-        <div className='grid grid-cols-2 gap-2 text-xs text-white/50 sm:grid-cols-4'>
+        <div className='grid grid-cols-2 gap-2 text-xs text-white/50 sm:grid-cols-5'>
           <div className='rounded-lg bg-white/5 px-3 py-2'>1. Trova prodotti</div>
-          <div className='rounded-lg bg-white/5 px-3 py-2'>2. Salva catalogo</div>
-          <div className='rounded-lg bg-white/5 px-3 py-2'>3. Genera ad</div>
-          <div className='rounded-lg bg-white/5 px-3 py-2'>4. Genera sito</div>
+          <div className='rounded-lg bg-white/5 px-3 py-2'>2. Analizza margini</div>
+          <div className='rounded-lg bg-white/5 px-3 py-2'>3. Salva catalogo</div>
+          <div className='rounded-lg bg-white/5 px-3 py-2'>4. Ad + sottotitoli</div>
+          <div className='rounded-lg bg-white/5 px-3 py-2'>5. Landing + coda</div>
         </div>
         {loading ? (
-          <p className='text-xs text-white/40'>Puo richiedere 20-40 secondi: sto cercando su CJ, salvando e facendo scrivere ad e sito dall AI.</p>
+          <p className='text-xs text-white/40'>Puo richiedere 30-60 secondi: sto cercando su CJ, salvando e facendo scrivere ad e sito dall AI.</p>
         ) : null}
       </div>
 
@@ -145,6 +172,20 @@ export default function AutopilotPage() {
 
       {data && data.ok === false ? (
         <div className='glass border border-amber-500/30 p-4 text-sm text-amber-200'>{txt(data.note)}</div>
+      ) : null}
+
+      {steps.length > 0 ? (
+        <div className='glass divide-y divide-white/5 p-2'>
+          {steps.map((s: any, i: number) => (
+            <div key={s.id + i} className='flex items-start gap-2.5 px-3 py-2.5 text-sm'>
+              <div className='mt-0.5'>{stepIcon(s.status)}</div>
+              <div className='min-w-0'>
+                <div className='text-white/80'>{txt(s.label)}</div>
+                <div className='text-xs text-white/40'>{txt(s.message)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : null}
 
       {data && data.ok ? (
@@ -168,12 +209,12 @@ export default function AutopilotPage() {
                     {p.image && (String(p.image).indexOf('http') === 0 || String(p.image).startsWith('/')) ? (
                       <img src={p.image} alt={txt(p.name)} className='h-full w-full object-cover' />
                     ) : (
-                      <span className='text-3xl'>\ud83d\udce6</span>
+                      <span className='text-3xl'>📦</span>
                     )}
                   </div>
                   <div className='line-clamp-2 text-xs text-white/80'>{txt(p.name)}</div>
                   <div className='mt-1 flex items-center justify-between text-xs'>
-                    <span className='font-semibold text-white'>\u20ac{p.suggestedPrice}</span>
+                    <span className='font-semibold text-white'>€{p.suggestedPrice}</span>
                     <span className='text-brand'>{p.score}</span>
                   </div>
                 </div>
@@ -182,37 +223,62 @@ export default function AutopilotPage() {
           </div>
 
           {ad ? (
-            <div className='glass space-y-3 p-5'>
-              <div className='flex items-center justify-between'>
-                <h2 className='flex items-center gap-2 text-lg font-medium'><Sparkles size={18} className='text-brand' /> Ad virale per: {txt(best.product && best.product.name)}</h2>
-                <button
-                  onClick={queueAd}
-                  className='inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20'
-                >
-                  {queued ? <Check size={14} /> : <ListPlus size={14} />}
-                  {queued ? 'In coda' : 'Salva in coda'}
-                </button>
+            <div className='glass space-y-4 p-5'>
+              <div className='flex flex-wrap items-center justify-between gap-2'>
+                <h2 className='flex items-center gap-2 text-lg font-medium'><Sparkles size={18} className='text-brand' /> Pacchetto ad per: {txt(best.product && best.product.name)}</h2>
+                <div className='flex flex-wrap gap-2'>
+                  {ad.subtitles && ad.subtitles.srt ? (
+                    <button
+                      onClick={() => download(ad.subtitles.srt, 'sottotitoli.srt', 'text/plain')}
+                      className='inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20'
+                    >
+                      <FileText size={14} /> Sottotitoli .srt
+                    </button>
+                  ) : null}
+                  <button
+                    onClick={queueAd}
+                    className='inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20'
+                  >
+                    {queued ? <Check size={14} /> : <ListPlus size={14} />}
+                    {queued ? 'In coda' : 'Salva in coda'}
+                  </button>
+                </div>
               </div>
+
               <div>
                 <div className='text-xs uppercase tracking-wide text-white/40'>Hook</div>
                 <p className='text-sm text-white/90'>{txt(ad.hook)}</p>
+              </div>
+              <div>
+                <div className='text-xs uppercase tracking-wide text-white/40'>Titolo</div>
+                <p className='text-sm text-white/80'>{txt(ad.title)}</p>
               </div>
               <div>
                 <div className='text-xs uppercase tracking-wide text-white/40'>Didascalia</div>
                 <p className='text-sm text-white/80'>{txt(ad.caption)}</p>
               </div>
               <div>
-                <div className='text-xs uppercase tracking-wide text-white/40'>Script</div>
+                <div className='text-xs uppercase tracking-wide text-white/40'>Storyboard</div>
                 <ol className='mt-1 space-y-1 text-sm text-white/80'>
-                  {lines(ad.script).map((s, i) => (
-                    <li key={i} className='rounded-lg bg-white/5 px-3 py-1.5'>{s}</li>
+                  {(ad.scenes || []).map((s: any, i: number) => (
+                    <li key={i} className='rounded-lg bg-white/5 px-3 py-2'>
+                      <span className='mr-2 text-xs text-brand'>{txt(s.time)}</span>
+                      {txt(s.visual)}
+                      {s.text ? <span className='ml-2 rounded bg-white/10 px-1.5 py-0.5 text-[11px] text-white/70'>a schermo: {txt(s.text)}</span> : null}
+                    </li>
                   ))}
                 </ol>
               </div>
               <div>
                 <div className='text-xs uppercase tracking-wide text-white/40'>Hashtag</div>
-                <p className='text-sm text-brand'>{lines(ad.hashtags).map((h) => '#' + h.replace(/^#/, '')).join(' ')}</p>
+                <p className='text-sm text-brand'>{lines(ad.hashtags).join(' ')}</p>
               </div>
+              {ad.description ? (
+                <div>
+                  <div className='text-xs uppercase tracking-wide text-white/40'>Descrizione pronta</div>
+                  <p className='whitespace-pre-wrap text-sm text-white/70'>{txt(ad.description)}</p>
+                </div>
+              ) : null}
             </div>
           ) : null}
 

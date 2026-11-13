@@ -8,6 +8,19 @@ import { MARKUP } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
+// Applica le regole di prezzo salvate dall'utente: ricarico, margine minimo e,
+// se attivo, arrotondamento psicologico a .99. Stessa formula della pagina
+// Regole prezzo, cosi l'anteprima e l'import danno lo stesso numero.
+function priceFor(cost: number, markup: number, round99: boolean, minMargin: number): number {
+  const round = (value: number) => (round99 ? Math.max(Math.floor(value), 1) + 0.99 : value)
+  let price = round(cost * markup)
+  if (minMargin > 0 && cost > 0 && price > 0) {
+    const margin = ((price - cost) / price) * 100
+    if (margin < minMargin) price = round(cost / (1 - minMargin / 100))
+  }
+  return Math.round(price * 100) / 100
+}
+
 type ImportItem = {
   externalId: string
   name: string
@@ -41,6 +54,9 @@ export async function POST(req: NextRequest) {
   }
 
   const rawItems = validation.data.items
+  const markup = validation.data.markup && validation.data.markup >= 1 ? validation.data.markup : MARKUP
+  const round99 = validation.data.round99 === true
+  const minMargin = typeof validation.data.minMargin === 'number' ? validation.data.minMargin : 0
   const items = rawItems.map(mapSupplierItem).filter((i) => i.externalId && i.name)
 
   if (items.length === 0) {
@@ -57,7 +73,7 @@ export async function POST(req: NextRequest) {
       image: i.image,
       supplier: i.supplier,
       cost: i.cost,
-      price: Math.round(i.cost * MARKUP * 100) / 100,
+      price: priceFor(i.cost, markup, round99, minMargin),
       status: 'active',
       updated_at: new Date().toISOString(),
     }

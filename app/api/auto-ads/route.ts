@@ -1,49 +1,24 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { searchCjProducts } from '@/lib/cj'
 import { MARKUP, scoreProduct } from '@/lib/products'
 import { generateJson, aiConfigured, aiProvider } from '@/lib/ai'
+import { rateLimitConfigs } from '@/lib/rateLimit'
+import { adSystemPrompt, adPrompt, adStrictSuffix, buildAdScript } from '@/lib/adkit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 120
 
-const MIN_SCORE = 50
+const MIN_SCORE = 40
 
-function toText(v: any): string {
-  if (v === null || v === undefined) return ''
-  if (typeof v === 'string') return v
-  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
-  if (Array.isArray(v)) return v.map(toText).filter(Boolean).join(' ')
-  if (typeof v === 'object') {
-    const keys = ['visual', 'scene', 'scena', 'text', 'description', 'descrizione', 'value']
-    for (let i = 0; i < keys.length; i++) {
-      if (typeof v[keys[i]] === 'string') return v[keys[i]]
-    }
-    return Object.keys(v).map((k) => toText(v[k])).filter(Boolean).join(' ')
-  }
-  return String(v)
-}
+// Ads automatiche: trova i prodotti con potenziale su CJ e scrive per ognuno
+// un pacchetto TikTok + YouTube completo (hashtag, descrizione, sottotitoli).
+export async function GET(req: NextRequest) {
+  const limited = await rateLimitConfigs.search(req)
+  if (limited) return limited
 
-function toLines(v: any): string[] {
-  if (Array.isArray(v)) return v.map(toText).filter(Boolean)
-  const s = toText(v)
-  return s ? [s] : []
-}
-
-function normTiktok(o: any) {
-  if (!o || typeof o !== 'object') return null
-  return { hook: toText(o.hook), caption: toText(o.caption), hashtags: toLines(o.hashtags), script: toLines(o.script) }
-}
-
-function normYoutube(o: any) {
-  if (!o || typeof o !== 'object') return null
-  return { title: toText(o.title), description: toText(o.description), tags: toLines(o.tags), script: toLines(o.script) }
-}
-
-// Genera automaticamente ads TikTok + YouTube per ogni prodotto con potenziale.
-export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const keyword = searchParams.get('q') || ''
-  const limit = Math.min(12, Math.max(1, parseInt(searchParams.get('limit') || '8', 10)))
+  const limit = Math.min(8, Math.max(1, parseInt(searchParams.get('limit') || '6', 10) || 6))
 
   if (!aiConfigured()) {
     return NextResponse.json({
@@ -88,29 +63,46 @@ export async function GET(req: Request) {
     })
   }
 
-  const system =
-    'Sei un media buyer e copywriter esperto di video ads virali per dropshipping. Scrivi in italiano, orientato alla conversione.'
-  const strictSuffix =
-    ' IMPORTANTE: usa ESATTAMENTE queste chiavi. tiktok: hook, caption, hashtags (array di stringhe), script (array di stringhe brevi). ' +
-    'youtube: title, description, tags (array di stringhe), script (array di stringhe brevi). ' +
-    'Le scene dello script devono essere stringhe semplici, NON oggetti, e niente chiavi in italiano.'
-
   const ads = []
   for (const p of candidates) {
-    const prompt =
-      'Prodotto: "' + p.name + '" (categoria ' + p.category + ', prezzo di vendita ' + p.price + ' euro). ' +
-      'Crea due video ad pronti da pubblicare. Restituisci un JSON con: ' +
-      'tiktok (oggetto con hook, caption, hashtags array di 6, script array di 4 scene brevi come stringhe), ' +
-      'youtube (oggetto con title, description, tags array di 6, script array di 4 scene brevi come stringhe).'
-    let data = await generateJson(system, prompt)
-    if (!data || (!data.tiktok && !data.youtube)) {
-      data = await generateJson(system, prompt + strictSuffix)
+    const request = {
+      product: p.name,
+      audience: p.category,
+      tone: 'energico',
+      platform: 'TikTok',
+      price: p.price,
     }
+    let data = await generateJson(adSystemPrompt(), adPrompt(request), { maxTokens: 1600, budgetMs: 45_000 })
+    if (!data || !data.hook || !Array.isArray(data.scenes)) {
+      data = await generateJson(adSystemPrompt(), adPrompt(request) + adStrictSuffix, {
+        maxTokens: 1600,
+        budgetMs: 45_000,
+      })
+    }
+    const script = buildAdScript(data, request)
+
     ads.push({
       product: { id: p.id, name: p.name, image: p.image, price: p.price, score: p.score, label: p.label },
-      tiktok: data && data.tiktok ? normTiktok(data.tiktok) : null,
-      youtube: data && data.youtube ? normYoutube(data.youtube) : null,
-      ok: Boolean(data && (data.tiktok || data.youtube)),
+      tiktok: script
+        ? {
+            hook: script.hook,
+            caption: script.caption,
+            hashtags: script.hashtags,
+            captionWithTags: (script.caption + '\n\n' + script.hashtags.join(' ')).trim(),
+            script: script.scenes.map((s) => s.time + ' - ' + s.visual + ' | ' + s.voiceover),
+          }
+        : null,
+      youtube: script
+        ? {
+            title: script.title || script.hook,
+            description: script.description,
+            tags: script.keywords,
+            descriptionWithTags: (script.description + '\n\n' + script.hashtags.join(' ')).trim(),
+            script: script.scenes.map((s) => s.time + ' - ' + s.visual + ' | ' + s.voiceover),
+          }
+        : null,
+      subtitles: script ? { srt: script.subtitles.srt, vtt: script.subtitles.vtt } : null,
+      ok: Boolean(script),
     })
   }
 
@@ -119,7 +111,7 @@ export async function GET(req: Request) {
     provider: aiProvider(),
     cj: true,
     count: ads.length,
-    note: 'Ads generate automaticamente con AI (' + aiProvider() + ') per i prodotti con potenziale.',
+    note: 'Ads generate con AI (' + aiProvider() + ') per i prodotti con potenziale, sottotitoli inclusi.',
     ads,
   })
 }

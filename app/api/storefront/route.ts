@@ -21,16 +21,21 @@ export async function POST(req: Request) {
   }
 
   const system =
-    'Sei un esperto di landing page e CRO per e-commerce. Scrivi in italiano persuasivo, chiaro e onesto, orientato alla conversione.'
+    'Sei un consulente CRO e copywriter di landing page e-commerce di alto livello. ' +
+    'Scrivi in italiano persuasivo ma onesto, con la struttura che converte: promessa chiara, meccanismo, prove, obiezioni, offerta, CTA. ' +
+    'Non inventi numeri di clienti, recensioni, certificazioni o garanzie legali che non esistono.'
   const prompt =
     'Crea il testo completo di una landing page che vende "' + product + '". ' +
     'Pubblico: ' + audience + '. ' + (price ? 'Prezzo: ' + price + ' euro. ' : '') +
-    'Restituisci un JSON con: headline (titolo forte), subheadline (sottotitolo), ' +
-    'benefits (array di 4 benefici brevi), bullets (array di 5 caratteristiche), ' +
-    'faq (array di 4 oggetti con q e a), guarantee (stringa garanzia), ' +
-    'socialProof (stringa con prova sociale credibile), cta (testo del bottone).'
+    'Restituisci un JSON con: headline (promessa concreta, max 12 parole), subheadline (chiarisce per chi e e cosa cambia), ' +
+    'benefits (array di 4 benefici espressi come risultato, non come caratteristica), ' +
+    'bullets (array di 5 dettagli pratici: materiali, misure, uso, spedizione, assistenza), ' +
+    'faq (array di 4 oggetti con q e a che risolvono obiezioni reali prima dell acquisto), ' +
+    'guarantee (stringa di garanzia realistica), ' +
+    'socialProof (stringa di prova sociale credibile e non numerica se non hai dati), ' +
+    'cta (testo del bottone, max 4 parole).'
 
-  const data = await generateJson(system, prompt)
+  const data = await generateJson(system, prompt, { maxTokens: 1800, budgetMs: 45_000 })
   if (!data || !data.headline) {
     return NextResponse.json({
       configured: true,

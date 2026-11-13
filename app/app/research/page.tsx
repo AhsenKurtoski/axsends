@@ -49,6 +49,22 @@ export default function ResearchPage() {
     load('')
   }, [])
 
+  // Regole di prezzo salvate in "Regole prezzo": vengono applicate all'import.
+  function pricingRules(): { markup?: number; round99?: boolean; minMargin?: number } {
+    try {
+      const raw = localStorage.getItem('ahsends_pricing') || localStorage.getItem('axsends_pricing')
+      if (!raw) return {}
+      const r = JSON.parse(raw)
+      const out: { markup?: number; round99?: boolean; minMargin?: number } = {}
+      if (typeof r.markup === 'number' && r.markup >= 1) out.markup = r.markup
+      if (typeof r.round99 === 'boolean') out.round99 = r.round99
+      if (typeof r.minMargin === 'number' && r.minMargin >= 0) out.minMargin = r.minMargin
+      return out
+    } catch (err) {
+      return {}
+    }
+  }
+
   async function importProduct(p: Product) {
     setNote('')
     try {
@@ -65,6 +81,7 @@ export default function ResearchPage() {
               supplier: 'CJ Dropshipping',
             },
           ],
+          ...pricingRules(),
         }),
       })
       const data = await res.json().catch(() => null)

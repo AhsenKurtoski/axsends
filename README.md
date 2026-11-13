@@ -179,7 +179,7 @@ I modelli predefiniti sono allineati ai cataloghi attuali — GPT-OSS 120B per G
 
 | Endpoint | Metodo | Descrizione |
 |---|---|---|
-| `/api/autopilot` | GET | Esecuzione completa Autopilot (ricerca + catalogo + ad + landing) |
+| `/api/autopilot` | GET | Autopilot: prodotti, catalogo, pacchetto ad, coda e landing page, con stato di ogni passaggio |
 | `/api/radar` | GET | Scansione automatica multi-nicchia con calcolo score |
 | `/api/research` | GET | Ricerca prodotti su CJ Dropshipping con punteggio |
 | `/api/describe` | POST | Scheda prodotto persuasiva + tag SEO |
@@ -189,15 +189,15 @@ I modelli predefiniti sono allineati ai cataloghi attuali — GPT-OSS 120B per G
 | `/api/suppliers` | GET | Elenco fornitori verificati |
 | `/api/fulfill` | POST | Preparazione evasione ordine verso CJ |
 | `/api/monitor` | GET | Snapshot periodico prezzi e stock per cron jobs |
-| `/api/generate-ad` | POST | Script storyboard, copy persuasivo e prompt creativo |
-| `/api/generate-video` | POST | Fotogrammi verticali pubblicitari via Hugging Face |
+| `/api/generate-ad` | POST | Pacchetto ad completo: script, storyboard con testo a schermo, sottotitoli SRT/VTT, 12 hashtag, descrizione, keyword e copertina |
+| `/api/generate-video` | POST | Video AI gratuito (Wan 2.2 su Hugging Face ZeroGPU) + fotogrammi di riserva |
 | `/api/website` | POST | Generazione sito web e landing page completa |
 | `/api/contact` | POST | Modulo contatti pubblico: validazione, honeypot, rate limit 5/min, salvataggio in Supabase (`settings`) e notifica SendGrid se configurata |
 | `/api/tiktok` | POST | Pubblicazione video su TikTok |
 | `/api/youtube` | POST | Caricamento video Shorts su YouTube |
 | `/api/products` | GET | Catalogo prodotti (richiede sessione) |
 | `/api/ad-queue` | GET / POST | Coda di pubblicazione delle ads |
-| `/api/auto-ads` | GET | Ads TikTok + YouTube generate per i prodotti con potenziale |
+| `/api/auto-ads` | GET | Ads TikTok + YouTube generate per i prodotti con potenziale, con sottotitoli pronti |
 | `/api/storefront` | POST | Testi completi di una landing page di vendita |
 | `/api/digital-product` | POST | Ebook/guida vendibile scritta dall'AI |
 | `/api/calendar` | POST | Piano editoriale di 7 giorni |
@@ -228,3 +228,82 @@ I modelli predefiniti sono allineati ai cataloghi attuali — GPT-OSS 120B per G
 Software ideato, sviluppato e manutenuto da **Ahsen Kurtoski**.
 
 Rilasciato con licenza **MIT** — vedi il file [LICENSE](./LICENSE).
+
+---
+
+## 🔑 Doppie chiavi API (fallback automatico)
+
+Ogni provider di testo accetta **due chiavi**. Se la prima finisce il credito giornaliero, scade o viene rifiutata, la stessa richiesta passa alla seconda senza interruzioni:
+
+| Provider | Chiave primaria | Chiave di riserva |
+|---|---|---|
+| Groq | `GROQ_API_KEY` | `GROQ_API_KEY_2` |
+| Google Gemini | `GEMINI_API_KEY` | `GEMINI_API_KEY_2` |
+| OpenRouter (opzionale) | `OPENROUTER_API_KEY` | `OPENROUTER_API_KEY_2` |
+
+Il codice prova modello per modello e chiave per chiave, con timeout di 25 secondi per tentativo, e ricorda la coppia modello+chiave che ha funzionato. Per aggiungere le seconde chiavi apri `.env.local`, incolla i valori e riavvia `npm run dev`. La pagina **Diagnostica** mostra quale chiave e quale modello stanno rispondendo.
+
+## 🎬 Video AI gratuito (senza carta di credito)
+
+La generazione video non usa servizi a pagamento:
+
+1. **Fotogramma** — Pollinations (`image.pollinations.ai`): gratuito, nessuna chiave, nessuna carta.
+2. **Animazione** — **Wan 2.2 I2V** su **Hugging Face Spaces con ZeroGPU**: un account gratuito ha 5 minuti di GPU al giorno e non richiede carta. Il fotogramma viene animato in un MP4 verticale di 3 secondi, pronto da scaricare e pubblicare.
+
+Variabili:
+
+```bash
+HF_VIDEO_SPACE=prithivmlmods/Wan2.2-Fast   # cambia Space senza toccare il codice; "off" disattiva il video
+HUGGINGFACE_API_TOKEN=...                  # opzionale: usa la tua quota GPU invece di quella anonima
+```
+
+Se lo Space e in coda o la quota giornaliera e finita, la pagina Ads mostra automaticamente i fotogrammi AI: il flusso di lavoro non si blocca mai.
+
+Altri servizi gratuiti senza carta, se vuoi un video piu lungo: **Google Flow** (5 clip da 8 secondi al giorno dal browser, non ha API) e **Shotstack** (10 crediti gratuiti alla registrazione, con API).
+
+## 🏷️ Ads pronte alla pubblicazione
+
+`POST /api/generate-ad` restituisce un pacchetto completo, non solo lo script:
+
+| Campo | Cosa contiene |
+|---|---|
+| `hook` + `variants` | Prima frase e 3 alternative per l A/B test |
+| `title` | Titolo max 90 caratteri per YouTube Shorts |
+| `description` | Descrizione completa (700-1000 caratteri) con gancio, benefici, elenco puntato, CTA e hashtag finali |
+| `hashtags` | 12 hashtag virali misti (grandi, di nicchia, specifici del prodotto), gia con il cancelletto |
+| `keywords` | 10 keyword senza # per i tag di YouTube |
+| `caption` | Caption max 150 caratteri pronta per TikTok e Reels |
+| `scenes` | Storyboard di 5 scene con tempi, visual e voiceover |
+| `targeting` | Pubblico, interessi e orario consigliato |
+
+Le stesse informazioni vengono usate dai pulsanti di pubblicazione: TikTok e Instagram ricevono caption + hashtag, YouTube riceve titolo, descrizione completa e tag.
+
+---
+
+## 🎬 Video e sottotitoli da studio
+
+La pagina **AI Ads** produce un pacchetto pronto alla pubblicazione, non solo uno script:
+
+- **Storyboard** in 5 scene con tempi, movimento di camera, voiceover e **testo a schermo** di 3-6 parole per scena.
+- **Sottotitoli professionali** generati dallo storyboard: massimo 2 righe, righe bilanciate, tempi allineati al voiceover. Scaricabili in **.srt** e **.vtt** e gia pronti per CapCut, Premiere o DaVinci.
+- **Anteprima con sottotitoli sincronizzata**: player con la linea temporale vera dell'ad (scene + cue SRT), play/pausa e barra per spostarsi nel tempo. La caption compare esattamente al suo secondo, sullo stile dei reel (bianco, bold, contorno nero), e lo storyboard avanza con un lento Ken Burns: non e una proporzione sul clip di 3 secondi.
+- **Video completo con sottotitoli bruciati**: dalla stessa scheda si scarica l'ad intera (720x1280, durata reale dello script, zoom lento per scena, vignettatura e caption disegnate ai tempi esatti del SRT). Formato MP4 H.264, con WebM come riserva se il browser non lo supporta.
+- **Video AI** generato con prompt da studio: ottica 35mm, key light + rim light, color grading, dolly-in lento, 9:16.
+
+Il clip gratuito dura 3 secondi perche la quota ZeroGPU e di 5 minuti al giorno: per un ad da 20 secondi monta il clip in loop con i fotogrammi e il file SRT (lo stesso flusso di uno studio, con strumenti gratuiti).
+
+Il video riusa l'immagine gia generata per l'ad: una sola generazione per tutto il pacchetto. Le immagini gratuite hanno un limite reale di **1 ogni 45 secondi per IP**, gestito dal codice con una coda che distanzia le richieste; con una pollen key gratuita (`POLLINATIONS_TOKEN`) il limite sparisce.
+
+## 🩺 Diagnostica e stato del progetto
+
+La pagina **Diagnostica** (`/app/settings`) fa un controllo reale, non simulato, di ogni servizio:
+
+- **Punteggio di prontezza** (0-100%) su quello che serve davvero: AI testi, immagini, database.
+- **Chiavi per provider**: quante chiavi Groq, Gemini e OpenRouter sono configurate (1 o 2).
+- **Tabelle del database**: le 6 tabelle dello schema vengono verificate automaticamente a ogni controllo.
+- **Variabili mancanti**: elenco esatto delle env da impostare, con il servizio che le usa.
+- Ogni servizio riporta stato (`Funziona`, `Errore`, `Da verificare`, `Mancante`) e il motivo reale, incluso il modello AI e la chiave in uso.
+
+## 🤖 Autopilot
+
+L Autopilot esegue in sequenza e mostra lo stato di ogni passaggio: ricerca CJ, punteggio e margini, salvataggio catalogo, pacchetto ad con sottotitoli, coda di pubblicazione, landing page. Se un passaggio fallisce lo dice con il motivo esatto (credenziali mancanti, tabella assente, AI non raggiungibile) invece di inventare contenuti.

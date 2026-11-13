@@ -36,15 +36,21 @@ export async function POST(req: NextRequest) {
   }
 
   const system =
-    'Sei un copywriter e-commerce esperto di dropshipping. Scrivi in italiano, persuasivo ma onesto, ottimizzato per conversione e SEO. Tono: ' + (tone || 'energico') + '.'
+    'Sei un copywriter e-commerce senior specializzato in schede prodotto che convertono. ' +
+    'Scrivi in italiano concreto e verificabile: benefici prima delle caratteristiche, linguaggio del cliente, zero superlativi vuoti. ' +
+    'Non inventi certificazioni, recensioni, premi o dati di vendita. Tono richiesto: ' + (tone || 'energico') + '.'
   const prompt =
     'Crea la scheda prodotto per: "' + name + '". Categoria: ' + categoryLabel + '. ' +
     (features && features.length > 0 ? 'Caratteristiche principali: ' + features.join(', ') + '. ' : '') +
     (price ? 'Prezzo di vendita: ' + price + ' euro. ' : '') +
-    'Restituisci un JSON con questi campi esatti: title (titolo SEO accattivante, max 70 caratteri), ' +
-    'description (60-110 parole), bullets (array di 4 benefici), tags (array di 6 parole chiave SEO minuscole).'
+    'Restituisci un JSON con questi campi esatti: ' +
+    'title (titolo SEO con la keyword principale, max 70 caratteri), ' +
+    'description (60-110 parole: prima frase = beneficio principale, poi come funziona, poi per chi e, chiudi con una ragione per comprare ora), ' +
+    'bullets (array di 4 benefici scritti come risultati per il cliente, non come specifiche), ' +
+    'objections (array di 2 obiezioni reali con la risposta in una frase), ' +
+    'tags (array di 6 parole chiave SEO minuscole).'
 
-  const data = await generateJson(system, prompt)
+  const data = await generateJson(system, prompt, { maxTokens: 1200, budgetMs: 40_000 })
   if (!data || !data.description) {
     return NextResponse.json(
       {

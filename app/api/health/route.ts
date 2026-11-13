@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import fs from 'node:fs'
 import path from 'node:path'
-import { probeGroq, probeOpenRouter, probeGemini, type AiProbe } from '@/lib/ai'
+import { probeGroq, probeOpenRouter, probeGemini, providerKeyCount, type AiProbe } from '@/lib/ai'
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin'
 import { searchCjProducts } from '@/lib/cj'
 import { rateLimitConfigs } from '@/lib/rateLimit'
-import { hfConfigured, hfImageModel } from '@/lib/hf'
+import { generateImage, hfImageModel } from '@/lib/hf'
+import { probeVideoSpace, videoModelLabel, videoConfigured } from '@/lib/video'
 import { contactNotifyFrom, contactNotifyTo, emailNotificationsConfigured } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
@@ -26,12 +27,22 @@ export type HealthService = {
   fix?: { env: string[]; hint?: string }
 }
 
+export type TableCheck = { table: string; ok: boolean; message: string }
+
 export type HealthReport = {
   app: string
   developer: string
   generatedAt: string
   aiOk: boolean
   summary: { total: number; ok: number; missing: number; error: number; configured: number }
+  readiness: {
+    score: number
+    label: string
+    essentials: Array<{ id: string; label: string; ok: boolean; message: string }>
+  }
+  keys: { groq: number; gemini: number; openrouter: number }
+  tables: { checked: boolean; note: string; items: TableCheck[] }
+  missingEnv: string[]
   envFile: { exists: boolean; path: string; fromSystemEnv: boolean }
   services: HealthService[]
 }
@@ -126,26 +137,44 @@ async function checkCj(): Promise<HealthService> {
   }
 }
 
-async function checkHf(): Promise<HealthService> {
+async function checkImages(): Promise<HealthService> {
   const base = {
-    id: 'hf',
-    name: 'Hugging Face',
+    id: 'images',
+    name: 'Immagini AI (Pollinations)',
     group: 'Creativita',
-    powers: 'Immagini e fotogrammi per le ads',
-    fix: { env: ['HUGGINGFACE_API_TOKEN'], hint: 'Modello immagini: ' + hfImageModel() },
-  }
-  if (!hfConfigured()) {
-    return { ...base, status: 'missing', message: 'Manca HUGGINGFACE_API_TOKEN (opzionale, solo per le immagini).' }
+    powers: 'Creativita e fotogrammi delle ads',
+    fix: { env: ['HF_IMAGE_MODEL'], hint: 'Provider attivo: ' + hfImageModel() },
   }
   try {
-    const r = await fetch('https://huggingface.co/api/whoami-v2', {
-      headers: { Authorization: 'Bearer ' + process.env.HUGGINGFACE_API_TOKEN },
-    })
-    if (r.ok) return { ...base, status: 'ok', message: 'Token valido.' }
-    return { ...base, status: 'error', message: 'Token non valido (HTTP ' + r.status + '). Rigeneralo su huggingface.co/settings/tokens.' }
+    // Prova reale: genera un'immagine minuscola. Pollinations e' gratuito e non
+    // richiede chiavi, quindi questo controllo funziona su ogni installazione.
+    const img = await generateImage('a red apple on a white background', { width: 64, height: 64, seed: 1 })
+    if (img) {
+      return { ...base, status: 'ok', message: 'Funzionante: immagini generate gratuitamente, senza chiavi e senza carta.' }
+    }
+    return { ...base, status: 'error', message: 'Il generatore immagini non ha risposto. Riprova tra un minuto.' }
   } catch (e) {
     return { ...base, status: 'error', message: 'Errore di rete: ' + String(e).slice(0, 140) }
   }
+}
+
+async function checkVideo(): Promise<HealthService> {
+  const base = {
+    id: 'video',
+    name: 'Video AI (Hugging Face ZeroGPU)',
+    group: 'Creativita',
+    powers: 'Video mp4 verticale generato dall AI, gratis',
+    fix: {
+      env: ['HF_VIDEO_SPACE', 'HUGGINGFACE_API_TOKEN'],
+      hint: 'Modello video: ' + videoModelLabel(),
+    },
+  }
+  if (!videoConfigured()) {
+    return { ...base, status: 'missing', message: 'Generazione video disattivata (HF_VIDEO_SPACE=off).' }
+  }
+  const probe = await probeVideoSpace()
+  if (probe.ok) return { ...base, status: 'ok', message: probe.message }
+  return { ...base, status: 'error', message: probe.message }
 }
 
 async function checkYouTube(): Promise<HealthService> {
@@ -269,8 +298,12 @@ function checkTikTok(): HealthService {
 // (per esempio impostate in Windows o nel pannello di hosting), non solo da .env.local.
 const SYSTEM_ENV_KEYS = [
   'GROQ_API_KEY',
+  'GROQ_API_KEY_2',
   'OPENROUTER_API_KEY',
+  'OPENROUTER_API_KEY_2',
   'GEMINI_API_KEY',
+  'GEMINI_API_KEY_2',
+  'HF_VIDEO_SPACE',
   'NEXT_PUBLIC_SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
   'CJ_API_KEY',
@@ -295,34 +328,78 @@ function envFileInfo(): { exists: boolean; path: string; fromSystemEnv: boolean 
   return { exists: false, path: '.env.local', fromSystemEnv }
 }
 
+const TABLES = ['products', 'orders', 'suppliers', 'price_history', 'ad_queue', 'settings'] as const
+
+// Verifica reale delle tabelle: con la service role la diagnostica controlla lo
+// schema senza bisogno di premere altri pulsanti.
+async function checkTables(): Promise<{ checked: boolean; note: string; items: TableCheck[] }> {
+  if (!isSupabaseAdminConfigured) {
+    return {
+      checked: false,
+      note: 'Serve SUPABASE_SERVICE_ROLE_KEY per verificare le tabelle da qui. In alternativa usa il pulsante qui sotto con la sessione attiva.',
+      items: [],
+    }
+  }
+  const items: TableCheck[] = []
+  for (let i = 0; i < TABLES.length; i++) {
+    const table = TABLES[i]
+    const r = await supabaseAdmin.from(table).select('*', { count: 'exact', head: true })
+    if (r.error) {
+      const missing = /schema cache|does not exist|relation|not find the table/i.test(r.error.message)
+      items.push({
+        table,
+        ok: false,
+        message: missing
+          ? 'Tabella mancante: apri Supabase > SQL Editor, incolla supabase-schema.sql e premi Run.'
+          : r.error.message,
+      })
+    } else {
+      items.push({ table, ok: true, message: 'Tabella raggiungibile.' })
+    }
+  }
+  const missing = items.filter((t) => !t.ok).length
+  return {
+    checked: true,
+    items,
+    note:
+      missing === 0
+        ? 'Tutte le 6 tabelle dello schema rispondono correttamente.'
+        : missing + ' tabelle mancanti: apri Supabase > SQL Editor, incolla supabase-schema.sql e premi Run.',
+  }
+}
+
 export async function GET(req: NextRequest) {
   // Endpoint pubblico e diagnostico: chiama servizi esterni, quindi va limitato.
   const limited = await rateLimitConfigs.default(req)
   if (limited) return limited
 
   const [groq, openrouter, gemini] = await Promise.all([probeGroq(), probeOpenRouter(), probeGemini()])
-  const [supabase, cj, hf, youtube, facebook, instagram] = await Promise.all([
+  const [supabase, cj, images, video, youtube, facebook, instagram] = await Promise.all([
     checkSupabase(),
     checkCj(),
-    checkHf(),
+    checkImages(),
+    checkVideo(),
     checkYouTube(),
     checkFacebook(),
     checkInstagram(),
   ])
 
   const services: HealthService[] = [
-    aiSvc('groq', 'Groq', groq, ['GROQ_API_KEY', 'GROQ_MODEL']),
-    aiSvc('openrouter', 'OpenRouter', openrouter, ['OPENROUTER_API_KEY', 'OPENROUTER_MODEL']),
-    aiSvc('gemini', 'Google Gemini', gemini, ['GEMINI_API_KEY', 'GEMINI_MODEL']),
+    aiSvc('groq', 'Groq', groq, ['GROQ_API_KEY', 'GROQ_API_KEY_2', 'GROQ_MODEL']),
+    aiSvc('openrouter', 'OpenRouter', openrouter, ['OPENROUTER_API_KEY', 'OPENROUTER_API_KEY_2', 'OPENROUTER_MODEL']),
+    aiSvc('gemini', 'Google Gemini', gemini, ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_MODEL']),
     supabase,
     checkEmailNotifications(),
     cj,
-    hf,
+    images,
+    video,
     youtube,
     instagram,
     facebook,
     checkTikTok(),
   ]
+
+  const tables = await checkTables()
 
   const aiOk = [groq, openrouter, gemini].some((p) => p.ok === true)
   const summary = {
@@ -333,12 +410,54 @@ export async function GET(req: NextRequest) {
     configured: services.filter((s) => s.status === 'configured').length,
   }
 
+  // Cosa serve davvero per usare il software: testo AI, immagini, database.
+  const essentials = [
+    {
+      id: 'ai',
+      label: 'AI testi',
+      ok: aiOk,
+      message: aiOk ? 'Almeno un provider risponde.' : 'Nessun provider AI risponde: controlla le chiavi.',
+    },
+    {
+      id: 'images',
+      label: 'Immagini AI',
+      ok: images.status === 'ok',
+      message: images.message,
+    },
+    {
+      id: 'database',
+      label: 'Database',
+      ok: supabase.status === 'ok',
+      message: supabase.message,
+    },
+  ]
+  const score = Math.round((essentials.filter((e) => e.ok).length / essentials.length) * 100)
+  const label =
+    score === 100
+      ? 'Pronto: testo AI, immagini e database funzionano. I servizi social si attivano quando aggiungi i token.'
+      : score >= 66
+        ? 'Quasi pronto: manca ' + essentials.filter((e) => !e.ok).map((e) => e.label).join(', ') + '.'
+        : 'Base incompleta: manca ' + essentials.filter((e) => !e.ok).map((e) => e.label).join(', ') + '.'
+
+  const missingEnvRaw = services
+    .filter((s) => s.status === 'missing' && s.fix)
+    .flatMap((s) => (s.fix ? s.fix.env : []))
+  const missingEnv = missingEnvRaw.filter((v, i) => missingEnvRaw.indexOf(v) === i)
+
   const report: HealthReport = {
     app: 'AhsenDS',
     developer: 'Ahsen Kurtoski',
     generatedAt: new Date().toISOString(),
     aiOk,
     summary,
+    readiness: { score, label, essentials },
+    keys: {
+      groq: providerKeyCount('groq'),
+      gemini: providerKeyCount('gemini'),
+      openrouter: providerKeyCount('openrouter'),
+    },
+    tables,
+    missingEnv,
     envFile: envFileInfo(),
     services,
   }

@@ -9,6 +9,7 @@ import {
   Loader2,
   MinusCircle,
   RefreshCw,
+  ShieldCheck,
   Wrench,
   XCircle,
 } from 'lucide-react'
@@ -25,11 +26,21 @@ type Service = {
   fix?: { env: string[]; hint?: string }
 }
 
+type Readiness = {
+  score: number
+  label: string
+  essentials: Array<{ id: string; label: string; ok: boolean; message: string }>
+}
+
 type Report = {
   app: string
   generatedAt: string
   aiOk: boolean
   summary: { total: number; ok: number; missing: number; error: number; configured: number }
+  readiness?: Readiness
+  keys?: { groq: number; gemini: number; openrouter: number }
+  tables?: { checked: boolean; note: string; items: TableCheck[] }
+  missingEnv?: string[]
   envFile: { exists: boolean; path: string; fromSystemEnv: boolean }
   services: Service[]
 }
@@ -116,9 +127,11 @@ export default function DiagnosticsPage() {
     if (groups.indexOf(s.group) < 0) groups.push(s.group)
   })
 
+  const fromReport = report && Array.isArray(report.missingEnv) ? report.missingEnv : []
   const missingEnv = services
     .filter((s) => s.status === 'missing' && s.fix)
     .flatMap((s) => (s.fix ? s.fix.env : []))
+    .concat(fromReport)
   const uniqueMissingEnv = missingEnv.filter((v, i) => missingEnv.indexOf(v) === i)
 
   return (
@@ -144,6 +157,51 @@ export default function DiagnosticsPage() {
 
       {error ? (
         <div className='glass border border-rose-500/30 p-4 text-sm text-rose-300'>{error}</div>
+      ) : null}
+
+      {report && report.readiness ? (
+        <div className='glass space-y-3 p-5'>
+          <div className='flex flex-wrap items-center justify-between gap-2'>
+            <div className='flex items-center gap-2 text-sm font-medium'>
+              <ShieldCheck size={16} className='text-brand' /> Stato del progetto
+            </div>
+            <span
+              className={
+                'rounded-full px-2.5 py-1 text-[11px] font-semibold ' +
+                (report.readiness.score === 100
+                  ? 'bg-emerald-500/15 text-emerald-400'
+                  : report.readiness.score >= 66
+                    ? 'bg-amber-500/15 text-amber-400'
+                    : 'bg-rose-500/15 text-rose-400')
+              }
+            >
+              {report.readiness.score}% pronto
+            </span>
+          </div>
+          <div className='h-2 w-full overflow-hidden rounded-full bg-white/10'>
+            <div className='h-full rounded-full bg-brand transition-all' style={{ width: report.readiness.score + '%' }} />
+          </div>
+          <p className='text-xs text-white/60'>{report.readiness.label}</p>
+          <div className='grid gap-2 sm:grid-cols-3'>
+            {report.readiness.essentials.map((e) => (
+              <div key={e.id} className='rounded-xl border border-white/5 bg-white/5 p-3'>
+                <div className='flex items-center gap-1.5 text-xs font-medium'>
+                  {e.ok ? <CheckCircle2 size={14} className='text-emerald-400' /> : <XCircle size={14} className='text-rose-400' />}
+                  {e.label}
+                </div>
+                <div className='mt-1 text-[11px] text-white/50'>{e.message}</div>
+              </div>
+            ))}
+          </div>
+          {report.keys ? (
+            <div className='flex flex-wrap gap-x-4 gap-y-1 border-t border-white/5 pt-3 text-[11px] text-white/50'>
+              <span>Groq: <b className='text-white/80'>{report.keys.groq}</b> chiav{report.keys.groq === 1 ? 'e' : 'i'}</span>
+              <span>Gemini: <b className='text-white/80'>{report.keys.gemini}</b> chiav{report.keys.gemini === 1 ? 'e' : 'i'}</span>
+              <span>OpenRouter: <b className='text-white/80'>{report.keys.openrouter}</b> chiav{report.keys.openrouter === 1 ? 'e' : 'i'}</span>
+              <span className='text-white/30'>Con 2 chiavi per provider il servizio continua anche quando la prima finisce il credito.</span>
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       {summary ? (
@@ -234,8 +292,31 @@ export default function DiagnosticsPage() {
         </div>
         <p className='text-xs text-white/50'>
           Controlla che products, orders, suppliers, price_history, ad_queue e settings esistano davvero.
-          Serve una sessione attiva e le chiavi Supabase.
+          Con SUPABASE_SERVICE_ROLE_KEY il controllo gira gia con questa pagina; altrimenti serve una sessione attiva.
         </p>
+        {report && report.tables && report.tables.checked ? (
+          <div className='space-y-2'>
+            <div className='flex flex-wrap gap-2'>
+              {report.tables.items.map((t) => (
+                <span
+                  key={t.table}
+                  className={
+                    'rounded-full px-2.5 py-1 text-[11px] ' +
+                    (t.ok ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400')
+                  }
+                  title={t.message}
+                >
+                  {t.table}
+                </span>
+              ))}
+            </div>
+            <p className={'text-xs ' + (report.tables.items.every((t) => t.ok) ? 'text-emerald-400' : 'text-amber-300')}>
+              {report.tables.note}
+            </p>
+          </div>
+        ) : report && report.tables ? (
+          <p className='text-xs text-white/40'>{report.tables.note}</p>
+        ) : null}
         {fixError ? <p className='text-xs text-rose-300'>{fixError}</p> : null}
         {fix ? (
           <div className='space-y-2'>
