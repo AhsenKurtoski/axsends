@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: 'AhsenDS — Launch Kit 2026 | Ahsen Kurtoski',
   description:
     'Launch kit ufficiale di AhsenDS: film 1080p, teaser verticale, otto screenshot reali, poster e press kit. Costruito da Ahsen Kurtoski.',
+  alternates: { canonical: '/launch' },
 }
 
 const SHOTS = [

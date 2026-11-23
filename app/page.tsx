@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import ContactForm from '@/components/ContactForm'
 import {
@@ -28,6 +29,12 @@ import {
   Wand2,
   Zap,
 } from 'lucide-react'
+
+// Canonical della sola home: i metadata della root si ereditano su ogni
+// pagina, quindi un canonical li dichiarerebbe tutti come duplicati.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 type Feature = { icon: typeof Radar; title: string; desc: string }
 type Group = { title: string; intro: string; items: Feature[] }
