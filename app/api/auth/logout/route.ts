@@ -11,7 +11,7 @@ export async function POST() {
   }
 
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     await supabase.auth.signOut()
   } catch {
     // Anche se signOut fallisce, rimandiamo al login: il middleware blocca ugualmente.

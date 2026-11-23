@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ source: 'supabase', configured: true, data: [], note: 'Sessione non valida: rifai il login.' }, { status: 401 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.from('orders').select('*').order('date', { ascending: false })
   if (error) {
     return NextResponse.json({ source: 'supabase', configured: true, data: [], note: dbNote(error.message) })
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ source: 'supabase', configured: true, ok: false, note: 'Sessione non valida: rifai il login.' }, { status: 401 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.from('orders').insert(validation.data).select().single()
   if (error) {
     return NextResponse.json({ source: 'supabase', configured: true, ok: false, note: dbNote(error.message) })
