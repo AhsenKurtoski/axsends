@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 // Gestione autenticazione e sessioni Supabase per AhsenDS
 // Costruito da Ahsen Kurtoski
 
-export function createSupabaseServerClient() {
+export async function createSupabaseServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -13,7 +13,8 @@ export function createSupabaseServerClient() {
     throw new Error('Supabase non configurato. Imposta NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local')
   }
 
-  const cookieStore = cookies()
+  // In Next 15 cookies() e' asincrono: va atteso prima di leggerlo.
+  const cookieStore = await cookies()
   return createServerClient(
     url,
     anonKey,
@@ -46,7 +47,7 @@ export async function getSession() {
     return null
   }
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     const { data: { session } } = await supabase.auth.getSession()
     return session
   } catch {
@@ -59,7 +60,7 @@ export async function getUser() {
     return null
   }
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
     return user
   } catch {

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   // La sessione utente e' gia' verificata: senza service role possiamo usare
   // il client autenticato, che la RLS autorizza a leggere tutte le tabelle.
-  const db = isSupabaseAdminConfigured ? supabaseAdmin : createSupabaseServerClient()
+  const db = isSupabaseAdminConfigured ? supabaseAdmin : await createSupabaseServerClient()
   const tables: Array<{ table: string; ok: boolean; message: string }> = []
   for (let i = 0; i < TABLES.length; i++) {
     const table = TABLES[i]

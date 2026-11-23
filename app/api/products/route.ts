@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ source: 'supabase', configured: true, data: [], note: 'Sessione non valida: rifai il login.' }, { status: 401 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.from('products').select('*').order('sold', { ascending: false })
   if (error) {
     return NextResponse.json({ source: 'supabase', configured: true, data: [], note: dbNote(error.message) })
